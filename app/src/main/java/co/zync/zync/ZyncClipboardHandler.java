@@ -1,9 +1,11 @@
 package co.zync.zync;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.widget.TextView;
 
 import java.nio.charset.Charset;
 
@@ -11,13 +13,12 @@ import java.nio.charset.Charset;
  * @author Mazen Kotb
  */
 public class ZyncClipboardHandler {
-    private final ZyncApplication app;
+    private final Activity activity;
     private final ClipboardManager clipMan;
 
-    public ZyncClipboardHandler(ZyncApplication app) {
-        this.app = app;
-        this.clipMan = (ClipboardManager) app.getApplicationContext()
-                .getSystemService(Context.CLIPBOARD_SERVICE);
+    public ZyncClipboardHandler(Activity activity) {
+        this.activity = activity;
+        this.clipMan = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
         clipMan.addPrimaryClipChangedListener(new ZyncClipboardListener());
     }
 
@@ -28,7 +29,7 @@ public class ZyncClipboardHandler {
         switch (data.getDescription().getMimeType(0)) {
             case ClipDescription.MIMETYPE_TEXT_HTML:
             case ClipDescription.MIMETYPE_TEXT_PLAIN:
-                return item.getHtmlText().getBytes(Charset.forName("UTF-8"));
+                return item.getText().toString().getBytes(Charset.forName("UTF-8"));
 
             case ClipDescription.MIMETYPE_TEXT_URILIST:
                 // ????
@@ -57,6 +58,10 @@ public class ZyncClipboardHandler {
         public void onPrimaryClipChanged() {
             byte[] data = getRawData();
             // act on data and push to servers async
+
+            // assume string for now to test
+            String value = new String(data, Charset.forName("UTF-8"));
+            ((TextView) activity.findViewById(R.id.pasteView)).setText(value);
         }
     }
 }

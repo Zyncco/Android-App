@@ -6,4 +6,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="co.zync.zync.StartActivity">
+    <TextView
+            android:text="Empty for now..."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="36dp" android:id="@+id/pasteView"
+            android:textAppearance="@android:style/TextAppearance.Material.Large"
+            android:layout_alignParentTop="true" android:layout_centerHorizontal="true"/>
+    <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:layout_below="@+id/pasteView" android:layout_centerHorizontal="true" android:layout_marginTop="36dp"
+            android:id="@+id/editText" android:text="Enter text to copy" tools:ignore="LabelFor"/>
+    <Button
+            android:text="Copy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="41dp" android:id="@+id/copyButton"
+            android:layout_below="@+id/editText" android:layout_alignParentStart="true"
+            android:layout_marginStart="39dp" android:onClick="onCopyClick"/>
+    <Button
+            android:text="Paste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="38dp" android:id="@+id/pasteButton" android:layout_alignBaseline="@+id/copyButton"
+            android:layout_alignBottom="@+id/copyButton" android:layout_alignParentEnd="true"
+            android:onClick="onPasteClick"/>
 </android.widget.RelativeLayout>
