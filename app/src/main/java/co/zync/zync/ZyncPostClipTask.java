@@ -1,6 +1,8 @@
 package co.zync.zync;
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import co.zync.zync.activities.SettingsActivity;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
@@ -42,11 +44,18 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         // act on data and push to servers async
+        SharedPreferences preferences = app.getSharedPreferences(SettingsActivity.PREFERENCES_NAME, 0);
+
         try {
             ZyncAPI.clipboard(
                     app.httpRequestQueue(),
-                    new ZyncClipData(null, type, data),
-                    "no_token",
+                    new ZyncClipData(
+                            preferences.getBoolean("encryption_enabled", false) ?
+                                    preferences.getString("encryption_pass", "default") : null,
+                            type,
+                            data
+                    ),
+                    app.getAccount().getIdToken(),
                     listener
             );
         } catch (JSONException ignored) {

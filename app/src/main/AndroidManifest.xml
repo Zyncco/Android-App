@@ -12,7 +12,7 @@
             android:theme="@style/AppTheme">
         <service android:name=".ZyncClipboardService" />
 
-        <activity android:name=".activities.StartActivity">
+        <activity android:name=".activities.SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -28,10 +28,10 @@
         <activity
                 android:name=".activities.SettingsActivity"
                 android:label="@string/zync_settings"
-                android:parentActivityName=".activities.StartActivity">
+                android:parentActivityName=".activities.SignInActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="co.zync.zync.activities.StartActivity"/>
+                    android:value="co.zync.zync.activities.SignInActivity"/>
         </activity>
     </application>
 

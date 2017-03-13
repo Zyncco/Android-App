@@ -4,8 +4,10 @@ import android.app.Application;
 import android.content.Intent;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 public class ZyncApplication extends Application {
+    private GoogleSignInAccount account;
     private RequestQueue httpRequestQueue;
 
     @Override
@@ -19,5 +21,13 @@ public class ZyncApplication extends Application {
 
     public RequestQueue httpRequestQueue() {
         return httpRequestQueue;
+    }
+
+    public GoogleSignInAccount getAccount() {
+        return account;
+    }
+
+    public void setAccount(GoogleSignInAccount account) {
+        this.account = account;
     }
 }
