@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Zync</string>
+    <string name="zync_settings">Zync Settings</string>
+    <string name="encryption">Encryption</string>
+    <string name="encryption_pass">Encryption Password</string>
+    <string name="encryption_pass_sum">Password used for encryption</string>
+    <string name="encryption_enabled">Encryption Enabled</string>
+    <string name="pref_header_general">General Settings</string>
 </resources>

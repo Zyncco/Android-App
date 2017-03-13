@@ -25,5 +25,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support:support-v4:25.2.0'
+    compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.7'
     testCompile 'junit:junit:4.12'
 }

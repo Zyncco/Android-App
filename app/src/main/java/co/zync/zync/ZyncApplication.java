@@ -7,5 +7,6 @@ public class ZyncApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        new ZyncClipboardHandler(this);
     }
 }

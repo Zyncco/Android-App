@@ -13,13 +13,17 @@ import java.nio.charset.Charset;
  * @author Mazen Kotb
  */
 public class ZyncClipboardHandler {
-    private final Activity activity;
+    private static ZyncClipboardHandler instance = null;
     private final ClipboardManager clipMan;
 
-    public ZyncClipboardHandler(Activity activity) {
-        this.activity = activity;
-        this.clipMan = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+    public ZyncClipboardHandler(ZyncApplication app) {
+        this.clipMan = (ClipboardManager) app.getSystemService(Context.CLIPBOARD_SERVICE);
         clipMan.addPrimaryClipChangedListener(new ZyncClipboardListener());
+        instance = null;
+    }
+
+    public static ZyncClipboardHandler getInstance() {
+        return instance;
     }
 
     public byte[] getRawData() {
@@ -58,10 +62,6 @@ public class ZyncClipboardHandler {
         public void onPrimaryClipChanged() {
             byte[] data = getRawData();
             // act on data and push to servers async
-
-            // assume string for now to test
-            String value = new String(data, Charset.forName("UTF-8"));
-            ((TextView) activity.findViewById(R.id.pasteView)).setText(value);
         }
     }
 }
