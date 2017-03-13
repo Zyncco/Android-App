@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.view.View;
+import co.zync.zync.activities.intro.PasswordActivity;
 import com.google.android.gms.auth.api.Auth;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -82,7 +83,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                 ((ZyncApplication) getApplication()).setAccount(acct);
                 System.out.println(acct.getDisplayName() + " is logged in!");
 
-                startActivity(new Intent(this, SettingsActivity.class));
+                startActivity(new Intent(this, PasswordActivity.class));
             } else {
                 // they didn't sign in :c
                 System.out.println("no sign in :c");
