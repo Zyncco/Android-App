@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 import java.util.zip.Deflater;
 
 public class ZyncClipData {
@@ -88,7 +89,7 @@ public class ZyncClipData {
             object.put("timestamp", timestamp);
             object.put("hash", hash);
             object.put("encrypted", encrypted);
-            object.put("type", type.name().toLowerCase());
+            object.put("type", type.name().toLowerCase(Locale.US));
             object.put("data", data);
 
             return object;
