@@ -1,6 +1,7 @@
 package co.zync.zync;
 
 import android.app.Application;
+import android.content.Intent;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
@@ -10,7 +11,9 @@ public class ZyncApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        new ZyncClipboardHandler(this);
+        Intent intent = new Intent(this, ZyncClipboardService.class);
+
+        startService(intent);
         httpRequestQueue = Volley.newRequestQueue(getApplicationContext());
     }
 

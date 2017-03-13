@@ -1,12 +1,9 @@
 package co.zync.zync;
 
-import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipDescription;
-import android.content.ClipboardManager;
-import android.content.Context;
+import android.app.Service;
+import android.content.*;
 import android.os.AsyncTask;
-import android.widget.TextView;
+import android.os.IBinder;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
@@ -18,20 +15,25 @@ import java.nio.charset.Charset;
 /**
  * @author Mazen Kotb
  */
-public class ZyncClipboardHandler {
-    private static ZyncClipboardHandler instance = null;
-    private final ZyncApplication app;
-    private final ClipboardManager clipMan;
+public class ZyncClipboardService extends Service {
+    private static ZyncClipboardService instance = null;
+    private ZyncApplication app;
+    private ClipboardManager clipMan;
 
-    public ZyncClipboardHandler(ZyncApplication app) {
-        this.app = app;
-        this.clipMan = (ClipboardManager) app.getSystemService(Context.CLIPBOARD_SERVICE);
-        clipMan.addPrimaryClipChangedListener(new ZyncClipboardListener());
-        instance = null;
+    public ZyncClipboardService() {
     }
 
-    public static ZyncClipboardHandler getInstance() {
+    public static ZyncClipboardService getInstance() {
         return instance;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        this.clipMan = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        this.app = (ZyncApplication) getApplication();
+        instance = this;
+        clipMan.addPrimaryClipChangedListener(new ZyncClipboardListener());
     }
 
     public byte[] getRawData() {
@@ -63,6 +65,11 @@ public class ZyncClipboardHandler {
 
     public void writeImageToClip(int id, byte[] data) {
         // TODO figure out how this works
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     public class ZyncClipboardListener implements ClipboardManager.OnPrimaryClipChangedListener {
