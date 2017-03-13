@@ -5,7 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ZyncAPI {
-    public static final String BASE = "https://api.zync.co/api/v";
+    public static final String BASE = "https://zync-123456.appspot.com/api/v";
     public static final int VERSION = 0;
 
     /*
