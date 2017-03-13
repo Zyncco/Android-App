@@ -45,10 +45,6 @@ public class ZyncClipboardService extends Service {
             case ClipDescription.MIMETYPE_TEXT_PLAIN:
                 return item.getText().toString().getBytes(Charset.forName("UTF-8"));
 
-            case ClipDescription.MIMETYPE_TEXT_URILIST:
-                // ????
-                return new byte[256];
-
             default:
                 return new byte[0];
         }
@@ -75,42 +71,11 @@ public class ZyncClipboardService extends Service {
     public class ZyncClipboardListener implements ClipboardManager.OnPrimaryClipChangedListener {
         @Override
         public void onPrimaryClipChanged() {
-            new ZyncPostClipTask(app, getRawData()).execute();
-        }
-    }
+            byte[] data = getRawData();
 
-    public static class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
-        private final ZyncApplication app;
-        private final byte[] data;
-
-        public ZyncPostClipTask(ZyncApplication app, byte[] data) {
-            this.app = app;
-            this.data = data;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            // act on data and push to servers async
-            try {
-                ZyncAPI.clipboard(
-                        app.httpRequestQueue(),
-                        new ZyncClipData(null, ZyncClipType.TEXT, data),
-                        "no_token",
-                        new ZyncAPI.ZyncResponseListener() {
-                            @Override
-                            public void success() {
-                                System.out.println("Sent request!");
-                            }
-
-                            @Override
-                            public void handleError(ZyncError error) {
-                                System.out.println("error");
-                            }
-                        }
-                );
-            } catch (JSONException ignored) {
+            if (data.length != 0) {
+                new ZyncPostClipTask(app, data, ZyncClipType.TEXT).execute();
             }
-            return null;
         }
     }
 }
