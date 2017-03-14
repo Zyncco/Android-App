@@ -3,19 +3,12 @@ package co.zync.zync.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.view.View;
-import co.zync.zync.activities.intro.PasswordActivity;
-import co.zync.zync.api.ZyncAPI;
-import co.zync.zync.api.ZyncError;
-import com.google.android.gms.auth.api.Auth;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import co.zync.zync.R;
-import co.zync.zync.ZyncApplication;
-import co.zync.zync.ZyncPostClipTask;
-import co.zync.zync.ZyncPostImageTask;
-import co.zync.zync.api.ZyncClipType;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -25,6 +18,15 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.nio.charset.Charset;
+
+import co.zync.zync.R;
+import co.zync.zync.ZyncApplication;
+import co.zync.zync.ZyncPostClipTask;
+import co.zync.zync.ZyncPostImageTask;
+import co.zync.zync.activities.intro.PasswordActivity;
+import co.zync.zync.api.ZyncAPI;
+import co.zync.zync.api.ZyncClipType;
+import co.zync.zync.api.ZyncError;
 
 /*
  * Activity presented to the user when they are signing in (with google)
@@ -119,40 +121,43 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+    }
 
-            if (result.isSuccess()) {
-                // Signed in successfully, show authenticated UI.
-                GoogleSignInAccount acct = result.getSignInAccount();
-                getZyncApp().setAccount(acct);
-                System.out.println(acct.getDisplayName() + " is logged in!");
+    private void handleSignInResult(GoogleSignInResult result) {
+        if (result.isSuccess()) {
+            // Signed in successfully, show authenticated UI.
+            GoogleSignInAccount acct = result.getSignInAccount();
+            getZyncApp().setAccount(acct);
+            System.out.println(acct.getDisplayName() + " is logged in!");
 
-                ZyncAPI.signup(
-                        getZyncApp().httpRequestQueue(),
-                        acct.getIdToken(),
-                        new ZyncAPI.ZyncCallback<ZyncAPI>() {
-                            @Override
-                            public void success(ZyncAPI api) {
-                                getZyncApp().setApi(api);
-                                getZyncApp().getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
+            ZyncAPI.signup(
+                    getZyncApp().httpRequestQueue(),
+                    acct.getIdToken(),
+                    new ZyncAPI.ZyncCallback<ZyncAPI>() {
+                        @Override
+                        public void success(ZyncAPI api) {
+                            getZyncApp().setApi(api);
+                            getZyncApp().getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
 
 
-                                if (!getZyncApp().getPreferences().contains("encryption_enabled")) {
-                                    startActivity(new Intent(SignInActivity.this, PasswordActivity.class));
-                                } else {
-                                    getZyncApp().openSettings(SignInActivity.this);
-                                }
-                            }
-
-                            @Override
-                            public void handleError(ZyncError error) {
-                                // TODO do something
+                            if (!getZyncApp().getPreferences().contains("encryption_enabled")) {
+                                startActivity(new Intent(SignInActivity.this, PasswordActivity.class));
+                            } else {
+                                getZyncApp().openSettings(SignInActivity.this);
                             }
                         }
-                );
-            } else {
-                // they didn't sign in :c
-                System.out.println("no sign in :c");
-            }
+
+                        @Override
+                        public void handleError(ZyncError error) {
+                            // TODO do something
+                        }
+                    }
+            );
+        } else {
+            // they didn't sign in :c
+            System.out.println("no sign in :c");
         }
     }
 
