@@ -36,7 +36,7 @@ public class ZyncAPI {
                 callback.handleError(error);
             }
         });
-        JsonObjectRequest request = new JsonObjectRequest(BASE + VERSION + "/callback?token=" + idToken, null, listener, listener);
+        JsonObjectRequest request = new JsonObjectRequest(BASE + VERSION + "/user/callback?token=" + idToken, null, listener, listener);
 
         queue.add(request);
     }

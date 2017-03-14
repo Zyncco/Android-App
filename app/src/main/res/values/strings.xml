@@ -12,6 +12,4 @@
     <string name="sync_up_sum">Synchronize local keyboard with other devices</string>
     <string name="sync_down">Sync down</string>
     <string name="sync_down_sum">Synchronize cloud keyboard on this device</string>
-    <string name="images">Images</string>
-    <string name="images_sum">Enable image download </string>
 </resources>
