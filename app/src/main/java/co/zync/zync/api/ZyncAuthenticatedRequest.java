@@ -1,9 +1,7 @@
 package co.zync.zync.api;
 
+import co.zync.zync.api.generic.ZyncGenericAPIListener;
 import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONObject;
 
@@ -13,8 +11,8 @@ import java.util.Map;
 public class ZyncAuthenticatedRequest extends JsonObjectRequest {
     private String token;
 
-    public ZyncAuthenticatedRequest(String method, JSONObject body, String token, final ZyncGenericAPIListener listener) {
-        super(Request.Method.POST, ZyncAPI.BASE + ZyncAPI.VERSION + "/" + method, body, listener, listener);
+    public ZyncAuthenticatedRequest(int httpMethod, String method, JSONObject body, String token, final ZyncGenericAPIListener listener) {
+        super(httpMethod, ZyncAPI.BASE + ZyncAPI.VERSION + "/" + method, body, listener, listener);
         this.token = token;
     }
 

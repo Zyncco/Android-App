@@ -33,6 +33,16 @@ public class ZyncClipData {
         this.data = Base64.encodeToString(data, Base64.DEFAULT);
     }
 
+    public ZyncClipData(String encryptionKey, JSONObject obj) throws JSONException {
+        this.timestamp = obj.getLong("timestamp");
+        this.hash = obj.getString("hash");
+        this.encrypted = obj.getBoolean("encrypted");
+        this.type = ZyncClipType.valueOf(obj.getString("type"));
+        this.data = obj.getString("data");
+
+        // todo decrypt and decompress
+    }
+
     private static byte[] compress(byte[] data) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         Deflater deflater = new Deflater();
@@ -80,6 +90,10 @@ public class ZyncClipData {
         }
 
         return sb.toString();
+    }
+
+    public String data() {
+        return data;
     }
 
     public JSONObject toJson() {

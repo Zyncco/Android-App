@@ -15,9 +15,9 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
     private final ZyncApplication app;
     private final byte[] data;
     private final ZyncClipType type;
-    private ZyncAPI.ZyncResponseListener listener = new ZyncAPI.ZyncResponseListener() {
+    private ZyncAPI.ZyncCallback<Void> listener = new ZyncAPI.ZyncCallback<Void>() {
         @Override
-        public void success() {
+        public void success(Void v) {
             System.out.println("Sent request!");
         }
 
@@ -33,7 +33,7 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
         this.type = type;
     }
 
-    public ZyncPostClipTask(ZyncApplication app, byte[] data, ZyncClipType type, ZyncAPI.ZyncResponseListener listener) {
+    public ZyncPostClipTask(ZyncApplication app, byte[] data, ZyncClipType type, ZyncAPI.ZyncCallback<Void> listener) {
         this.app = app;
         this.data = data;
         this.type = type;
@@ -50,7 +50,7 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
         }
 
         try {
-            app.getApi().clipboard(
+            app.getApi().postClipboard(
                     new ZyncClipData(
                             preferences.getBoolean("encryption_enabled", false) ?
                                     preferences.getString("encryption_pass", "default") : null,

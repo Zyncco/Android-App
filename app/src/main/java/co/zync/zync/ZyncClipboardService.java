@@ -50,16 +50,16 @@ public class ZyncClipboardService extends Service {
         }
     }
 
-    public void writeToClip(int id, String data, boolean html) {
+    public void writeToClip(String data, boolean html) {
         clipMan.setPrimaryClip(new ClipData(
-                "zync_paste_" + id,
+                "zync_paste",
                 new String[] {html ? ClipDescription.MIMETYPE_TEXT_HTML : ClipDescription.MIMETYPE_TEXT_PLAIN},
                 new ClipData.Item(data)
         ));
     }
 
 
-    public void writeImageToClip(int id, byte[] data) {
+    public void writeImageToClip(byte[] data) {
         // TODO figure out how this works
     }
 

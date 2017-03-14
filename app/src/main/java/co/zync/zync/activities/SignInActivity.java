@@ -21,6 +21,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -34,6 +35,8 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
+
+        GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this);
 
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -79,6 +82,12 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         signInButton.setSize(SignInButton.SIZE_WIDE);
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this);
     }
 
     @Override

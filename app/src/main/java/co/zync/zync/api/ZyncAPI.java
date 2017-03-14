@@ -1,5 +1,10 @@
 package co.zync.zync.api;
 
+import co.zync.zync.api.generic.ZyncGenericAPIListener;
+import co.zync.zync.api.generic.ZyncNullTransformer;
+import co.zync.zync.api.generic.ZyncTransformer;
+import co.zync.zync.api.generic.ZyncTransformerCallback;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
@@ -16,8 +21,8 @@ public class ZyncAPI {
         this.token = token;
     }
 
-    public static void signup(final RequestQueue queue, String idToken, final SignupCallback callback) {
-        ZyncGenericAPIListener listener = new ZyncGenericAPIListener(new ZyncGenericAPIListener.ListenerCallback() {
+    public static void signup(final RequestQueue queue, String idToken, final ZyncCallback<ZyncAPI> callback) {
+        ZyncGenericAPIListener listener = new ZyncGenericAPIListener(new ZyncCallback<JSONObject>() {
             @Override
             public void success(JSONObject node) {
                 try {
@@ -41,16 +46,37 @@ public class ZyncAPI {
     }
 
     /*
-     * Sends a request using the Volley library to post a clipboard update
+     * Sends a request using the Volley library to post a postClipboard update
      */
-    public void clipboard(ZyncClipData clipData,
-                                 final ZyncResponseListener responseListener) throws JSONException {
+    public void postClipboard(ZyncClipData clipData,
+                              final ZyncCallback<Void> responseListener) throws JSONException {
         JSONObject body = new JSONObject().put("data", clipData.toJson());
         ZyncAuthenticatedRequest request = new ZyncAuthenticatedRequest(
+                Request.Method.POST,
                 "clipboard",
                 body,
                 token,
-                new ZyncGenericAPIListener(new ZyncGenericAPIListener.GenericListenerCallback(responseListener))
+                new ZyncGenericAPIListener(responseListener, new ZyncNullTransformer<Void>())
+        );
+        queue.add(request);
+    }
+
+    public void getClipboard(final String encryptionKey, final ZyncCallback<ZyncClipData> callback) {
+        ZyncAuthenticatedRequest request = new ZyncAuthenticatedRequest(
+                Request.Method.GET,
+                "clipboard",
+                null,
+                token,
+                new ZyncGenericAPIListener(callback, new ZyncTransformer<ZyncClipData>() {
+                    @Override
+                    public ZyncClipData transform(JSONObject obj) {
+                        try {
+                            return new ZyncClipData(encryptionKey, obj);
+                        } catch (Exception ex) {
+                            return null;
+                        }
+                    }
+                })
         );
         queue.add(request);
     }
@@ -59,13 +85,8 @@ public class ZyncAPI {
         return token;
     }
 
-    public interface SignupCallback {
-        void success(ZyncAPI api);
-        void handleError(ZyncError error);
-    }
-
-    public interface ZyncResponseListener {
-        void success();
+    public interface ZyncCallback<T> {
+        void success(T value);
         void handleError(ZyncError error);
     }
 }

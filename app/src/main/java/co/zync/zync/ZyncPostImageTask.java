@@ -6,10 +6,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import co.zync.zync.api.ZyncAPI;
-import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
-import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,9 +38,9 @@ public class ZyncPostImageTask extends AsyncTask<Uri, Void, Void> {
 
         // TODO do size-checks
 
-        new ZyncPostClipTask(app, byteArray, ZyncClipType.IMAGE, new ZyncAPI.ZyncResponseListener() {
+        new ZyncPostClipTask(app, byteArray, ZyncClipType.IMAGE, new ZyncAPI.ZyncCallback<Void>() {
             @Override
-            public void success() {
+            public void success(Void v) {
             }
 
             @Override

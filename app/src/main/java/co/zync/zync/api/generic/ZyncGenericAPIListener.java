@@ -1,5 +1,7 @@
-package co.zync.zync.api;
+package co.zync.zync.api.generic;
 
+import co.zync.zync.api.ZyncAPI;
+import co.zync.zync.api.ZyncError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import org.json.JSONException;
@@ -9,10 +11,14 @@ import org.json.JSONObject;
  * @author Mazen Kotb
  */
 public class ZyncGenericAPIListener implements Response.Listener<JSONObject>, Response.ErrorListener {
-    private final ListenerCallback responseListener;
+    private final ZyncAPI.ZyncCallback<JSONObject> responseListener;
 
-    public ZyncGenericAPIListener(ListenerCallback responseListener) {
+    public ZyncGenericAPIListener(ZyncAPI.ZyncCallback<JSONObject> responseListener) {
         this.responseListener = responseListener;
+    }
+
+    public <T> ZyncGenericAPIListener(ZyncAPI.ZyncCallback<T> callback, ZyncTransformer<T> transformer) {
+        this.responseListener = new ZyncTransformerCallback<>(callback, transformer);
     }
 
     @Override
@@ -43,30 +49,6 @@ public class ZyncGenericAPIListener implements Response.Listener<JSONObject>, Re
 
             responseListener.handleError(new ZyncError(error.getInt("code"), error.getString("message")));
         } catch (JSONException ignored) {
-        }
-    }
-
-    public interface ListenerCallback {
-        void success(JSONObject node);
-        void handleError(ZyncError error);
-    }
-
-    public static class GenericListenerCallback implements ListenerCallback {
-        private final ZyncAPI.ZyncResponseListener listener;
-
-
-        public GenericListenerCallback(ZyncAPI.ZyncResponseListener listener) {
-            this.listener = listener;
-        }
-
-        @Override
-        public void success(JSONObject node) {
-            listener.success();
-        }
-
-        @Override
-        public void handleError(ZyncError error) {
-            listener.handleError(error);
         }
     }
 }
