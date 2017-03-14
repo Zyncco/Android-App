@@ -1,7 +1,11 @@
 package co.zync.zync;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceActivity;
+import co.zync.zync.activities.SettingsActivity;
 import co.zync.zync.api.ZyncAPI;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -21,6 +25,14 @@ public class ZyncApplication extends Application {
         httpRequestQueue = Volley.newRequestQueue(getApplicationContext());
     }
 
+    public void openSettings(Context context) {
+        Intent settingsIntent = new Intent(context, SettingsActivity.class);
+
+        settingsIntent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, SettingsActivity.GeneralPreferenceFragment.class.getName());
+        settingsIntent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true);
+        startActivity(settingsIntent);
+    }
+
     public RequestQueue httpRequestQueue() {
         return httpRequestQueue;
     }
@@ -31,6 +43,10 @@ public class ZyncApplication extends Application {
 
     public ZyncAPI getApi() {
         return api;
+    }
+
+    public SharedPreferences getPreferences() {
+        return getSharedPreferences(SettingsActivity.PREFERENCES_NAME, 0);
     }
 
     public void setApi(ZyncAPI api) {

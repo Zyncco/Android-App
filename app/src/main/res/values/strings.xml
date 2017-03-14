@@ -7,4 +7,11 @@
     <string name="encryption_enabled">Encryption Enabled</string>
     <string name="pref_header_general">General Settings</string>
     <string name="enter_pass">Please enter the password you wish to use for encryption</string>
+    <string name="sync_settings">Sync</string>
+    <string name="sync_up">Sync up</string>
+    <string name="sync_up_sum">Synchronize local keyboard with other devices</string>
+    <string name="sync_down">Sync down</string>
+    <string name="sync_down_sum">Synchronize cloud keyboard on this device</string>
+    <string name="images">Images</string>
+    <string name="images_sum">Enable image download </string>
 </resources>

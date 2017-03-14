@@ -73,6 +73,10 @@ public class ZyncClipboardService extends Service {
         public void onPrimaryClipChanged() {
             byte[] data = getRawData();
 
+            if (!app.getPreferences().getBoolean("sync_up", true)) {
+                return;
+            }
+
             if (data.length != 0) {
                 new ZyncPostClipTask(app, data, ZyncClipType.TEXT).execute();
             }

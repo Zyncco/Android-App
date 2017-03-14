@@ -1,15 +1,13 @@
 package co.zync.zync.activities;
 
-
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
+import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 import co.zync.zync.R;
@@ -57,7 +55,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         int id = item.getItemId();
         if (id == android.R.id.home) {
             if (!super.onMenuItemSelected(featureId, item)) {
-                NavUtils.navigateUpFromSameTask(this);
+                NavUtils.navigateUpFromSameTask(this); // TODO send to main menu
             }
             return true;
         }
@@ -98,20 +96,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
-            setHasOptionsMenu(true);
             getPreferenceManager().setSharedPreferencesName(PREFERENCES_NAME);
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            int id = item.getItemId();
-            if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
+            addPreferencesFromResource(R.xml.pref_general);
+            //setHasOptionsMenu(true);
         }
     }
 }

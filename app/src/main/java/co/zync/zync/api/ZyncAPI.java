@@ -36,6 +36,10 @@ public class ZyncAPI {
         queue.add(request);
     }
 
+    public static ZyncAPI login(final RequestQueue queue, String zyncToken) {
+        return new ZyncAPI(queue, zyncToken);
+    }
+
     /*
      * Sends a request using the Volley library to post a clipboard update
      */
@@ -49,6 +53,10 @@ public class ZyncAPI {
                 new ZyncGenericAPIListener(new ZyncGenericAPIListener.GenericListenerCallback(responseListener))
         );
         queue.add(request);
+    }
+
+    public String getToken() {
+        return token;
     }
 
     public interface SignupCallback {

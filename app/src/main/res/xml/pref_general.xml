@@ -19,4 +19,14 @@
                 android:title="@string/encryption_pass" android:key="encryption_pass" android:defaultValue="password"
                 android:summary="@string/encryption_pass_sum"/>
     </PreferenceCategory>
+    <PreferenceCategory
+            android:title="@string/sync_settings">
+
+        <SwitchPreference
+                android:defaultValue="true"
+                android:title="@string/sync_up" android:key="sync_up" android:summary="@string/sync_up_sum"/>
+        <SwitchPreference
+                android:defaultValue="true"
+                android:title="@string/sync_down" android:key="sync_down" android:summary="@string/sync_down_sum"/>
+    </PreferenceCategory>
 </PreferenceScreen>

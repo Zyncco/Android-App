@@ -2,7 +2,6 @@ package co.zync.zync;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import co.zync.zync.activities.SettingsActivity;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
@@ -44,7 +43,7 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         // act on data and push to servers async
-        SharedPreferences preferences = app.getSharedPreferences(SettingsActivity.PREFERENCES_NAME, 0);
+        SharedPreferences preferences = app.getPreferences();
 
         if (app.getApi() == null) {
             return null; // app is not running yet

@@ -29,11 +29,7 @@
         </activity>
         <activity
                 android:name=".activities.SettingsActivity"
-                android:label="@string/zync_settings"
-                android:parentActivityName=".activities.SignInActivity">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="co.zync.zync.activities.SignInActivity"/>
+                android:label="@string/zync_settings">
         </activity>
         <activity android:name=".activities.intro.PasswordActivity">
         </activity>

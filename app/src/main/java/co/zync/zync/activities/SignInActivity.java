@@ -1,7 +1,9 @@
 package co.zync.zync.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceActivity;
 import android.support.annotation.NonNull;
 import android.view.View;
 import co.zync.zync.activities.intro.PasswordActivity;
@@ -40,16 +42,27 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if (type.startsWith("image/")) {
                 Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                new ZyncPostImageTask((ZyncApplication) getApplication(), getContentResolver())
+                new ZyncPostImageTask(getZyncApp(), getContentResolver())
                         .execute(imageUri);
             } else if ("text/plain".equals(type)) {
                 String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
                 new ZyncPostClipTask(
-                        (ZyncApplication) getApplication(),
+                        getZyncApp(),
                         sharedText.getBytes(Charset.forName("UTF-8")),
                         ZyncClipType.TEXT
                 ).execute();
             }
+        }
+
+        SharedPreferences preferences = getZyncApp().getPreferences();
+
+        if (preferences.contains("zync_api_token")) {
+            getZyncApp().setApi(ZyncAPI.login(
+                    getZyncApp().httpRequestQueue(),
+                    preferences.getString("zync_api_token", "")
+            ));
+            getZyncApp().openSettings(this);
+            return;
         }
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -83,17 +96,24 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             if (result.isSuccess()) {
                 // Signed in successfully, show authenticated UI.
                 GoogleSignInAccount acct = result.getSignInAccount();
-                ((ZyncApplication) getApplication()).setAccount(acct);
+                getZyncApp().setAccount(acct);
                 System.out.println(acct.getDisplayName() + " is logged in!");
 
                 ZyncAPI.signup(
-                        ((ZyncApplication) getApplication()).httpRequestQueue(),
+                        getZyncApp().httpRequestQueue(),
                         acct.getIdToken(),
                         new ZyncAPI.SignupCallback() {
                             @Override
                             public void success(ZyncAPI api) {
-                                ((ZyncApplication) getApplication()).setApi(api);
-                                startActivity(new Intent(SignInActivity.this, PasswordActivity.class));
+                                getZyncApp().setApi(api);
+                                getZyncApp().getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
+
+
+                                if (!getZyncApp().getPreferences().contains("encryption_pass")) {
+                                    startActivity(new Intent(SignInActivity.this, PasswordActivity.class));
+                                } else {
+                                    getZyncApp().openSettings(SignInActivity.this);
+                                }
                             }
 
                             @Override
@@ -117,5 +137,9 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                 startActivityForResult(signInIntent, RC_SIGN_IN);
                 break;
         }
+    }
+
+    private ZyncApplication getZyncApp() {
+        return (ZyncApplication) getApplication();
     }
 }
