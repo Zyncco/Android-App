@@ -1,5 +1,6 @@
 package co.zync.zync.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -34,6 +35,9 @@ import co.zync.zync.api.ZyncError;
 public class SignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
     private static final int RC_SIGN_IN = 64209;
     private GoogleApiClient googleApiClient;
+
+    // Progress of signing into google.
+    private ProgressDialog connectionProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +106,10 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+
+        connectionProgressDialog = new ProgressDialog(this);
+        // TODO: I have no idea how to get the actual string?
+        connectionProgressDialog.setMessage(getString(R.string.signing_in));
     }
 
     @Override
@@ -113,6 +121,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         // yell at user to get internet
+        // Unrecoverable.
     }
 
     @Override
@@ -151,6 +160,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
                         @Override
                         public void handleError(ZyncError error) {
+                            System.out.println(error.toString());
                             // TODO do something
                         }
                     }

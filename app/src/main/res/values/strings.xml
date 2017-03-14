@@ -12,4 +12,5 @@
     <string name="sync_up_sum">Synchronize local keyboard with other devices</string>
     <string name="sync_down">Sync down</string>
     <string name="sync_down_sum">Synchronize cloud keyboard on this device</string>
+    <string name="signing_in">Signing in…</string>
 </resources>
