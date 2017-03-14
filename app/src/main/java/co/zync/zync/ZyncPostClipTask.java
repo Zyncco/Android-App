@@ -46,16 +46,18 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
         // act on data and push to servers async
         SharedPreferences preferences = app.getSharedPreferences(SettingsActivity.PREFERENCES_NAME, 0);
 
+        if (app.getApi() == null) {
+            return null; // app is not running yet
+        }
+
         try {
-            ZyncAPI.clipboard(
-                    app.httpRequestQueue(),
+            app.getApi().clipboard(
                     new ZyncClipData(
                             preferences.getBoolean("encryption_enabled", false) ?
                                     preferences.getString("encryption_pass", "default") : null,
                             type,
                             data
                     ),
-                    app.getAccount().getIdToken(),
                     listener
             );
         } catch (JSONException ignored) {

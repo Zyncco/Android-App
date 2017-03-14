@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.view.View;
 import co.zync.zync.activities.intro.PasswordActivity;
+import co.zync.zync.api.ZyncAPI;
+import co.zync.zync.api.ZyncError;
 import com.google.android.gms.auth.api.Auth;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -52,6 +54,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
+                .requestIdToken("837094062175-1jgrmfclvp8pc88gaa79u6qejve321k6.apps.googleusercontent.com")
                 .build();
 
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -83,7 +86,22 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                 ((ZyncApplication) getApplication()).setAccount(acct);
                 System.out.println(acct.getDisplayName() + " is logged in!");
 
-                startActivity(new Intent(this, PasswordActivity.class));
+                ZyncAPI.signup(
+                        ((ZyncApplication) getApplication()).httpRequestQueue(),
+                        acct.getIdToken(),
+                        new ZyncAPI.SignupCallback() {
+                            @Override
+                            public void success(ZyncAPI api) {
+                                ((ZyncApplication) getApplication()).setApi(api);
+                                startActivity(new Intent(SignInActivity.this, PasswordActivity.class));
+                            }
+
+                            @Override
+                            public void handleError(ZyncError error) {
+                                // TODO do something
+                            }
+                        }
+                );
             } else {
                 // they didn't sign in :c
                 System.out.println("no sign in :c");
