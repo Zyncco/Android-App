@@ -111,14 +111,14 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                 ZyncAPI.signup(
                         getZyncApp().httpRequestQueue(),
                         acct.getIdToken(),
-                        new ZyncAPI.SignupCallback() {
+                        new ZyncAPI.ZyncCallback<ZyncAPI>() {
                             @Override
                             public void success(ZyncAPI api) {
                                 getZyncApp().setApi(api);
                                 getZyncApp().getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
 
 
-                                if (!getZyncApp().getPreferences().contains("encryption_pass")) {
+                                if (!getZyncApp().getPreferences().contains("encryption_enabled")) {
                                     startActivity(new Intent(SignInActivity.this, PasswordActivity.class));
                                 } else {
                                     getZyncApp().openSettings(SignInActivity.this);

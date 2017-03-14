@@ -1,7 +1,5 @@
 package co.zync.zync.activities.intro;
 
-import android.content.Intent;
-import android.preference.PreferenceActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -9,7 +7,6 @@ import android.view.View;
 import android.widget.EditText;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
-import co.zync.zync.activities.SettingsActivity;
 
 public class PasswordActivity extends AppCompatActivity {
 
