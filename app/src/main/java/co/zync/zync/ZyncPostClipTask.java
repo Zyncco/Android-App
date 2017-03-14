@@ -9,6 +9,9 @@ import co.zync.zync.api.ZyncError;
 import org.json.JSONException;
 
 /**
+ * Task which when given the appropriate variables
+ * posts provided content to cloud clipboard
+ *
  * @author Mazen Kotb
  */
 public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {

@@ -8,6 +8,13 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * An authenticated request from Zync's servers.
+ * Due to the nature of Volley's design, this class
+ * had to be created to insert the token header
+ *
+ * @author Mazen Kotb
+ */
 public class ZyncAuthenticatedRequest extends JsonObjectRequest {
     private String token;
 

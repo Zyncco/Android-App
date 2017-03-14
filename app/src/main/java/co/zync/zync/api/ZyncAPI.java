@@ -61,6 +61,11 @@ public class ZyncAPI {
         queue.add(request);
     }
 
+    /*
+     * Sends a request to get the clipboard from the servers
+     * This method handles the decryption, decompression, and hash verification of the data.
+     * If any of these processes fail, null will be returned to the callback.
+     */
     public void getClipboard(final String encryptionKey, final ZyncCallback<ZyncClipData> callback) {
         ZyncAuthenticatedRequest request = new ZyncAuthenticatedRequest(
                 Request.Method.GET,

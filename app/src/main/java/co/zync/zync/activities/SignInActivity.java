@@ -3,7 +3,6 @@ package co.zync.zync.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.preference.PreferenceActivity;
 import android.support.annotation.NonNull;
 import android.view.View;
 import co.zync.zync.activities.intro.PasswordActivity;
@@ -27,6 +26,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.nio.charset.Charset;
 
+/*
+ * Activity presented to the user when they are signing in (with google)
+ */
 public class SignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
     private static final int RC_SIGN_IN = 64209;
     private GoogleApiClient googleApiClient;
@@ -36,8 +38,20 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
+        // make sure google play services is available
         GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this);
 
+        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_WIDE);
+
+        findViewById(R.id.sign_in_button).setOnClickListener(this);
+
+        /*
+         * SHARE START
+         *
+         * If the share feature was used with Zync,
+         * read the data and act accordingly
+         */
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -55,10 +69,18 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                         ZyncClipType.TEXT
                 ).execute();
             }
+
+            return;
         }
+
+        /*                            SHARE END                           */
+
 
         SharedPreferences preferences = getZyncApp().getPreferences();
 
+        /*
+         * If the user has logged in before, set the API variable and continue to settings.
+         */
         if (preferences.contains("zync_api_token")) {
             getZyncApp().setApi(ZyncAPI.login(
                     getZyncApp().httpRequestQueue(),
@@ -67,6 +89,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             getZyncApp().openSettings(this);
             return;
         }
+
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -77,11 +100,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-
-        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_WIDE);
-
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
     }
 
     @Override

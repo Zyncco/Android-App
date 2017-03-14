@@ -68,6 +68,10 @@ public class ZyncClipboardService extends Service {
         return null;
     }
 
+    /*
+     * Listens for changes in the clipboard of the system
+     * and posts them to the server async (if it's enabled)
+     */
     public class ZyncClipboardListener implements ClipboardManager.OnPrimaryClipChangedListener {
         @Override
         public void onPrimaryClipChanged() {

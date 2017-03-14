@@ -9,6 +9,12 @@ import co.zync.zync.api.ZyncError;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+/**
+ * Listens for messages from Firebase and acts accordingly
+ * as outlined in the Spec doc.
+ *
+ * @author Mazen Kotb
+ */
 public class ZyncMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {

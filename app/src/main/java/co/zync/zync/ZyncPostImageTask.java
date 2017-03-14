@@ -12,6 +12,11 @@ import co.zync.zync.api.ZyncError;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/**
+ * Task which compresses (PNG) and posts image to cloud clipboard
+ *
+ * @author Mazen Kotb
+ */
 public class ZyncPostImageTask extends AsyncTask<Uri, Void, Void> {
     private final ZyncApplication app;
     private final ContentResolver resolver;
