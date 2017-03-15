@@ -1,5 +1,6 @@
 package co.zync.zync.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -116,6 +117,12 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         // Signed in successfully, show authenticated UI.
         System.out.println(result.getEmail() + " is logged in!");
         final ZyncApplication app = getZyncApp();
+        final ProgressDialog dialog = new ProgressDialog(this, R.style.AppTheme);
+        dialog.setIndeterminate(true);
+        dialog.setTitle("");
+        dialog.setMessage(getString(R.string.signing_in));
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.show();
 
         ZyncAPI.signup(
                 app.httpRequestQueue(),
@@ -133,11 +140,14 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                             app.openSettings(SignInActivity.this);
                             app.syncDown();
                         }
+
+                        dialog.dismiss();
                     }
 
                     @Override
                     public void handleError(ZyncError error) {
                         System.out.println(error.toString());
+                        dialog.dismiss();
                         // TODO do something
                     }
                 }
