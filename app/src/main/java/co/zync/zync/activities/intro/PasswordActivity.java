@@ -1,5 +1,6 @@
 package co.zync.zync.activities.intro;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -7,6 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
+import co.zync.zync.activities.MainActivity;
 
 public class PasswordActivity extends AppCompatActivity {
 
@@ -26,7 +28,7 @@ public class PasswordActivity extends AppCompatActivity {
                             .putBoolean("encryption_enabled", true)
                             .apply();
                     // move to next screen
-                    app.openSettings(PasswordActivity.this);
+                    startActivity(new Intent(PasswordActivity.this, MainActivity.class));
                     app.syncDown();
                     return true;
                 }

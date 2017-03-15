@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import co.zync.zync.*;
+import co.zync.zync.activities.intro.IntroActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.ResultCodes;
@@ -38,6 +39,11 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         findViewById(R.id.sign_in_button).setOnClickListener(this);
 
         SharedPreferences preferences = getZyncApp().getPreferences();
+
+        if (!preferences.contains("seen_intro")) {
+            startActivity(new Intent(this, IntroActivity.class));
+            return;
+        }
 
         /*
          * If the user has logged in before, set the API variable and continue to settings.
@@ -101,7 +107,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                         app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
 
 
-                        if (!app.getPreferences().contains("encryption_enabled")) {
+                        if (!app.getPreferences().contains("encryption_enabled") || BuildConfig.DEBUG) {
                             startActivity(new Intent(SignInActivity.this, PasswordActivity.class));
                         } else {
                             //app.openSettings(SignInActivity.this);

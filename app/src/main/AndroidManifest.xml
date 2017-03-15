@@ -33,13 +33,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-
-                <category android:name="android.intent.category.DEFAULT"/>
-
-                <data android:mimeType="image/*"/>
-            </intent-filter>
         </activity>
         <activity
                 android:name=".activities.SettingsActivity"
@@ -50,6 +43,18 @@
         <activity
                 android:name=".activities.MainActivity"
                 android:label="@string/title_activity_main"
+                android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data android:mimeType="image/*"/>
+            </intent-filter>
+        </activity>
+        <activity
+                android:name=".activities.intro.IntroActivity"
+                android:label="@string/title_activity_intro"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
