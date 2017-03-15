@@ -24,4 +24,13 @@
     <string name="start">Start</string>
     <string name="title_activity_intro">@string/app_name</string>
     <string name="section_format">Hello World from section: %1$d</string>
+
+    <string name="example_question">Example question?</string>
+    <string name="example_answer">
+        This is done through super technology that utilizes quantum physics to
+        reach an exchange of three proxy superpositions, generating equilibrium
+        between the device spaces
+    </string>
+
+    <string name="separator">Separator between questions</string>
 </resources>

@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity
             getZyncApp().openSettings(this);
         } else if (id == R.id.nav_help) {
             // TODO open help activity
+            startActivity(new Intent(this, HelpActivity.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
