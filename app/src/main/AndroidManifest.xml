@@ -12,14 +12,16 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <service android:name=".ZyncClipboardService"/>
-        <service android:name=".firebase.ZyncMessagingService" android:exported="false">
+        <service
+                android:name=".firebase.ZyncMessagingService"
+                android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
-
         <service
-                android:name=".firebase.ZyncInstanceIdService" android:exported="false">
+                android:name=".firebase.ZyncInstanceIdService"
+                android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
@@ -44,6 +46,11 @@
                 android:label="@string/zync_settings">
         </activity>
         <activity android:name=".activities.intro.PasswordActivity">
+        </activity>
+        <activity
+                android:name=".activities.MainActivity"
+                android:label="@string/title_activity_main"
+                android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 

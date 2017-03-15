@@ -3,7 +3,6 @@ package co.zync.zync.activities;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -17,12 +16,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import co.zync.zync.activities.intro.PasswordActivity;
 import co.zync.zync.api.ZyncAPI;
-import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 
 /*
@@ -39,36 +36,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         // make sure google play services is available
         GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this);
         findViewById(R.id.sign_in_button).setOnClickListener(this);
-
-        /*
-         * SHARE START
-         *
-         * If the share feature was used with Zync,
-         * read the data and act accordingly
-         */
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        String type = intent.getType();
-
-        if (Intent.ACTION_SEND.equals(action) && type != null) {
-            if (type.startsWith("image/")) {
-                Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                new ZyncPostImageTask(getZyncApp(), getContentResolver())
-                        .execute(imageUri);
-            } else if ("text/plain".equals(type)) {
-                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-                new ZyncPostClipTask(
-                        getZyncApp(),
-                        sharedText.getBytes(Charset.forName("UTF-8")),
-                        ZyncClipType.TEXT
-                ).execute();
-            }
-
-            return;
-        }
-
-        /*                            SHARE END                           */
-
 
         SharedPreferences preferences = getZyncApp().getPreferences();
 
@@ -137,7 +104,8 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                         if (!app.getPreferences().contains("encryption_enabled")) {
                             startActivity(new Intent(SignInActivity.this, PasswordActivity.class));
                         } else {
-                            app.openSettings(SignInActivity.this);
+                            //app.openSettings(SignInActivity.this);
+                            startActivity(new Intent(SignInActivity.this, MainActivity.class));
                             app.syncDown();
                         }
 

@@ -14,4 +14,11 @@
     <string name="sync_down_sum">Synchronize cloud keyboard on this device</string>
     <string name="signing_in">Logging into Zync&#8230;</string>
     <string name="log_in">Login</string>
+    <string name="title_activity_main">Zync</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="settings">Settings</string>
+    <string name="help">Help</string>
 </resources>

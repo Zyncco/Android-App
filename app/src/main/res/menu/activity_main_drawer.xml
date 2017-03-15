@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+                android:icon="@android:drawable/ic_menu_camera"
+                android:title="Feature X" android:id="@+id/feature_x"/>
+    </group>
+    <group>
+        <item android:icon="@android:drawable/ic_menu_help" android:title="@string/help" android:id="@+id/nav_help"/>
+        <item android:icon="@android:drawable/ic_menu_preferences" android:title="@string/settings" android:id="@+id/nav_settings"/>
+    </group>
+
+</menu>
