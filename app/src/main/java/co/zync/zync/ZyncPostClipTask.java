@@ -55,8 +55,7 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
         try {
             app.getApi().postClipboard(
                     new ZyncClipData(
-                            preferences.getBoolean("encryption_enabled", false) ?
-                                    preferences.getString("encryption_pass", "default") : null,
+                            app.getEncryptionPass(),
                             type,
                             data
                     ),

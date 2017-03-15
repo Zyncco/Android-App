@@ -7,9 +7,11 @@
         android:layout_height="match_parent"
         tools:context="co.zync.zync.activities.SignInActivity">
 
-    <com.google.android.gms.common.SignInButton
+    <Button
             android:id="@+id/sign_in_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true" android:layout_centerHorizontal="true"/>
+            style="@android:style/Widget.Material.Light.Button.Borderless.Colored" android:text="@string/log_in"
+            android:layout_marginBottom="197dp" android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
 </android.widget.RelativeLayout>

@@ -96,6 +96,10 @@ public class ZyncClipData {
         return data;
     }
 
+    public ZyncClipType type() {
+        return type;
+    }
+
     public JSONObject toJson() {
         try {
             JSONObject object = new JSONObject();

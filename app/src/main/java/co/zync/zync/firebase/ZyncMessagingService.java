@@ -43,28 +43,12 @@ public class ZyncMessagingService extends FirebaseMessagingService {
             return;
         }
 
-        if (clipType != ZyncClipType.TEXT) {
+        if (!application.isTypeSupported(clipType)) {
             return;
         }
 
         // todo filter by size
 
-        application.getApi().getClipboard(
-                application.getPreferences().getString("encryption_pass", null),
-                new ZyncAPI.ZyncCallback<ZyncClipData>() {
-                    @Override
-                    public void success(ZyncClipData value) {
-                        if (value == null || value.data() == null) {
-                            return;
-                        }
-
-                        ZyncClipboardService.getInstance().writeToClip(value.data(), false);
-                    }
-
-                    @Override
-                    public void handleError(ZyncError error) {
-                        // ignored
-                    }
-                });
+        application.syncDown();
     }
 }

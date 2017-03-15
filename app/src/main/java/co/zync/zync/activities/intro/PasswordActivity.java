@@ -20,12 +20,14 @@ public class PasswordActivity extends AppCompatActivity {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                    ((ZyncApplication) getApplication()).getPreferences().edit()
+                    ZyncApplication app = (ZyncApplication) getApplication();
+                    app.getPreferences().edit()
                             .putString("encryption_pass", passEntry.getText().toString())
                             .putBoolean("encryption_enabled", true)
                             .apply();
                     // move to next screen
-                    ((ZyncApplication) getApplication()).openSettings(PasswordActivity.this);
+                    app.openSettings(PasswordActivity.this);
+                    app.syncDown();
                     return true;
                 }
                 return false;
