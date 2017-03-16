@@ -39,7 +39,11 @@
     <string name="encryption_warning_title">Warning</string>
     <string name="encryption_warning_message">Disabling encryption means your clipboard data will be vulnerable to hackers! Are you sure you want to do this?</string>
     <string name="encryption_warning_cancel">Cancel</string>
-    <string name="encryption_warning_yes">Yes</string>
+    <string name="encryption_warning_yes">Disable</string>
     <string name="ok">OK</string>
+    <string name="logout">Log out</string>
+    <string name="logout_success">Successfully logged out</string>
     <string name="disable_encryption">Disable Encryption</string>
+    <string name="uploading_image">Uploading image&#8230;</string>
+    <string name="please_wait">Please wait</string>
 </resources>

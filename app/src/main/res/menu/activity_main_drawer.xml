@@ -10,5 +10,9 @@
         <item android:icon="@android:drawable/ic_menu_help" android:title="@string/help" android:id="@+id/nav_help"/>
         <item android:icon="@android:drawable/ic_menu_preferences" android:title="@string/settings" android:id="@+id/nav_settings"/>
     </group>
+    <group
+    >
+        <item android:icon="@drawable/ic_exit_to_app_black" android:title="@string/logout" android:id="@+id/logout"/>
+    </group>
 
 </menu>

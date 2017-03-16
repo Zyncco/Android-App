@@ -1,9 +1,14 @@
 package co.zync.zync.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -14,12 +19,20 @@ import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
 import co.zync.zync.ZyncPostClipTask;
 import co.zync.zync.ZyncPostImageTask;
+import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipType;
+import co.zync.zync.api.ZyncError;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    public static int REQUEST_IMAGE = 23212;
+    private String currentPhotoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +83,11 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // remove camera feature if the system does not support it
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            navigationView.removeView(navigationView.findViewById(R.id.feature_x));
+        }
     }
 
     @Override
@@ -90,8 +108,40 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_settings) {
             getZyncApp().openSettings(this);
         } else if (id == R.id.nav_help) {
-            // TODO open help activity
             startActivity(new Intent(this, HelpActivity.class));
+        } else if (id == R.id.logout) {
+            getZyncApp().setApi(null);
+            getZyncApp().getPreferences().edit()
+                    .remove("encryption_pass")
+                    .remove("encryption_enabled")
+                    .remove("zync_api_token")
+                    .apply();
+            startActivity(new Intent(this, SignInActivity.class));
+        } else if (id == R.id.feature_x) {
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            // ensure there's an app which can take the picture for us
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                File photoFile = null;
+
+                try {
+                    photoFile = createImageFile();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    // unable to create image file. TODO: Complain to user
+                }
+
+                if (photoFile != null) {
+                    // generate a URI for the app to put the photo in
+                    Uri photoURI = FileProvider.getUriForFile(this,
+                            "co.zync.zync.fileprovider",
+                            photoFile);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+
+                    // move the user to the app to take the image
+                    startActivityForResult(intent, REQUEST_IMAGE);
+                }
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -99,6 +149,55 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    // creates a temporary image file used when capturing images
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "PNG_" + timeStamp + "_";
+        File storageDir = new File(getFilesDir(), "images/");
+        storageDir.mkdirs();
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".png",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE && resultCode == RESULT_OK) {
+            final ProgressDialog dialog = new ProgressDialog(this);
+            dialog.setTitle(R.string.uploading_image);
+            dialog.setMessage(getString(R.string.please_wait));
+            dialog.setIndeterminate(true);
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.show();
+
+            // post image to zync async
+            new ZyncPostImageTask(
+                    getZyncApp(),
+                    BitmapFactory.decodeFile(currentPhotoPath),
+                    new ZyncAPI.ZyncCallback<Void>() {
+                        @Override
+                        public void success(Void value) {
+                            // todo send notification saying it was successful
+                            dialog.dismiss();
+                            System.out.println("sent image");
+                        }
+
+                        @Override
+                        public void handleError(ZyncError error) {
+                            // todo complain to user
+                            dialog.dismiss();
+                            System.out.println("error sending image");
+                        }
+                    }).execute(); // we do not need to give it a URI since we already provided the bitmap
+        }
+    }
 
     private ZyncApplication getZyncApp() {
         return (ZyncApplication) getApplication();
