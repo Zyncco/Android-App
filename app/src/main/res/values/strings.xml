@@ -3,7 +3,7 @@
     <string name="zync_settings">Zync Settings</string>
     <string name="encryption">Encryption</string>
     <string name="encryption_pass">Encryption Password</string>
-    <string name="encryption_pass_sum">Password used for encryption</string>
+    <string name="encryption_pass_sum">Enter the key used to keep your clipboard safe</string>
     <string name="encryption_enabled">Encryption Enabled</string>
     <string name="pref_header_general">General Settings</string>
     <string name="enter_pass">Please enter the password you wish to use for encryption</string>
@@ -33,4 +33,13 @@
     </string>
 
     <string name="separator">Separator between questions</string>
+    <string name="zync_caption">End-to-end encrypted cloud clipboard synchronization</string>
+    <string name="password_insufficient">Your password must be greater than 10 characters!</string>
+    <string name="encryption_password_title">Encryption Password</string>
+    <string name="encryption_warning_title">Warning</string>
+    <string name="encryption_warning_message">Disabling encryption means your clipboard data will be vulnerable to hackers! Are you sure you want to do this?</string>
+    <string name="encryption_warning_cancel">Cancel</string>
+    <string name="encryption_warning_yes">Yes</string>
+    <string name="ok">OK</string>
+    <string name="disable_encryption">Disable Encryption</string>
 </resources>

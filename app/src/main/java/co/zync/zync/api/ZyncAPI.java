@@ -16,12 +16,12 @@ public class ZyncAPI {
     private final RequestQueue queue;
     private final String token;
 
-    private ZyncAPI(RequestQueue queue, String token) {
+    public ZyncAPI(RequestQueue queue, String token) {
         this.queue = queue;
         this.token = token;
     }
 
-    public static void signup(final RequestQueue queue, String idToken, final ZyncCallback<ZyncAPI> callback) {
+    public static void signup(final RequestQueue queue, String idToken, String provider, final ZyncCallback<ZyncAPI> callback) {
         ZyncGenericAPIListener listener = new ZyncGenericAPIListener(new ZyncCallback<JSONObject>() {
             @Override
             public void success(JSONObject node) {
@@ -36,7 +36,7 @@ public class ZyncAPI {
                 callback.handleError(error);
             }
         });
-        JsonObjectRequest request = new JsonObjectRequest(BASE + VERSION + "/user/callback?token=" + idToken, null, listener, listener);
+        JsonObjectRequest request = new JsonObjectRequest(BASE + VERSION + "/user/callback?token=" + idToken + "&provider=" + provider, null, listener, listener);
 
         queue.add(request);
     }

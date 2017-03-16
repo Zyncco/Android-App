@@ -12,6 +12,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@android:style/Widget.Material.Light.Button.Borderless.Colored" android:text="@string/log_in"
-            android:layout_marginBottom="197dp" android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"/>
+            android:layout_marginTop="100dp"
+            android:layout_below="@+id/Zync" android:layout_centerHorizontal="true"/>
+    <TextView
+            android:text="@string/app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/Zync"
+            android:textAppearance="@android:style/TextAppearance.Material.Headline"
+            android:layout_centerVertical="true" android:layout_centerHorizontal="true"/>
+    <TextView
+            android:text="@string/zync_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp" android:id="@+id/name_caption"
+            android:textAppearance="@android:style/TextAppearance.Material.Caption"
+            android:layout_below="@+id/Zync" android:layout_centerHorizontal="true"/>
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/logo"
+            android:maxWidth="175dp"
+            android:maxHeight="175dp"
+            android:id="@+id/login_logo" android:cropToPadding="false"
+            android:adjustViewBounds="true" android:scaleType="fitCenter"
+            android:contentDescription="@string/accessibility_logo"
+            android:layout_above="@+id/Zync" android:layout_centerHorizontal="true" android:layout_marginBottom="14dp"/>
 </android.widget.RelativeLayout>
