@@ -1,5 +1,6 @@
 package co.zync.zync.firebase;
 
+import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
 import co.zync.zync.ZyncClipboardService;
 import co.zync.zync.api.ZyncAPI;
@@ -50,5 +51,9 @@ public class ZyncMessagingService extends FirebaseMessagingService {
         // todo filter by size
 
         application.syncDown();
+        application.sendNotification(
+                getString(R.string.clipboard_changed_notification),
+                getString(R.string.clipboard_changed_notification_desc)
+        );
     }
 }

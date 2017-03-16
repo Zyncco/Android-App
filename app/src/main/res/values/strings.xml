@@ -23,7 +23,6 @@
     <string name="help">Help</string>
     <string name="start">Start</string>
     <string name="title_activity_intro">@string/app_name</string>
-    <string name="section_format">Hello World from section: %1$d</string>
 
     <string name="example_question">Example question?</string>
     <string name="example_answer">
@@ -46,4 +45,17 @@
     <string name="disable_encryption">Disable Encryption</string>
     <string name="uploading_image">Uploading image&#8230;</string>
     <string name="please_wait">Please wait</string>
+    <string name="zync_persistentnotif_title">@string/app_name</string>
+    <string name="zync_persistentnotif_descr">Zync is listening to the clipboard&#8230;</string>
+    <string name="notifications">Notifications</string>
+    <string name="persistent_notification">Persistent Notification</string>
+    <string name="persistent_notification_desc">This allows the application to accurately listen for clipboard changes</string>
+    <string name="clipboard_change_notification">Clipboard Change</string>
+    <string name="clipboard_change_notification_desc">Be notified of changes to the cloud clipboard</string>
+    <string name="clipboard_posted_notification">Clipboard posted!</string>
+    <string name="clipboard_posted_notification_desc">Your clipboard was just posted!</string>
+    <string name="clipboard_post_error_notification">Error posting your clipboard</string>
+    <string name="clipboard_post_error_notification_desc">Are you connected to the internet?</string>
+    <string name="clipboard_changed_notification">Clipboard updated!</string>
+    <string name="clipboard_changed_notification_desc">New content has been written to your clipboard!</string>
 </resources>

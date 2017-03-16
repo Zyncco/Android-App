@@ -30,4 +30,16 @@
                 android:defaultValue="true"
                 android:title="@string/sync_down" android:key="sync_down" android:summary="@string/sync_down_sum"/>
     </PreferenceCategory>
+    <PreferenceCategory
+            android:title="@string/notifications">
+
+        <SwitchPreference
+                android:defaultValue="true"
+                android:title="@string/persistent_notification" android:key="enable_persistent_notification"
+                android:summary="@string/persistent_notification_desc"/>
+        <SwitchPreference
+                android:defaultValue="true"
+                android:title="@string/clipboard_change_notification" android:key="clipboard_change_notification"
+                android:summary="@string/clipboard_change_notification_desc"/>
+    </PreferenceCategory>
 </PreferenceScreen>

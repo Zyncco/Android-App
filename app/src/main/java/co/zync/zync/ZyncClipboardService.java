@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.*;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.util.Log;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
@@ -77,12 +78,36 @@ public class ZyncClipboardService extends Service {
         public void onPrimaryClipChanged() {
             byte[] data = getRawData();
 
+            if (app.getApi() == null) {
+                return; // they haven't logged in yet
+            }
+
             if (!app.getPreferences().getBoolean("sync_up", true)) {
                 return;
             }
 
             if (data.length != 0) {
-                new ZyncPostClipTask(app, data, ZyncClipType.TEXT).execute();
+                new ZyncPostClipTask(app, data, ZyncClipType.TEXT, new ZyncAPI.ZyncCallback<Void>() {
+                    @Override
+                    public void success(Void value) {
+                        if (app.getPreferences().getBoolean("clipboard_change_notification", true)) {
+                            app.sendNotification(
+                                    getString(R.string.clipboard_posted_notification),
+                                    getString(R.string.clipboard_posted_notification_desc)
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void handleError(ZyncError error) {
+                        app.sendNotification(
+                                getString(R.string.clipboard_post_error_notification),
+                                getString(R.string.clipboard_post_error_notification_desc)
+                        );
+                        Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
+                                + error.code() + " : " + error.message());
+                    }
+                }).execute();
             }
         }
     }

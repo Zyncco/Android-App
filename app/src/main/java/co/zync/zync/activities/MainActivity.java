@@ -14,6 +14,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
@@ -184,16 +185,24 @@ public class MainActivity extends AppCompatActivity
                     new ZyncAPI.ZyncCallback<Void>() {
                         @Override
                         public void success(Void value) {
-                            // todo send notification saying it was successful
                             dialog.dismiss();
-                            System.out.println("sent image");
+                            if (getZyncApp().getPreferences().getBoolean("clipboard_change_notification", true)) {
+                                getZyncApp().sendNotification(
+                                        getString(R.string.clipboard_posted_notification),
+                                        getString(R.string.clipboard_posted_notification_desc)
+                                );
+                            }
                         }
 
                         @Override
                         public void handleError(ZyncError error) {
-                            // todo complain to user
                             dialog.dismiss();
-                            System.out.println("error sending image");
+                            getZyncApp().sendNotification(
+                                    getString(R.string.clipboard_post_error_notification),
+                                    getString(R.string.clipboard_post_error_notification_desc)
+                            );
+                            Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
+                                    + error.code() + " : " + error.message());
                         }
                     }).execute(); // we do not need to give it a URI since we already provided the bitmap
         }
