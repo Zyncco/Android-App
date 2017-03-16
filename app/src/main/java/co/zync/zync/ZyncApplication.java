@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Icon;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.preference.PreferenceActivity;
 import co.zync.zync.activities.SettingsActivity;
 import co.zync.zync.api.ZyncAPI;
@@ -25,11 +28,20 @@ public class ZyncApplication extends Application {
     public static int PERSISTENT_NOTIFICATION_ID = 329321;
     private RequestQueue httpRequestQueue;
     private ZyncAPI api;
+    private final ZyncPreferenceChangeListener preferenceChangeListener = new ZyncPreferenceChangeListener(this);
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        if (isWifiConnected() || getPreferences().getBoolean("use_on_data", true)) {
+            setupNetwork();
+        }
+
+        getPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+    }
+
+    public void setupNetwork() {
         // Zync services
         startService(ZyncClipboardService.class);
         startService(ZyncInstanceIdService.class);
@@ -37,14 +49,59 @@ public class ZyncApplication extends Application {
 
         httpRequestQueue = Volley.newRequestQueue(getApplicationContext());
 
+        if (api != null) {
+            api.setQueue(httpRequestQueue);
+        }
+
         if (getPreferences().getBoolean("enable_persistent_notification", true)) {
             createPersistentNotification();
         }
     }
 
+    public void removeNetworkUsages() {
+        stopService(new Intent(this, ZyncClipboardService.class));
+        stopService(new Intent(this, ZyncInstanceIdService.class));
+        stopService(new Intent(this, ZyncMessagingService.class));
+
+        httpRequestQueue = null;
+
+        if (api != null) {
+            api.setQueue(null);
+        }
+
+        if (getPreferences().getBoolean("enable_persistent_notification", true)) {
+            removePersistentNotification();
+        }
+    }
+
+    public boolean isWifiConnected() {
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        boolean connected = false;
+
+        for (Network network : connManager.getAllNetworks()) {
+            NetworkInfo info = connManager.getNetworkInfo(network);
+
+            if (info.getType() != ConnectivityManager.TYPE_WIFI) {
+                continue;
+            }
+
+            if (info.isConnected()) {
+                connected = true;
+            }
+        }
+
+        return connected;
+    }
+
     private void startService(Class<? extends Service> cls) {
         Intent intent = new Intent(this, cls);
         startService(intent);
+    }
+
+    public void removePersistentNotification() {
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(PERSISTENT_NOTIFICATION_ID);
     }
 
     public void createPersistentNotification() {

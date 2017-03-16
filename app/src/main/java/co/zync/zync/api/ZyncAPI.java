@@ -13,7 +13,7 @@ import org.json.JSONObject;
 public class ZyncAPI {
     public static final String BASE = "https://zync-123456.appspot.com/api/v";
     public static final int VERSION = 0;
-    private final RequestQueue queue;
+    private RequestQueue queue;
     private final String token;
 
     public ZyncAPI(RequestQueue queue, String token) {
@@ -88,6 +88,14 @@ public class ZyncAPI {
 
     public String getToken() {
         return token;
+    }
+
+    public RequestQueue queue() {
+        return queue;
+    }
+
+    public void setQueue(RequestQueue queue) {
+        this.queue = queue;
     }
 
     public interface ZyncCallback<T> {

@@ -58,7 +58,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                     getZyncApp().httpRequestQueue(),
                     preferences.getString("zync_api_token", "")
             ));
-            getZyncApp().openSettings(this);
+            startActivity(new Intent(this, MainActivity.class));
         }
     }
 
@@ -138,16 +138,27 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sign_in_button:
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setProviders(Arrays.asList(
-                                        new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
-                                        new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
-                                        ))
-                                .setTheme(R.style.AppTheme)
-                                .build(),
-                        RC_SIGN_IN);
+                if (getZyncApp().httpRequestQueue() != null) {
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setProviders(Arrays.asList(
+                                            new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
+                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
+                                    ))
+                                    .setTheme(R.style.AppTheme)
+                                    .build(),
+                            RC_SIGN_IN);
+                } else {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                    dialog.setTitle(R.string.no_internet);
+                    dialog.setMessage(R.string.no_internet_desc);
+                    dialog.setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {}
+                    });
+                    dialog.show();
+                }
                 break;
         }
     }
