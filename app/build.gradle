@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
@@ -11,6 +15,12 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    buildTypes.each {
+        it.resValue "string", "facebook_application_id", keystoreProperties["FacebookApplicationId"].toString()
+        it.resValue "string", "facebook_login_protocol_scheme", "fb" + keystoreProperties["FacebookApplicationId"]
+    }
+
     buildTypes {
         release {
             minifyEnabled false
