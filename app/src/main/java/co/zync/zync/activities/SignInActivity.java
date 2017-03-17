@@ -8,11 +8,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputType;
-import android.view.KeyEvent;
 import android.view.View;
 
-import android.widget.EditText;
 import co.zync.zync.*;
 import co.zync.zync.activities.intro.IntroActivity;
 import co.zync.zync.utils.ZyncPassDialog;
@@ -33,7 +30,6 @@ import co.zync.zync.api.ZyncError;
  */
 public class SignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
     private static final int RC_SIGN_IN = 64209;
-    private AlertDialog passwordDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,11 +115,11 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                             new ZyncPassDialog(SignInActivity.this, getZyncApp(), new ZyncPassDialog.Callback() {
                                 @Override
                                 public void callback() {
-                                    enterMainActivity();
+                                    signInSuccess();
                                 }
                             }).promptForPassword();
                         } else {
-                            enterMainActivity();
+                            signInSuccess();
                         }
                     }
 
@@ -148,10 +144,12 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                     startActivityForResult(
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
+                                    .setLogo(R.drawable.logo)
                                     .setProviders(Arrays.asList(
-                                            new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
-                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
+                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
+                                            new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
                                     ))
+                                    .setIsSmartLockEnabled(!BuildConfig.DEBUG) // disable smart lock if debugging
                                     .setTheme(R.style.AppTheme)
                                     .build(),
                             RC_SIGN_IN);
@@ -169,7 +167,8 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         }
     }
 
-    private void enterMainActivity() {
+    private void signInSuccess() {
+        startService(new Intent(this, ZyncClipboardService.class));
         startActivity(new Intent(SignInActivity.this, MainActivity.class));
         getZyncApp().syncDown();
     }

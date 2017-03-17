@@ -44,25 +44,25 @@ public class ZyncApplication extends Application {
 
     public void setupNetwork() {
         // Zync services
-        startService(ZyncClipboardService.class);
         startService(ZyncInstanceIdService.class);
         startService(ZyncMessagingService.class);
 
         httpRequestQueue = Volley.newRequestQueue(getApplicationContext());
 
         if (api != null) {
+            startService(ZyncClipboardService.class);
             api.setQueue(httpRequestQueue);
         }
     }
 
     public void removeNetworkUsages() {
-        stopService(new Intent(this, ZyncClipboardService.class));
         stopService(new Intent(this, ZyncInstanceIdService.class));
         stopService(new Intent(this, ZyncMessagingService.class));
 
         httpRequestQueue = null;
 
         if (api != null) {
+            stopService(new Intent(this, ZyncClipboardService.class));
             api.setQueue(null);
         }
     }

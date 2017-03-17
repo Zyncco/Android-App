@@ -16,10 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import co.zync.zync.R;
-import co.zync.zync.ZyncApplication;
-import co.zync.zync.ZyncPostClipTask;
-import co.zync.zync.ZyncPostImageTask;
+import co.zync.zync.*;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
@@ -117,6 +114,7 @@ public class MainActivity extends AppCompatActivity
                     .remove("encryption_enabled")
                     .remove("zync_api_token")
                     .apply();
+            stopService(new Intent(this, ZyncClipboardService.class));
             startActivity(new Intent(this, SignInActivity.class));
         } else if (id == R.id.feature_x) {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
