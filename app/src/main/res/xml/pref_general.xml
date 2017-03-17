@@ -13,10 +13,7 @@
         <SwitchPreference
                 android:defaultValue="false"
                 android:title="@string/encryption_enabled" android:key="encryption_enabled" android:checked="false"/>
-        <EditTextPreference
-                android:selectAllOnFocus="true"
-                android:singleLine="true"
-                android:inputType="textPassword"
+        <Preference
                 android:title="@string/encryption_pass" android:key="encryption_pass" android:defaultValue="password"
                 android:summary="@string/encryption_pass_sum"/>
     </PreferenceCategory>

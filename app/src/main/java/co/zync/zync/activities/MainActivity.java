@@ -188,6 +188,7 @@ public class MainActivity extends AppCompatActivity
                             dialog.dismiss();
                             if (getZyncApp().getPreferences().getBoolean("clipboard_change_notification", true)) {
                                 getZyncApp().sendNotification(
+                                        ZyncApplication.CLIPBOARD_POSTED_ID,
                                         getString(R.string.clipboard_posted_notification),
                                         getString(R.string.clipboard_posted_notification_desc)
                                 );
@@ -198,6 +199,7 @@ public class MainActivity extends AppCompatActivity
                         public void handleError(ZyncError error) {
                             dialog.dismiss();
                             getZyncApp().sendNotification(
+                                    ZyncApplication.CLIPBOARD_ERROR_ID,
                                     getString(R.string.clipboard_post_error_notification),
                                     getString(R.string.clipboard_post_error_notification_desc)
                             );

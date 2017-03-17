@@ -17,10 +17,13 @@ import co.zync.zync.firebase.ZyncMessagingService;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
-import java.util.Random;
-
 public class ZyncApplication extends Application {
+    /* START NOTIFICATION IDS */
+    public static int CLIPBOARD_UPDATED_ID = 281902;
+    public static int CLIPBOARD_POSTED_ID = 213812;
+    public static int CLIPBOARD_ERROR_ID = 9308312;
     public static int PERSISTENT_NOTIFICATION_ID = 329321;
+    /* END NOTIFICATION IDS */
     private RequestQueue httpRequestQueue;
     private ZyncAPI api;
     private ZyncWifiReceiver receiver; // do not remove, we have to retain the reference
@@ -88,16 +91,18 @@ public class ZyncApplication extends Application {
         startService(intent);
     }
 
-    public void sendNotification(String title, String text) {
+    public void sendNotification(int id, String title, String text) {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.cancel(id);
+
         Notification.Builder builder = new Notification.Builder(this);
         builder.setSmallIcon(R.drawable.notification_icon);
-        builder.setLargeIcon(Icon.createWithResource("mipmap", R.mipmap.ic_launcher));
         builder.setContentTitle(title);
         builder.setContentText(text);
 
-        notificationManager.notify(new Random().nextInt(), builder.build());
+        notificationManager.notify(id, builder.build());
     }
 
     /*

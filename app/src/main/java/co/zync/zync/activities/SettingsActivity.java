@@ -6,12 +6,15 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 import co.zync.zync.R;
+import co.zync.zync.ZyncApplication;
+import co.zync.zync.utils.ZyncPassDialog;
 
 import java.util.List;
 
@@ -100,6 +103,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             getPreferenceManager().setSharedPreferencesName(PREFERENCES_NAME);
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
             addPreferencesFromResource(R.xml.pref_general);
+            findPreference("encryption_pass").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    new ZyncPassDialog(
+                            getActivity(),
+                            (ZyncApplication) getActivity().getApplication(),
+                            new ZyncPassDialog.Callback() {
+                                @Override
+                                public void callback() {
+                                }
+                            }).promptForPassword();
+                    return true;
+                }
+            });
             //setHasOptionsMenu(true);
         }
     }

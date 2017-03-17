@@ -1,20 +1,13 @@
 package co.zync.zync;
 
 import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.*;
-import android.graphics.drawable.Icon;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
-import co.zync.zync.activities.MainActivity;
 import co.zync.zync.api.ZyncAPI;
-import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
-import org.json.JSONException;
 
 import java.nio.charset.Charset;
 
@@ -52,7 +45,6 @@ public class ZyncClipboardService extends Service {
         startForeground(ZyncApplication.PERSISTENT_NOTIFICATION_ID, new Notification.Builder(this)
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.notification_icon)
-                .setLargeIcon(Icon.createWithResource("mipmap", R.mipmap.ic_launcher))
                 .setContentTitle(getString(R.string.zync_persistentnotif_title))
                 .setContentText(getString(R.string.zync_persistentnotif_descr))
                 .setPriority(Notification.PRIORITY_MIN)
@@ -118,6 +110,7 @@ public class ZyncClipboardService extends Service {
                     public void success(Void value) {
                         if (app.getPreferences().getBoolean("clipboard_change_notification", true)) {
                             app.sendNotification(
+                                    ZyncApplication.CLIPBOARD_POSTED_ID,
                                     getString(R.string.clipboard_posted_notification),
                                     getString(R.string.clipboard_posted_notification_desc)
                             );
@@ -127,6 +120,7 @@ public class ZyncClipboardService extends Service {
                     @Override
                     public void handleError(ZyncError error) {
                         app.sendNotification(
+                                ZyncApplication.CLIPBOARD_ERROR_ID,
                                 getString(R.string.clipboard_post_error_notification),
                                 getString(R.string.clipboard_post_error_notification_desc)
                         );

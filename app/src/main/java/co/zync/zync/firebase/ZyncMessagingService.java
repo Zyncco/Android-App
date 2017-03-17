@@ -52,6 +52,7 @@ public class ZyncMessagingService extends FirebaseMessagingService {
 
         application.syncDown();
         application.sendNotification(
+                ZyncApplication.CLIPBOARD_UPDATED_ID,
                 getString(R.string.clipboard_changed_notification),
                 getString(R.string.clipboard_changed_notification_desc)
         );
