@@ -9,9 +9,9 @@
     <string name="enter_pass">Please enter the password you wish to use for encryption</string>
     <string name="sync_settings">Sync</string>
     <string name="sync_up">Sync up</string>
-    <string name="sync_up_sum">Synchronize local keyboard with other devices</string>
+    <string name="sync_up_sum">Synchronize local clipboard with other devices</string>
     <string name="sync_down">Sync down</string>
-    <string name="sync_down_sum">Synchronize cloud keyboard on this device</string>
+    <string name="sync_down_sum">Synchronize cloud clipboard on this device</string>
     <string name="signing_in">Logging into Zync&#8230;</string>
     <string name="log_in">Login</string>
     <string name="title_activity_main">@string/app_name</string>

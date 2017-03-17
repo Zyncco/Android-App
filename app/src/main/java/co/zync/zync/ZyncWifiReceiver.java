@@ -12,13 +12,13 @@ public class ZyncWifiReceiver extends BroadcastReceiver {
         ZyncApplication app = (ZyncApplication) context.getApplicationContext();
         ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = conMan.getActiveNetworkInfo();
+        boolean useOnData = app.getPreferences().getBoolean("use_on_data", true);
 
         if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-            if (!app.getPreferences().getBoolean("use_on_data", true)
-                    && app.httpRequestQueue() == null) {
+            if (!useOnData && app.httpRequestQueue() == null) {
                 app.setupNetwork();
             }
-        } else if (app.httpRequestQueue() != null) {
+        } else if (app.httpRequestQueue() != null && !useOnData) {
             app.removeNetworkUsages();
         }
     }

@@ -55,7 +55,7 @@ public class ZyncClipboardService extends Service {
                 .setLargeIcon(Icon.createWithResource("mipmap", R.mipmap.ic_launcher))
                 .setContentTitle(getString(R.string.zync_persistentnotif_title))
                 .setContentText(getString(R.string.zync_persistentnotif_descr))
-                .setPriority(-2)
+                .setPriority(Notification.PRIORITY_MIN)
                 .build());
     }
 
