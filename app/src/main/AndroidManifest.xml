@@ -77,10 +77,6 @@
                     android:name="android.support.FILE_PROVIDER_PATHS"
                     android:resource="@xml/file_paths" />
         </provider>
-
-        <service android:name=".ZyncWifiJob"
-                 android:permission="android.permission.BIND_JOB_SERVICE"
-                 android:exported="false"/>
     </application>
 
 </manifest>

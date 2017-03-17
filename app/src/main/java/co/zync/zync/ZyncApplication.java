@@ -1,15 +1,7 @@
 package co.zync.zync;
 
-import android.app.Application;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.Service;
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.app.*;
+import android.content.*;
 import android.graphics.drawable.Icon;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -29,9 +21,9 @@ import java.util.Random;
 
 public class ZyncApplication extends Application {
     public static int PERSISTENT_NOTIFICATION_ID = 329321;
-    public static int WIFI_JOB_ID = 2312;
     private RequestQueue httpRequestQueue;
     private ZyncAPI api;
+    private ZyncWifiReceiver receiver; // do not remove, we have to retain the reference
     private final ZyncPreferenceChangeListener preferenceChangeListener = new ZyncPreferenceChangeListener(this);
 
     @Override
@@ -42,11 +34,9 @@ public class ZyncApplication extends Application {
             setupNetwork();
         }
 
+        receiver = new ZyncWifiReceiver();
+        registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         getPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
-
-        JobScheduler tm = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        tm.schedule(new JobInfo.Builder(WIFI_JOB_ID, new ComponentName(this, ZyncWifiJob.class))
-                .setPeriodic(15000, 3000).build());
     }
 
     public void setupNetwork() {
@@ -60,10 +50,6 @@ public class ZyncApplication extends Application {
         if (api != null) {
             api.setQueue(httpRequestQueue);
         }
-
-        if (getPreferences().getBoolean("enable_persistent_notification", true)) {
-            createPersistentNotification();
-        }
     }
 
     public void removeNetworkUsages() {
@@ -75,10 +61,6 @@ public class ZyncApplication extends Application {
 
         if (api != null) {
             api.setQueue(null);
-        }
-
-        if (getPreferences().getBoolean("enable_persistent_notification", true)) {
-            removePersistentNotification();
         }
     }
 
@@ -104,26 +86,6 @@ public class ZyncApplication extends Application {
     private void startService(Class<? extends Service> cls) {
         Intent intent = new Intent(this, cls);
         startService(intent);
-    }
-
-    public void removePersistentNotification() {
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(PERSISTENT_NOTIFICATION_ID);
-    }
-
-    public void createPersistentNotification() {
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification.Builder builder = new Notification.Builder(this);
-        builder.setOngoing(true);
-        builder.setSmallIcon(R.drawable.notification_icon);
-        builder.setLargeIcon(Icon.createWithResource("mipmap", R.mipmap.ic_launcher));
-        builder.setContentTitle(getString(R.string.zync_persistentnotif_title));
-        builder.setContentText(getString(R.string.zync_persistentnotif_descr));
-        builder.setPriority(-2);
-
-        notificationManager.notify(PERSISTENT_NOTIFICATION_ID, builder.build());
     }
 
     public void sendNotification(String title, String text) {
