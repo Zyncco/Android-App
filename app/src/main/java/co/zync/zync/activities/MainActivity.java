@@ -20,17 +20,22 @@ import co.zync.zync.*;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.utils.ZyncCircleView;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Timer;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private static final Timer TIMER = new Timer();
     public static int REQUEST_IMAGE = 23212;
     private String currentPhotoPath;
+    private ZyncCircleView.ColorChangeTask circleColorChangeTask;
+    private ZyncCircleView.SizeChangeTask circleSizeChangeTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +91,47 @@ public class MainActivity extends AppCompatActivity
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             navigationView.removeView(navigationView.findViewById(R.id.feature_x));
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        scheduleCircleTask();
+    }
+
+    private void scheduleCircleTask() {
+        if (circleColorChangeTask == null) {
+            circleColorChangeTask = new ZyncCircleView.ColorChangeTask(
+                    (ZyncCircleView) findViewById(R.id.zync_circle),
+                    30
+            );
+            circleSizeChangeTask = new ZyncCircleView.SizeChangeTask(
+                    this,
+                    (ZyncCircleView) findViewById(R.id.zync_circle),
+                    60
+            );
+
+            TIMER.scheduleAtFixedRate(circleColorChangeTask, 5, 5);
+            TIMER.scheduleAtFixedRate(circleSizeChangeTask, 5, 5);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (circleColorChangeTask != null) {
+            circleColorChangeTask.cancel();
+            circleSizeChangeTask.cancel();
+
+            circleColorChangeTask = null;
+            circleSizeChangeTask = null;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        scheduleCircleTask();
     }
 
     @Override

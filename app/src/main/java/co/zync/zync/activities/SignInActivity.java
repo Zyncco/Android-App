@@ -144,7 +144,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                     startActivityForResult(
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
-                                    .setLogo(R.drawable.logo)
                                     .setProviders(Arrays.asList(
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
                                             new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
