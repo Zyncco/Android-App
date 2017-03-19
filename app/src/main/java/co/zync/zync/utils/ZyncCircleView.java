@@ -43,7 +43,7 @@ public class ZyncCircleView extends View {
     }
 
     private int size() {
-        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.90);
+        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.74);
     }
 
     private void init() {
@@ -91,6 +91,10 @@ public class ZyncCircleView extends View {
         canvas.drawCircle(getWidth()/2, getHeight()/2, radius, paint);
     }
 
+    private int rectBound() {
+        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.02);
+    }
+
     private int convertDpToPixel(float dp) {
         Resources resources = getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
@@ -123,26 +127,28 @@ public class ZyncCircleView extends View {
     public static class SizeChangeTask extends TimerTask {
         private Activity activity;
         private ZyncCircleView view;
-        private float dpChangePerFrame;
-        private float maxSize;
-        private float lastSize;
+        private int rectBound;
+        private int dpChangePerFrame;
+        private int maxSize;
+        private int lastSize;
         private boolean dpAddition = true;
 
         public SizeChangeTask(Activity activity, ZyncCircleView view, int time) {
+            this.rectBound = view.rectBound();
             this.activity = activity;
             this.view = view;
-            this.dpChangePerFrame = (float) RECT_ADD_BOUND / (float) (time * 5);
-            this.lastSize = view.convertPixelsToDp(view.size()) / 2;
-            this.maxSize = lastSize + RECT_ADD_BOUND;
+            this.dpChangePerFrame = Math.max(rectBound / (time * 5), 1);
+            this.lastSize = view.size() / 2;
+            this.maxSize = lastSize + rectBound;
         }
 
         @Override
         public void run() {
             // size start
-            float newSize = dpAddition ?
+            int newSize = dpAddition ?
                     lastSize + dpChangePerFrame :
                     lastSize - dpChangePerFrame;
-            float originalSize = maxSize - RECT_ADD_BOUND;
+            int originalSize = maxSize - rectBound;
 
             if (newSize >= maxSize) {
                 newSize = maxSize;
@@ -161,7 +167,7 @@ public class ZyncCircleView extends View {
                 @Override
                 public void run() {
                     if (view.radius != lastSize) {
-                        view.radius = view.convertDpToPixel(lastSize);
+                        view.radius = lastSize;
                         view.invalidate();
                     }
                 }

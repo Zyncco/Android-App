@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         ViewGroup.LayoutParams params = findViewById(R.id.imageView2).getLayoutParams();
-        int imageSize = (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.80);
+        int imageSize = (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.75);
 
         params.height = imageSize;
         params.width = imageSize;
@@ -139,8 +139,8 @@ public class MainActivity extends AppCompatActivity
                     60
             );
 
-            TIMER.scheduleAtFixedRate(circleColorChangeTask, 5, 5);
-            TIMER.scheduleAtFixedRate(circleSizeChangeTask, 5, 5);
+            TIMER.scheduleAtFixedRate(circleColorChangeTask, 50, 50);
+            TIMER.scheduleAtFixedRate(circleSizeChangeTask, 75, 75);
         }
 
         getZyncApp().setRequestStatusListener(new ZyncPostClipTask.RequestStatusListener() {
