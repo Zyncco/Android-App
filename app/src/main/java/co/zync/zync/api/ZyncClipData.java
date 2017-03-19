@@ -14,7 +14,6 @@ import java.util.zip.Deflater;
 public class ZyncClipData {
     private final long timestamp;
     private final String hash;
-    private final boolean encrypted;
     private final ZyncClipType type;
     private String data; // encoded in base 64
 
@@ -22,13 +21,9 @@ public class ZyncClipData {
                         ZyncClipType type, byte[] data) {
         this.timestamp = System.currentTimeMillis();
         this.hash = hash(data);
-        this.encrypted = encryptionKey != null;
         this.type = type;
 
-        if (encrypted) {
-            data = encrypt(data, encryptionKey);
-        }
-
+        data = encrypt(data, encryptionKey);
         data = compress(data);
         this.data = Base64.encodeToString(data, Base64.DEFAULT);
     }
@@ -36,7 +31,6 @@ public class ZyncClipData {
     public ZyncClipData(String encryptionKey, JSONObject obj) throws JSONException {
         this.timestamp = obj.getLong("timestamp");
         this.hash = obj.getString("hash");
-        this.encrypted = obj.getBoolean("encrypted");
         this.type = ZyncClipType.valueOf(obj.getString("type"));
         this.data = obj.getString("data");
 
@@ -106,7 +100,6 @@ public class ZyncClipData {
 
             object.put("timestamp", timestamp);
             object.put("hash", hash);
-            object.put("encrypted", encrypted);
             object.put("type", type.name().toLowerCase(Locale.US));
             object.put("data", data);
 

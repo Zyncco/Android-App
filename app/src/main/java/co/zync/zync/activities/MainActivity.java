@@ -157,7 +157,6 @@ public class MainActivity extends AppCompatActivity
             getZyncApp().setApi(null);
             getZyncApp().getPreferences().edit()
                     .remove("encryption_pass")
-                    .remove("encryption_enabled")
                     .remove("zync_api_token")
                     .apply();
             stopService(new Intent(this, ZyncClipboardService.class));

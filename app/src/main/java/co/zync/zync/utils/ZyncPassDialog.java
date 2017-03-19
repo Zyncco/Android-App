@@ -22,14 +22,6 @@ public class ZyncPassDialog {
         this.callback = callback;
     }
 
-    private void dontUseEncryption() {
-        app.getPreferences().edit()
-                .putString("encryption_pass", "")
-                .putBoolean("encryption_enabled", false)
-                .apply();
-        callback.callback();
-    }
-
     public void promptForPassword() {
         final AlertDialog.Builder passwordDialogBuilder = new AlertDialog.Builder(context);
         final EditText view = new EditText(context);
@@ -48,14 +40,6 @@ public class ZyncPassDialog {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
         });
-        passwordDialogBuilder.setNegativeButton(R.string.disable_encryption, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                passwordDialog.dismiss();
-                passwordDialog = null;
-                showEncryptionWarning();
-            }
-        });
 
         passwordDialog = passwordDialogBuilder.show();
 
@@ -67,27 +51,6 @@ public class ZyncPassDialog {
                 }
             }
         });
-    }
-
-    private void showEncryptionWarning() {
-        AlertDialog.Builder alert = new AlertDialog.Builder(context);
-
-        alert.setTitle(R.string.encryption_warning_title);
-        alert.setMessage(R.string.encryption_warning_message);
-        alert.setNegativeButton(R.string.encryption_warning_yes, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dontUseEncryption();
-            }
-        });
-        alert.setPositiveButton(R.string.encryption_warning_cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                promptForPassword();
-            }
-        });
-
-        alert.show();
     }
 
     private boolean handlePassword(EditText view) {
@@ -102,7 +65,6 @@ public class ZyncPassDialog {
 
         app.getPreferences().edit()
                 .putString("encryption_pass", enteredPass)
-                .putBoolean("encryption_enabled", true)
                 .apply();
         callback.callback();
         return true;

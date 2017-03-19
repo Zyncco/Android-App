@@ -142,9 +142,7 @@ public class ZyncApplication extends Application {
     }
 
     public String getEncryptionPass() {
-        SharedPreferences preferences = getPreferences();
-        return preferences.getBoolean("encryption_enabled", false) ?
-                preferences.getString("encryption_pass", "default") : null;
+        return getPreferences().getString("encryption_pass", "default");
     }
 
     public RequestQueue httpRequestQueue() {

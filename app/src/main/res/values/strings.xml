@@ -3,8 +3,8 @@
     <string name="zync_settings">Zync Settings</string>
     <string name="encryption">Encryption</string>
     <string name="encryption_pass">Encryption Password</string>
-    <string name="encryption_pass_sum">Enter the key used to keep your clipboard safe</string>
-    <string name="encryption_enabled">Encryption Enabled</string>
+    <string name="encryption_pass_sum">Create/Enter the key used to keep your clipboard safe</string>
+    <string name="encryption_pass_settings_sum">The key used to keep your clipboard data safe</string>
     <string name="pref_header_general">General Settings</string>
     <string name="enter_pass">Please enter the password you wish to use for encryption</string>
     <string name="sync_settings">Sync</string>
@@ -60,7 +60,7 @@
     <string name="clipboard_changed_notification_desc">New content has been written to your clipboard!</string>
     <string name="connectivity">Connectivity</string>
     <string name="use_on_data">Use on Data</string>
-    <string name="use_on_data_desc">Use data to post/fetch clipboard on the cloud</string>
+    <string name="use_on_data_desc">Use mobile data to post/fetch clipboard on the cloud</string>
     <string name="no_internet">Cannot connect to the internet!</string>
     <string name="no_internet_desc">Please join a WiFi network to continue</string>
 </resources>

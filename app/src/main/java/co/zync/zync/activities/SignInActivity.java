@@ -110,7 +110,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                         app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
 
 
-                        if (!app.getPreferences().contains("encryption_enabled") || BuildConfig.DEBUG) {
+                        if (!app.getPreferences().contains("encryption_password") || BuildConfig.DEBUG) {
                             dialog.dismiss();
                             new ZyncPassDialog(SignInActivity.this, getZyncApp(), new ZyncPassDialog.Callback() {
                                 @Override
@@ -145,8 +145,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
                                     .setProviders(Arrays.asList(
-                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
-                                            new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
+                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
                                     ))
                                     .setIsSmartLockEnabled(!BuildConfig.DEBUG) // disable smart lock if debugging
                                     .setTheme(R.style.AppTheme)

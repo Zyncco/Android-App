@@ -12,7 +12,7 @@ import java.util.TimerTask;
 
 public class ZyncCircleView extends View {
     private static final float COLOR_FACTOR_BOUND = 0.15f;
-    private static int RECT_ADD_BOUND = 4; // dp
+    private static int RECT_ADD_BOUND = 5; // dp
     private int color = Color.rgb(71, 224, 20);
     private int radius = -1;
     private Paint paint;
