@@ -2,8 +2,12 @@ package co.zync.zync.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.BitmapFactory;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -16,6 +20,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import co.zync.zync.*;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipType;
@@ -91,6 +98,26 @@ public class MainActivity extends AppCompatActivity
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             navigationView.removeView(navigationView.findViewById(R.id.feature_x));
         }
+
+        findViewById(R.id.zync_circle).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences preferences = getZyncApp().getPreferences();
+                preferences.edit()
+                        .putBoolean("zync_on", !preferences.getBoolean("zync_on", true))
+                        .apply();
+
+                updateCircleColor();
+            }
+        });
+
+        ViewGroup.LayoutParams params = findViewById(R.id.imageView2).getLayoutParams();
+        int imageSize = (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.80);
+
+        params.height = imageSize;
+        params.width = imageSize;
+
+        findViewById(R.id.imageView2).requestLayout();
     }
 
     @Override
@@ -102,6 +129,7 @@ public class MainActivity extends AppCompatActivity
     private void scheduleCircleTask() {
         if (circleColorChangeTask == null) {
             circleColorChangeTask = new ZyncCircleView.ColorChangeTask(
+                    this,
                     (ZyncCircleView) findViewById(R.id.zync_circle),
                     30
             );
@@ -113,6 +141,43 @@ public class MainActivity extends AppCompatActivity
 
             TIMER.scheduleAtFixedRate(circleColorChangeTask, 5, 5);
             TIMER.scheduleAtFixedRate(circleSizeChangeTask, 5, 5);
+        }
+
+        getZyncApp().setRequestStatusListener(new ZyncPostClipTask.RequestStatusListener() {
+            @Override
+            public void onStatusChange(boolean value) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateCircleColor();
+                    }
+                });
+            }
+        });
+    }
+
+    private void updateCircleColor() {
+        ZyncCircleView circle = (ZyncCircleView) findViewById(R.id.zync_circle);
+
+        if (!getZyncApp().getPreferences().getBoolean("zync_on", true)) {
+            ColorMatrix matrix = new ColorMatrix();
+            matrix.setSaturation(0);
+
+            ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
+            ((ImageView) findViewById(R.id.imageView2)).setColorFilter(filter);
+
+            circle.setColor(ZyncCircleView.GRAY_OFF);
+            getZyncApp().disableClipboardService();
+            return;
+        } else {
+            circle.setColor(ZyncCircleView.GREEN_OK);
+
+            ((ImageView) findViewById(R.id.imageView2)).setColorFilter(null);
+            getZyncApp().enableClipboardService();
+        }
+
+        if (!getZyncApp().lastRequestStatus()) {
+            circle.setColor(ZyncCircleView.RED_ERROR);
         }
     }
 
@@ -126,6 +191,8 @@ public class MainActivity extends AppCompatActivity
             circleColorChangeTask = null;
             circleSizeChangeTask = null;
         }
+
+        getZyncApp().setRequestStatusListener(null);
     }
 
     @Override

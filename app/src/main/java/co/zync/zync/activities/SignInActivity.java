@@ -147,7 +147,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                                     .setProviders(Arrays.asList(
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
                                     ))
-                                    .setIsSmartLockEnabled(!BuildConfig.DEBUG) // disable smart lock if debugging
+                                    .setIsSmartLockEnabled(!BuildConfig.DEBUG) // disableClipboardService smart lock if debugging
                                     .setTheme(R.style.AppTheme)
                                     .build(),
                             RC_SIGN_IN);

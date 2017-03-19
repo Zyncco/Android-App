@@ -22,6 +22,10 @@ public class ZyncClipboardService extends Service {
     public ZyncClipboardService() {
     }
 
+    public static void nullify() {
+        instance = null;
+    }
+
     public static ZyncClipboardService getInstance() {
         return instance;
     }
@@ -115,6 +119,8 @@ public class ZyncClipboardService extends Service {
                                     getString(R.string.clipboard_posted_notification_desc)
                             );
                         }
+
+                        app.setLastRequestStatus(true);
                     }
 
                     @Override
@@ -124,6 +130,7 @@ public class ZyncClipboardService extends Service {
                                 getString(R.string.clipboard_post_error_notification),
                                 getString(R.string.clipboard_post_error_notification_desc)
                         );
+                        app.setLastRequestStatus(false);
                         Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
                                 + error.code() + " : " + error.message());
                     }

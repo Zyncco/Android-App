@@ -10,10 +10,15 @@ import android.view.View;
 
 import java.util.TimerTask;
 
+import static android.graphics.Color.rgb;
+
 public class ZyncCircleView extends View {
+    public static final int GREEN_OK = rgb(71, 224, 20);
+    public static final int RED_ERROR = rgb(255, 40, 40);
+    public static final int GRAY_OFF = rgb(145, 145, 145);
     private static final float COLOR_FACTOR_BOUND = 0.15f;
-    private static int RECT_ADD_BOUND = 5; // dp
-    private int color = Color.rgb(71, 224, 20);
+    private static int RECT_ADD_BOUND = 7; // dp
+    private int color = GREEN_OK;
     private int radius = -1;
     private Paint paint;
 
@@ -37,6 +42,10 @@ public class ZyncCircleView extends View {
         init();
     }
 
+    private int size() {
+        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.90);
+    }
+
     private void init() {
         paint = new Paint();
         paint.setAntiAlias(true);
@@ -50,8 +59,8 @@ public class ZyncCircleView extends View {
     }
 
     private void defineRadius() {
-        int w = getLayoutParams().width;
-        int h = getLayoutParams().height;
+        int w = 0;
+        int h = 0;
 
         int pl = getPaddingLeft();
         int pr = getPaddingRight();
@@ -123,7 +132,7 @@ public class ZyncCircleView extends View {
             this.activity = activity;
             this.view = view;
             this.dpChangePerFrame = (float) RECT_ADD_BOUND / (float) (time * 5);
-            this.lastSize = 180;
+            this.lastSize = view.convertPixelsToDp(view.size()) / 2;
             this.maxSize = lastSize + RECT_ADD_BOUND;
         }
 
@@ -161,13 +170,15 @@ public class ZyncCircleView extends View {
     }
 
     public static class ColorChangeTask extends TimerTask {
+        private Activity activity;
         private ZyncCircleView view;
         private float currentFactor;
         private float colorChangePerFrame;
         private boolean colorSubtraction = true;
 
 
-        public ColorChangeTask(ZyncCircleView view, int time) {
+        public ColorChangeTask(Activity activity, ZyncCircleView view, int time) {
+            this.activity = activity;
             this.view = view;
             this.currentFactor = COLOR_FACTOR_BOUND;
             this.colorChangePerFrame = (currentFactor * 2) / (time * 20);
@@ -188,15 +199,20 @@ public class ZyncCircleView extends View {
                 colorSubtraction = true;
             }
 
-            view.paint.setShader(new LinearGradient(
-                    0, 0, 0,
-                    view.radius,
-                    modify(view.color, currentFactor * -1),
-                    modify(view.color, currentFactor),
-                    Shader.TileMode.CLAMP
-            ));
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    view.paint.setShader(new LinearGradient(
+                            0, 0, 0,
+                            view.radius,
+                            modify(view.color, currentFactor * -1),
+                            modify(view.color, currentFactor),
+                            Shader.TileMode.CLAMP
+                    ));
 
-            view.postInvalidate();
+                    view.postInvalidate();
+                }
+            });
         }
     }
 }

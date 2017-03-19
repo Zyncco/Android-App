@@ -2,7 +2,6 @@ package co.zync.zync;
 
 import android.app.*;
 import android.content.*;
-import android.graphics.drawable.Icon;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
@@ -17,6 +16,8 @@ import co.zync.zync.firebase.ZyncMessagingService;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class ZyncApplication extends Application {
     /* START NOTIFICATION IDS */
     public static int CLIPBOARD_UPDATED_ID = 281902;
@@ -24,6 +25,8 @@ public class ZyncApplication extends Application {
     public static int CLIPBOARD_ERROR_ID = 9308312;
     public static int PERSISTENT_NOTIFICATION_ID = 329321;
     /* END NOTIFICATION IDS */
+    private AtomicBoolean lastRequestStatus = new AtomicBoolean(true);
+    private ZyncPostClipTask.RequestStatusListener requestStatusListener;
     private RequestQueue httpRequestQueue;
     private ZyncAPI api;
     private ZyncWifiReceiver receiver; // do not remove, we have to retain the reference
@@ -50,7 +53,7 @@ public class ZyncApplication extends Application {
         httpRequestQueue = Volley.newRequestQueue(getApplicationContext());
 
         if (api != null) {
-            startService(ZyncClipboardService.class);
+            enableClipboardService();
             api.setQueue(httpRequestQueue);
         }
     }
@@ -62,7 +65,7 @@ public class ZyncApplication extends Application {
         httpRequestQueue = null;
 
         if (api != null) {
-            stopService(new Intent(this, ZyncClipboardService.class));
+            disableClipboardService();
             api.setQueue(null);
         }
     }
@@ -84,6 +87,35 @@ public class ZyncApplication extends Application {
         }
 
         return connected;
+    }
+
+    public void enableClipboardService() {
+        if (ZyncClipboardService.getInstance() == null) {
+            startService(ZyncClipboardService.class);
+        }
+    }
+
+    public void disableClipboardService() {
+        if (ZyncClipboardService.getInstance() != null) {
+            stopService(new Intent(this, ZyncClipboardService.class));
+            ZyncClipboardService.nullify();
+        }
+    }
+
+    public void setRequestStatusListener(ZyncPostClipTask.RequestStatusListener requestStatusListener) {
+        this.requestStatusListener = requestStatusListener;
+    }
+
+    public void setLastRequestStatus(boolean val) {
+        lastRequestStatus.set(val);
+
+        if (requestStatusListener != null) {
+            requestStatusListener.onStatusChange(val);
+        }
+    }
+
+    public boolean lastRequestStatus() {
+        return lastRequestStatus.get();
     }
 
     private void startService(Class<? extends Service> cls) {

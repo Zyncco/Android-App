@@ -65,4 +65,8 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
         }
         return null;
     }
+
+    public interface RequestStatusListener {
+        void onStatusChange(boolean value);
+    }
 }
