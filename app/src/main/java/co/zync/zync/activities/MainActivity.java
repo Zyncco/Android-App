@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity
 
         // remove camera feature if the system does not support it
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            navigationView.removeView(navigationView.findViewById(R.id.feature_x));
+            navigationView.removeView(navigationView.findViewById(R.id.camera));
         }
 
         findViewById(R.id.zync_circle).setOnClickListener(new View.OnClickListener() {
@@ -206,8 +206,6 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 
@@ -218,6 +216,8 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_settings) {
             getZyncApp().openSettings(this);
+        } else if (id == R.id.history) {
+            startActivity(new Intent(this, HistoryActivity.class));
         } else if (id == R.id.nav_help) {
             startActivity(new Intent(this, HelpActivity.class));
         } else if (id == R.id.logout) {
@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity
                     .apply();
             stopService(new Intent(this, ZyncClipboardService.class));
             startActivity(new Intent(this, SignInActivity.class));
-        } else if (id == R.id.feature_x) {
+        } else if (id == R.id.camera) {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
             // ensure there's an app which can take the picture for us

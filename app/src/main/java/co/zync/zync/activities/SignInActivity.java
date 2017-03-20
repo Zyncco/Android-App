@@ -24,6 +24,11 @@ import java.util.Arrays;
 
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncError;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
 /*
  * Activity presented to the user when they are signing in (with google)
@@ -99,41 +104,53 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         dialog.show();
 
-        ZyncAPI.signup(
-                app.httpRequestQueue(),
-                result.getIdpToken(),
-                result.getProviderType(),
-                new ZyncAPI.ZyncCallback<ZyncAPI>() {
-                    @Override
-                    public void success(ZyncAPI api) {
-                        app.setApi(api);
-                        app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            String idToken = task.getResult().getToken();
+
+                            ZyncAPI.signup(
+                                    app.httpRequestQueue(),
+                                    idToken,
+                                    new ZyncAPI.ZyncCallback<ZyncAPI>() {
+                                        @Override
+                                        public void success(ZyncAPI api) {
+                                            app.setApi(api);
+                                            app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
 
 
-                        if (!app.getPreferences().contains("encryption_password") || BuildConfig.DEBUG) {
-                            dialog.dismiss();
-                            new ZyncPassDialog(SignInActivity.this, getZyncApp(), new ZyncPassDialog.Callback() {
-                                @Override
-                                public void callback() {
-                                    signInSuccess();
-                                }
-                            }).promptForPassword();
-                        } else {
-                            signInSuccess();
+                                            if (!app.getPreferences().contains("encryption_password") || BuildConfig.DEBUG) {
+                                                dialog.dismiss();
+                                                new ZyncPassDialog(SignInActivity.this, getZyncApp(), new ZyncPassDialog.Callback() {
+                                                    @Override
+                                                    public void callback() {
+                                                        signInSuccess();
+                                                    }
+                                                }).promptForPassword();
+                                            } else {
+                                                signInSuccess();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void handleError(ZyncError error) {
+                                            System.out.println(error.toString());
+                                            dialog.dismiss();
+                                            // TODO do something
+                                            if (BuildConfig.DEBUG) {
+                                                success(new ZyncAPI(app.httpRequestQueue(), ""));
+                                            }
+                                        }
+                                    }
+                            );
+                            return;
                         }
-                    }
 
-                    @Override
-                    public void handleError(ZyncError error) {
-                        System.out.println(error.toString());
-                        dialog.dismiss();
-                        // TODO do something
-                        if (BuildConfig.DEBUG) {
-                            success(new ZyncAPI(app.httpRequestQueue(), ""));
-                        }
+                        // todo handle error
                     }
-                }
-        );
+                });
     }
 
     @Override

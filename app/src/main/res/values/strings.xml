@@ -31,14 +31,11 @@
         between the device spaces
     </string>
 
-    <string name="separator">Separator between questions</string>
+    <string name="separator">Separator</string>
     <string name="zync_caption">End-to-end encrypted cloud clipboard synchronization</string>
     <string name="password_insufficient">Your password must be greater than 10 characters!</string>
     <string name="encryption_password_title">Encryption Password</string>
-    <string name="encryption_warning_title">Warning</string>
-    <string name="encryption_warning_message">Disabling encryption means your clipboard data will be vulnerable to hackers! Are you sure you want to do this?</string>
-    <string name="encryption_warning_cancel">Cancel</string>
-    <string name="encryption_warning_yes">Disable</string>
+    <string name="camera">Camera</string>
     <string name="ok">OK</string>
     <string name="logout">Log out</string>
     <string name="logout_success">Successfully logged out</string>
@@ -49,7 +46,8 @@
     <string name="zync_persistentnotif_descr">Zync is listening to the clipboard&#8230;</string>
     <string name="notifications">Notifications</string>
     <string name="persistent_notification">Persistent Notification</string>
-    <string name="persistent_notification_desc">This allows the application to accurately listen for clipboard changes</string>
+    <string name="persistent_notification_desc">This allows the application to accurately listen for clipboard changes
+    </string>
     <string name="clipboard_change_notification">Clipboard Change</string>
     <string name="clipboard_change_notification_desc">Be notified of changes to the cloud clipboard</string>
     <string name="clipboard_posted_notification">Clipboard posted!</string>
@@ -63,4 +61,13 @@
     <string name="use_on_data_desc">Use mobile data to post/fetch clipboard on the cloud</string>
     <string name="no_internet">Cannot connect to the internet!</string>
     <string name="no_internet_desc">Please join a WiFi network to continue</string>
+
+    <string name="history">History</string>
+    <string name="loading_history">Loading history&#8230;</string>
+    <string name="unable_fetch_history">Unable to fetch history!</string>
+    <string name="unable_fetch_history_msg">Due to Error #%1$d: %2$s</string>
+    <string name="history_entry_title">Clip at %1$s</string>
+    <string name="click_to_copy">Click here to copy!</string>
+    <string name="history_image_desc">Image. Click to share to another app!</string>
+    <string name="history_encryption_error">Error decrypting this entry&#8230;</string>
 </resources>

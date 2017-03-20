@@ -6,6 +6,7 @@ import android.content.*;
 import android.os.IBinder;
 import android.util.Log;
 import co.zync.zync.api.ZyncAPI;
+import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 
@@ -135,6 +136,8 @@ public class ZyncClipboardService extends Service {
                                 + error.code() + " : " + error.message());
                     }
                 }).execute();
+
+                app.addToHistory(new ZyncClipData(app.getEncryptionPass(), ZyncClipType.TEXT, data));
             }
         }
     }

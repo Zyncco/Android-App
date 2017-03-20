@@ -17,7 +17,6 @@ public class ZyncCircleView extends View {
     public static final int RED_ERROR = rgb(255, 40, 40);
     public static final int GRAY_OFF = rgb(145, 145, 145);
     private static final float COLOR_FACTOR_BOUND = 0.15f;
-    private static int RECT_ADD_BOUND = 7; // dp
     private int color = GREEN_OK;
     private int radius = -1;
     private Paint paint;
@@ -93,18 +92,6 @@ public class ZyncCircleView extends View {
 
     private int rectBound() {
         return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.02);
-    }
-
-    private int convertDpToPixel(float dp) {
-        Resources resources = getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        return (int) Math.floor(dp * (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
-
-    private float convertPixelsToDp(int px) {
-        Resources resources = getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        return px / ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     private static int modify(int color, float fraction) {

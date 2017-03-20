@@ -7,11 +7,17 @@ import co.zync.zync.api.generic.ZyncTransformerCallback;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 public class ZyncAPI {
-    public static final String BASE = "https://zync-123456.appspot.com/api/v";
+    public static final String BASE = "https://api.zync.co/v";
     public static final int VERSION = 0;
     private RequestQueue queue;
     private final String token;
@@ -21,7 +27,7 @@ public class ZyncAPI {
         this.token = token;
     }
 
-    public static void signup(final RequestQueue queue, String idToken, String provider, final ZyncCallback<ZyncAPI> callback) {
+    public static void signup(final RequestQueue queue, String idToken, final ZyncCallback<ZyncAPI> callback) {
         ZyncGenericAPIListener listener = new ZyncGenericAPIListener(new ZyncCallback<JSONObject>() {
             @Override
             public void success(JSONObject node) {
@@ -36,7 +42,7 @@ public class ZyncAPI {
                 callback.handleError(error);
             }
         });
-        JsonObjectRequest request = new JsonObjectRequest(BASE + VERSION + "/user/callback?token=" + idToken + "&provider=" + provider, null, listener, listener);
+        JsonObjectRequest request = new JsonObjectRequest(BASE + VERSION + "/user/callback?token=" + idToken, null, listener, listener);
 
         queue.add(request);
     }
@@ -77,6 +83,34 @@ public class ZyncAPI {
                     public ZyncClipData transform(JSONObject obj) {
                         try {
                             return new ZyncClipData(encryptionKey, obj);
+                        } catch (Exception ex) {
+                            return null;
+                        }
+                    }
+                })
+        );
+        queue.add(request);
+    }
+
+    public void getHistory(final String encryptionKey, final ZyncCallback<List<ZyncClipData>> callback) {
+        ZyncAuthenticatedRequest request = new ZyncAuthenticatedRequest(
+                Request.Method.GET,
+                "history",
+                null,
+                token,
+                new ZyncGenericAPIListener(callback, new ZyncTransformer<List<ZyncClipData>>() {
+                    @Override
+                    public List<ZyncClipData> transform(JSONObject obj) {
+                        try {
+                            JSONArray array = obj.getJSONArray("history");
+                            List<ZyncClipData> history = new ArrayList<>(array.length());
+
+                            for (int i = 0; i < array.length(); i++) {
+                                history.add(new ZyncClipData(encryptionKey, array.getJSONObject(i)));
+                            }
+
+                            Collections.sort(history, new ZyncClipData.TimeComparator()); // sort by time
+                            return history;
                         } catch (Exception ex) {
                             return null;
                         }

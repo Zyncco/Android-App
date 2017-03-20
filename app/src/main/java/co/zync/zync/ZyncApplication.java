@@ -16,6 +16,10 @@ import co.zync.zync.firebase.ZyncMessagingService;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ZyncApplication extends Application {
@@ -43,6 +47,18 @@ public class ZyncApplication extends Application {
         receiver = new ZyncWifiReceiver();
         registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         getPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+    }
+
+    public void addToHistory(ZyncClipData data) {
+        List<String> history = new ArrayList<>(getPreferences().getStringSet("zync_history", new HashSet<String>()));
+
+        if (history.size() == 10) {
+            history.remove(9);
+        }
+
+        history.add(data.toJson().toString());
+        getPreferences().edit().putStringSet("zync_history", new HashSet<>(history))
+                .apply();
     }
 
     public void setupNetwork() {
@@ -145,11 +161,13 @@ public class ZyncApplication extends Application {
             api.getClipboard(getEncryptionPass(), new ZyncAPI.ZyncCallback<ZyncClipData>() {
                 @Override
                 public void success(ZyncClipData value) {
-                    String data;
+                    byte[] data;
 
                     if (value != null && (data = value.data()) != null
                             && isTypeSupported(value.type())) {
-                        ZyncClipboardService.getInstance().writeToClip(data, false);
+                        if (value.type() == ZyncClipType.TEXT) {
+                            ZyncClipboardService.getInstance().writeToClip(new String(data), false);
+                        } // todo notify user of image thing
                     }
                 }
 
