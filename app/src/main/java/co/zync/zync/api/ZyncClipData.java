@@ -134,10 +134,11 @@ public class ZyncClipData {
         }
     }
 
+    // sorts latest -> oldest
     public static class TimeComparator implements Comparator<ZyncClipData> {
         @Override
         public int compare(ZyncClipData o1, ZyncClipData o2) {
-            return (int) (o1.timestamp() - o2.timestamp());
+            return (int) (o2.timestamp() - o1.timestamp());
         }
     }
 }

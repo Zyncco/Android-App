@@ -1,4 +1,9 @@
 <resources>
+    <string name="zync_text">Text</string>
+    <string name="zync_image">Image</string>
+    <string name="zync_video">Video</string>
+    <string name="zync_binary">Binary</string>
+
     <string name="app_name">Zync</string>
     <string name="zync_settings">Zync Settings</string>
     <string name="encryption">Encryption</string>
@@ -66,8 +71,11 @@
     <string name="loading_history">Loading history&#8230;</string>
     <string name="unable_fetch_history">Unable to fetch history!</string>
     <string name="unable_fetch_history_msg">Due to Error #%1$d: %2$s</string>
-    <string name="history_entry_title">Clip at %1$s</string>
+    <string name="history_entry_info">%1$s</string>
+    <string name="history_entry_title">%1$s Clip</string>
     <string name="click_to_copy">Click here to copy!</string>
     <string name="history_image_desc">Image. Click to share to another app!</string>
     <string name="history_encryption_error">Error decrypting this entry&#8230;</string>
+    <string name="history_copy_button">Copy to Clipboard</string>
+    <string name="history_clip_updated_msg">Your clipboard has been successfully updated</string>
 </resources>

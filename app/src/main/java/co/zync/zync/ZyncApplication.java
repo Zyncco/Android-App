@@ -49,6 +49,16 @@ public class ZyncApplication extends Application {
         getPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
     }
 
+    public void setHistory(List<ZyncClipData> history) {
+        Set<String> historyText = new HashSet<>(history.size());
+
+        for (ZyncClipData data : history) {
+            historyText.add(data.toJson().toString());
+        }
+
+        getPreferences().edit().putStringSet("zync_history", historyText).apply();
+    }
+
     public void addToHistory(ZyncClipData data) {
         List<String> history = new ArrayList<>(getPreferences().getStringSet("zync_history", new HashSet<String>()));
 

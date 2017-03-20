@@ -3,33 +3,39 @@ package co.zync.zync.activities;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
+import co.zync.zync.ZyncClipboardService;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
+import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class HistoryActivity extends AppCompatActivity {
+    private int baseId = ThreadLocalRandom.current().nextInt(32189, 98432);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +45,7 @@ public class HistoryActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         setContentView(R.layout.activity_history);
+        setupActionBar();
 
         final ProgressDialog dialog = new ProgressDialog(this);
 
@@ -47,12 +54,15 @@ public class HistoryActivity extends AppCompatActivity {
         dialog.setTitle(R.string.loading_history);
         dialog.setMessage(getString(R.string.please_wait));
 
+        dialog.show();
+
         getZyncApp().getApi().getHistory(getZyncApp().getEncryptionPass(), new ZyncAPI.ZyncCallback<List<ZyncClipData>>() {
             @Override
             public void success(List<ZyncClipData> value) {
                 dialog.dismiss();
                 getZyncApp().setLastRequestStatus(true);
-                // todo do stuff and check values, add to menu
+                setHistory(value);
+                getZyncApp().setHistory(value);
             }
 
             @Override
@@ -74,7 +84,30 @@ public class HistoryActivity extends AppCompatActivity {
         });
     }
 
+    /*       ACTION BAR START         */
 
+    /**
+     * Set up the {@link android.app.ActionBar}, if the API is available.
+     */
+    private void setupActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            // Show the Up button in the action bar.
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(R.string.history);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    /*       ACTION BAR END         */
 
     private ZyncApplication getZyncApp() {
         return (ZyncApplication) getApplication();
@@ -102,47 +135,59 @@ public class HistoryActivity extends AppCompatActivity {
         });
     }
 
+    // set history that is being displayed on the activity
+    // this will not override any pre-existing entries
     private void setHistory(List<ZyncClipData> history) {
-        for (int i = 0; i < history.size(); i++) {
-            ZyncClipData data = history.get(i);
+        int nextId = baseId;
 
-            // prepare the layout this entry will fall under
+        for (int i = 0; i < history.size(); i++) {
+            final ZyncClipData data = history.get(i);
+
             // (allows us to set an onClick listener for the whole region the entry covers)
             RelativeLayout layoutForClip = new RelativeLayout(this);
-
             layoutForClip.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-            layoutForClip.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO update their clipboard with new thing
-                    //    - update history with new entries, redrawing the activity
-                    //    - notify them of the change
-                }
-            });
 
             // prepare the title
             TextView title = new TextView(this);
-            // create a string matching to their locale
-            Date date = new Date(data.timestamp());
-            String stampString = DateFormat.getDateFormat(this).format(date) +
-                    " " + DateFormat.getTimeFormat(this).format(date);
 
-            // TODO make the timestamp an info button that is shown as a toast
             // set title, layout params, and appearance of title
-            title.setText(getString(R.string.history_entry_title, stampString));
-            setLayout(title, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 17);
+            title.setId(nextId++);
+            title.setText(getString(R.string.history_entry_title, getString(data.type().presentableName())));
+            setLayout(title, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 17);
             setTextAppearance(title, android.R.style.TextAppearance_Material_Headline);
             title.setTextSize(20);
 
             layoutForClip.addView(title);
 
+            // prepare buttons
+            layoutForClip.addView(createShareButton(
+                    data,
+                    title,
+                    nextId++
+            ));
+
+            if (data.type() == ZyncClipType.TEXT) {
+                layoutForClip.addView(createCopyButton(
+                        data,
+                        title,
+                        nextId++
+                ));
+            }
+
             // prepare little "click to copy"
             TextView subTitle = new TextView(this);
 
-            subTitle.setText(R.string.click_to_copy);
-            setLayout(subTitle, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, -1);
+            subTitle.setId(nextId++);
+            subTitle.setText(DateUtils.getRelativeTimeSpanString(
+                    data.timestamp(),
+                    System.currentTimeMillis(),
+                    DateUtils.SECOND_IN_MILLIS,
+                    DateUtils.FORMAT_NUMERIC_DATE
+            ));
+            setLayout(subTitle, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, -1);
+            setLayoutBelow(subTitle, title);
             setTextAppearance(subTitle, android.R.style.TextAppearance_Material_Small);
-            subTitle.setTextSize(13);
+            subTitle.setTextSize(12);
 
             layoutForClip.addView(subTitle);
 
@@ -155,7 +200,7 @@ public class HistoryActivity extends AppCompatActivity {
                             getString(R.string.history_encryption_error) :
                             new String(data.data());
 
-                    if (text.length() > 50) { // todo check if this is too long
+                    if (text.length() > 50) {
                         text = text.substring(0, 46) + "\u2026";
                     }
 
@@ -163,12 +208,15 @@ public class HistoryActivity extends AppCompatActivity {
                     break;
 
                 case IMAGE:
+                    // TODO give image info (or possibly preview image?)
                     description.setText(R.string.history_image_desc);
 
             }
 
             // set details for description and add to layout
+            description.setId(nextId++);
             setLayout(description, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 10);
+            setLayoutBelow(description, subTitle);
             setTextAppearance(description, android.R.style.TextAppearance_Material_Body1);
             description.setTextSize(13);
             layoutForClip.addView(description);
@@ -176,9 +224,11 @@ public class HistoryActivity extends AppCompatActivity {
             // prepare separator
             ImageView separator = new ImageView(this);
 
+            separator.setId(nextId++);
             setLayout(separator, LayoutParams.MATCH_PARENT, 1, 14);
+            setLayoutBelow(separator, description);
             separator.setContentDescription(getString(R.string.separator));
-            separator.setColorFilter(new PorterDuffColorFilter(Color.rgb(211, 211, 211), PorterDuff.Mode.SRC_ATOP));
+            separator.setImageDrawable(new ColorDrawable(Color.rgb(211, 211, 211)));
 
             // add separator
             layoutForClip.addView(separator);
@@ -188,12 +238,89 @@ public class HistoryActivity extends AppCompatActivity {
         }
     }
 
+    private ImageView createCopyButton(final ZyncClipData data, TextView title, int id) {
+        final ImageView view = new ImageView(this);
+
+        view.setId(id);
+        setLayout(view, 30f, 30f, 3);
+        view.setImageDrawable(getDrawable(R.drawable.ic_content_copy_black));
+        view.setContentDescription(getString(R.string.history_copy_button));
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(view.getLayoutParams());
+
+        params.addRule(RelativeLayout.BELOW, title.getId());
+        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        params.rightMargin = convertDpToPixel(50);
+
+        view.setLayoutParams(params);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // update clipboard and display snackbar
+                ZyncClipboardService.getInstance().writeToClip(new String(data.data()), false);
+                Snackbar.make(
+                        v,
+                        R.string.history_clip_updated_msg,
+                        Snackbar.LENGTH_LONG
+                ).show();
+            }
+        });
+
+        return view;
+    }
+
+    private ImageView createShareButton(final ZyncClipData data, TextView title, int id) {
+        final ImageView view = new ImageView(this);
+
+        view.setId(id);
+        setLayout(view, 30f, 30f, 3);
+        view.setImageDrawable(getDrawable(R.drawable.ic_share_black));
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(view.getLayoutParams());
+
+        params.addRule(RelativeLayout.BELOW, title.getId());
+        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
+        view.setLayoutParams(params);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (data.type()) {
+                    case TEXT:
+                        Intent sendIntent = new Intent();
+                        sendIntent.setAction(Intent.ACTION_SEND);
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, new String(data.data()));
+                        sendIntent.setType("text/plain");
+                        startActivity(sendIntent);
+                        break;
+
+                    case IMAGE:
+                        // TODO
+                }
+            }
+        });
+
+        return view;
+    }
+
     private void setTextAppearance(TextView view, int resId) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             view.setTextAppearance(this, resId);
         } else {
             view.setTextAppearance(resId);
         }
+    }
+
+    private void setLayoutBelow(View view, View below) {
+        RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(view.getLayoutParams());
+
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            p.topMargin = ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).topMargin;
+        }
+
+        p.addRule(RelativeLayout.BELOW, below.getId());
+
+        view.setLayoutParams(p);
     }
 
     private void setLayout(View view, float width, float height, int marginTop) {
@@ -209,7 +336,7 @@ public class HistoryActivity extends AppCompatActivity {
         params.width = widthPx;
 
         if (marginTop != -1) {
-            params.topMargin = marginTop;
+            params.topMargin = convertDpToPixel(marginTop);
         }
 
         view.setLayoutParams(params);
