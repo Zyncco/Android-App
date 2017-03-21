@@ -22,10 +22,10 @@ public class ZyncClipData {
     public ZyncClipData(String encryptionKey,
                         ZyncClipType type, byte[] data) {
         this.timestamp = System.currentTimeMillis();
-        this.hash = hash(data);
         this.type = type;
 
         data = encrypt(data, encryptionKey);
+        this.hash = hash(data);
         data = compress(data);
         this.data = Base64.encodeToString(data, Base64.DEFAULT).getBytes(Charset.forName("UTF-8"));
     }
@@ -41,6 +41,7 @@ public class ZyncClipData {
         } catch (DataFormatException ex) {
             this.data = null;
         }
+
         // todo decrypt and decompress
     }
 
