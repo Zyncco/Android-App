@@ -5,6 +5,8 @@ the service which syncs your clipboard across your devices.
 Please note that although Zync is open source, our credentials
 for the services we use are _not_ included in this repository for obvious reasons.
 
+![](/sign_in_screen.png?raw=true)
+
 ## Compiling
 
 Setting up the environment for this project involves two steps:
