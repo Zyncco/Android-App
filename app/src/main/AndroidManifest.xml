@@ -84,6 +84,9 @@
         </provider>
 
         <activity android:name=".activities.HistoryActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".activities.MainActivity"/>
         </activity>
     </application>
 

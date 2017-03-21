@@ -191,14 +191,13 @@ public class MainActivity extends AppCompatActivity
             circleColorChangeTask = null;
             circleSizeChangeTask = null;
         }
-
-        getZyncApp().setRequestStatusListener(null);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         scheduleCircleTask();
+        updateCircleColor();
     }
 
     @Override
