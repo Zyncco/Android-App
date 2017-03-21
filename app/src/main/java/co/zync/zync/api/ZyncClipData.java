@@ -5,12 +5,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.zip.CRC32;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -86,25 +84,11 @@ public class ZyncClipData {
         return data;
     }
 
-    // hash provided data into SHA-256 and output the hex representation
-    // returns "unsupported" if a SHA-256 implementation is not on the device
+    // hash provided data into CRC32 and output the hex representation
     private static String hash(byte[] data) {
-        MessageDigest md;
-
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException ex) {
-            return "unsupported";
-        }
-
-        data = md.digest(data);
-        StringBuilder sb = new StringBuilder();
-
-        for (byte b : data) {
-            sb.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
-        }
-
-        return sb.toString();
+        CRC32 crc = new CRC32();
+        crc.update(data);
+        return Long.toHexString(crc.getValue());
     }
 
     public long timestamp() {
