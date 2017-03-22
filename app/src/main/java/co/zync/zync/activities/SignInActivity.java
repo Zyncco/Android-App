@@ -139,9 +139,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                                             System.out.println(error.toString());
                                             dialog.dismiss();
                                             // TODO do something
-                                            if (BuildConfig.DEBUG) {
-                                                success(new ZyncAPI(app.httpRequestQueue(), ""));
-                                            }
                                         }
                                     }
                             );

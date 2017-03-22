@@ -16,4 +16,12 @@ public class ZyncError {
     public String message() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "ZyncError{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

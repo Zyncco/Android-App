@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Comparator;
 import java.util.Locale;
@@ -41,7 +42,7 @@ public class ZyncClipData {
         JSONObject encryption = obj.getJSONObject("encryption");
         this.iv = Base64.decode(encryption.getString("iv"), Base64.DEFAULT);
         this.salt = Base64.decode(encryption.getString("salt"), Base64.DEFAULT);
-        this.type = ZyncClipType.valueOf(obj.getString("paylod-type").toUpperCase(Locale.US));
+        this.type = ZyncClipType.valueOf(obj.getString("payload-type").toUpperCase(Locale.US));
         this.data = Base64.decode(obj.getString("payload"), Base64.DEFAULT);
 
         try {
@@ -115,13 +116,13 @@ public class ZyncClipData {
             object.put("hash", new JSONObject().put("crc32", hash));
             object.put("encryption", new JSONObject()
                     .put("type", "aes256-gcm-nopadding")
-                    .put("iv", Base64.encode(iv, Base64.DEFAULT))
-                    .put("salt", Base64.encode(salt, Base64.DEFAULT)));
+                    .put("iv", Base64.encodeToString(iv, Base64.DEFAULT))
+                    .put("salt", Base64.encodeToString(salt, Base64.DEFAULT)));
             object.put("payload-type", type.name());
-            object.put("payload", new String(data));
+            object.put("payload", new String(data, "UTF-8"));
 
             return object;
-        } catch (JSONException ignored) {
+        } catch (JSONException | UnsupportedEncodingException ignored) {
             return new JSONObject();
         }
     }

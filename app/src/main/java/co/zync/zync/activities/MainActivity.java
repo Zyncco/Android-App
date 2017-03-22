@@ -228,6 +228,7 @@ public class MainActivity extends AppCompatActivity
             getZyncApp().getPreferences().edit()
                     .remove("encryption_pass")
                     .remove("zync_api_token")
+                    .remove("zync_history")
                     .apply();
             stopService(new Intent(this, ZyncClipboardService.class));
             startActivity(new Intent(this, SignInActivity.class));

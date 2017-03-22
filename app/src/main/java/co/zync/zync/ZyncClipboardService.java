@@ -19,6 +19,7 @@ public class ZyncClipboardService extends Service {
     private static ZyncClipboardService instance = null;
     private ZyncApplication app;
     private ClipboardManager clipMan;
+    private ZyncClipboardListener clipboardListener;
 
     public ZyncClipboardService() {
     }
@@ -37,11 +38,17 @@ public class ZyncClipboardService extends Service {
         this.clipMan = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         this.app = (ZyncApplication) getApplication();
         instance = this;
-        clipMan.addPrimaryClipChangedListener(new ZyncClipboardListener());
+        clipboardListener = new ZyncClipboardListener();
+        clipMan.addPrimaryClipChangedListener(clipboardListener);
 
         if (app.getPreferences().getBoolean("enable_persistent_notification", true)) {
             becomePersistent();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        clipMan.removePrimaryClipChangedListener(clipboardListener);
     }
 
     public void becomePersistent() {

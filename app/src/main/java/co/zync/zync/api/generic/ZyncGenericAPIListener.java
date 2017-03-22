@@ -23,6 +23,14 @@ public class ZyncGenericAPIListener implements Response.Listener<JSONObject>, Re
 
     @Override
     public void onErrorResponse(VolleyError error) {
+        if (error.networkResponse != null && error.networkResponse.statusCode != 404) {
+            try {
+                onResponse(new JSONObject(new String(error.networkResponse.data)));
+                return;
+            } catch (JSONException ignored) {
+            }
+        }
+
         responseListener.handleError(new ZyncError(-4, "HTTP Error: " + error.getMessage()));
     }
 
@@ -35,9 +43,11 @@ public class ZyncGenericAPIListener implements Response.Listener<JSONObject>, Re
 
             if (node.getBoolean("success")) {
                 responseListener.success(node);
-            } if (!node.has("error")) {
+                return;
+            } else if (!node.has("error")) {
                 responseListener.handleError(new ZyncError(-2, "Server stated request was unsuccessful but " +
                         "did not provide error"));
+                return;
             }
 
             JSONObject error = node.getJSONObject("error");
@@ -45,6 +55,7 @@ public class ZyncGenericAPIListener implements Response.Listener<JSONObject>, Re
             if (!error.has("code") || !error.has("message")) {
                 responseListener.handleError(new ZyncError(-3, "Server stated request was unsuccessful but " +
                         "did not provide a proper error"));
+                return;
             }
 
             responseListener.handleError(new ZyncError(error.getInt("code"), error.getString("message")));

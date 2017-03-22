@@ -121,7 +121,8 @@ public class HistoryActivity extends AppCompatActivity {
         for (String json : historyStr) {
             try {
                 history.add(new ZyncClipData(getZyncApp().getEncryptionPass(), new JSONObject(json)));
-            } catch (JSONException ignored) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
