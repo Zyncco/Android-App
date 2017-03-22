@@ -1,6 +1,7 @@
 package co.zync.zync.api;
 
 import android.util.Base64;
+import co.zync.zync.utils.ZyncCrypto;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,23 +17,29 @@ import java.util.zip.Inflater;
 public class ZyncClipData {
     private final long timestamp;
     private final String hash;
+    private final byte[] iv;
+    private final byte[] salt;
     private final ZyncClipType type;
     private byte[] data; // encoded in base 64
 
     public ZyncClipData(String encryptionKey,
-                        ZyncClipType type, byte[] data) {
+                        ZyncClipType type, byte[] data) throws Exception {
         this.timestamp = System.currentTimeMillis();
         this.type = type;
+        this.iv = ZyncCrypto.generateSecureIv();
+        this.salt = ZyncCrypto.generateSecureSalt();
 
-        data = encrypt(data, encryptionKey);
+        data = ZyncCrypto.encrypt(data, encryptionKey, salt, iv);
         this.hash = hash(data);
         data = compress(data);
         this.data = Base64.encodeToString(data, Base64.DEFAULT).getBytes(Charset.forName("UTF-8"));
     }
 
-    public ZyncClipData(String encryptionKey, JSONObject obj) throws JSONException {
+    public ZyncClipData(String encryptionKey, JSONObject obj) throws Exception {
         this.timestamp = obj.getLong("timestamp");
-        this.hash = obj.getString("hash");
+        this.hash = obj.getJSONObject("hash").getString("crc32");
+        this.iv = Base64.decode(obj.getString("iv"), Base64.DEFAULT);
+        this.salt = Base64.decode(obj.getString("salt"), Base64.DEFAULT);
         this.type = ZyncClipType.valueOf(obj.getString("type").toUpperCase(Locale.US));
         this.data = Base64.decode(obj.getString("data"), Base64.DEFAULT);
 
@@ -42,7 +49,7 @@ public class ZyncClipData {
             this.data = null;
         }
 
-        // todo decrypt and decompress
+        this.data = ZyncCrypto.decrypt(data, encryptionKey, salt, iv);
     }
 
     private static byte[] compress(byte[] data) {
@@ -80,11 +87,6 @@ public class ZyncClipData {
         return bos.toByteArray();
     }
 
-    private static byte[] encrypt(byte[] data, String encryptionKey) {
-        // TODO decide on encryption method and implement from there
-        return data;
-    }
-
     // hash provided data into CRC32 and output the hex representation
     private static String hash(byte[] data) {
         CRC32 crc = new CRC32();
@@ -109,7 +111,9 @@ public class ZyncClipData {
             JSONObject object = new JSONObject();
 
             object.put("timestamp", timestamp);
-            object.put("hash", hash);
+            object.put("hash", new JSONObject().put("crc32", hash));
+            object.put("iv", Base64.encode(iv, Base64.DEFAULT));
+            object.put("salt", Base64.encode(salt, Base64.DEFAULT));
             object.put("type", type.name().toLowerCase(Locale.US));
             object.put("data", new String(data));
 

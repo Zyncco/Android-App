@@ -1,12 +1,10 @@
 package co.zync.zync;
 
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
-import org.json.JSONException;
 
 /**
  * Task which when given the appropriate variables
@@ -16,8 +14,7 @@ import org.json.JSONException;
  */
 public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
     private final ZyncApplication app;
-    private final byte[] data;
-    private final ZyncClipType type;
+    private final ZyncClipData data;
     private ZyncAPI.ZyncCallback<Void> listener = new ZyncAPI.ZyncCallback<Void>() {
         @Override
         public void success(Void v) {
@@ -30,39 +27,43 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
         }
     };
 
-    public ZyncPostClipTask(ZyncApplication app, byte[] data, ZyncClipType type) {
+    public ZyncPostClipTask(ZyncApplication app, byte[] data, ZyncClipType type) throws Exception {
         this.app = app;
-        this.data = data;
-        this.type = type;
+        this.data = new ZyncClipData(app.getEncryptionPass(), type, data);
     }
 
-    public ZyncPostClipTask(ZyncApplication app, byte[] data, ZyncClipType type, ZyncAPI.ZyncCallback<Void> listener) {
+    public ZyncPostClipTask(ZyncApplication app, byte[] data, ZyncClipType type, ZyncAPI.ZyncCallback<Void> listener) throws Exception {
+        this.app = app;
+        this.data = new ZyncClipData(app.getEncryptionPass(), type, data);
+        this.listener = listener;
+    }
+
+    public ZyncPostClipTask(ZyncApplication app, ZyncClipData data) {
         this.app = app;
         this.data = data;
-        this.type = type;
+    }
+
+    public ZyncPostClipTask(ZyncApplication app, ZyncClipData data, ZyncAPI.ZyncCallback<Void> listener) {
+        this.app = app;
+        this.data = data;
         this.listener = listener;
     }
 
     @Override
     protected Void doInBackground(Void... params) {
         // act on data and push to servers async
-        SharedPreferences preferences = app.getPreferences();
-
         if (app.getApi() == null) {
             return null; // app is not running yet
         }
 
         try {
             app.getApi().postClipboard(
-                    new ZyncClipData(
-                            app.getEncryptionPass(),
-                            type,
-                            data
-                    ),
+                    data,
                     listener
             );
-        } catch (JSONException ignored) {
+        } catch (Exception ignored) {
         }
+
         return null;
     }
 

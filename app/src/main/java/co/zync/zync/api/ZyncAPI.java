@@ -42,7 +42,7 @@ public class ZyncAPI {
                 callback.handleError(error);
             }
         });
-        JsonObjectRequest request = new JsonObjectRequest(BASE + VERSION + "/user/callback?token=" + idToken, null, listener, listener);
+        JsonObjectRequest request = new JsonObjectRequest(BASE + VERSION + "/user/authenticate?token=" + idToken, null, listener, listener);
 
         queue.add(request);
     }
@@ -95,7 +95,7 @@ public class ZyncAPI {
     public void getHistory(final String encryptionKey, final ZyncCallback<List<ZyncClipData>> callback) {
         ZyncAuthenticatedRequest request = new ZyncAuthenticatedRequest(
                 Request.Method.GET,
-                "history",
+                "clipboard/history",
                 null,
                 token,
                 new ZyncGenericAPIListener(callback, new ZyncTransformer<List<ZyncClipData>>() {

@@ -68,7 +68,15 @@ public class ZyncPostImageTask extends AsyncTask<Uri, Void, Void> {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] byteArray = stream.toByteArray();
-        new ZyncPostClipTask(app, byteArray, ZyncClipType.IMAGE, callback).doInBackground();
+
+        try {
+            new ZyncPostClipTask(app, byteArray, ZyncClipType.IMAGE, callback).doInBackground();
+        } catch (Exception ex) {
+            callback.handleError(new ZyncError(
+                    -5,
+                    "Exception=" + ex.getClass().getSimpleName() + ": " + ex.getMessage()
+            ));
+        }
         return null;
     }
 }

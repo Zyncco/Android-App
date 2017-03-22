@@ -110,7 +110,17 @@ public class ZyncClipboardService extends Service {
             }
 
             if (data.length != 0) {
-                new ZyncPostClipTask(app, data, ZyncClipType.TEXT, new ZyncAPI.ZyncCallback<Void>() {
+                ZyncClipData clipData;
+
+                try {
+                    clipData = new ZyncClipData(app.getEncryptionPass(), ZyncClipType.TEXT, data);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    app.setLastRequestStatus(false);
+                    return;
+                }
+
+                new ZyncPostClipTask(app, clipData, new ZyncAPI.ZyncCallback<Void>() {
                     @Override
                     public void success(Void value) {
                         if (app.getPreferences().getBoolean("clipboard_change_notification", true)) {
@@ -137,7 +147,7 @@ public class ZyncClipboardService extends Service {
                     }
                 }).execute();
 
-                app.addToHistory(new ZyncClipData(app.getEncryptionPass(), ZyncClipType.TEXT, data));
+                app.addToHistory(clipData);
             }
         }
     }
