@@ -66,11 +66,15 @@ public class MainActivity extends AppCompatActivity
                             .execute(imageUri);
                 } else if ("text/plain".equals(type)) {
                     String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-                    new ZyncPostClipTask(
-                            getZyncApp(),
-                            sharedText.getBytes(Charset.forName("UTF-8")),
-                            ZyncClipType.TEXT
-                    ).execute();
+
+                    try {
+                        new ZyncPostClipTask(
+                                getZyncApp(),
+                                sharedText.getBytes(Charset.forName("UTF-8")),
+                                ZyncClipType.TEXT
+                        ).execute();
+                    } catch (Exception ignored) {
+                    }
                 }
             } else {
                 startActivity(new Intent(this, SignInActivity.class));
