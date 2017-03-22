@@ -33,25 +33,29 @@ public class ZyncClipData {
         data = ZyncCrypto.encrypt(data, encryptionKey, salt, iv);
         this.hash = hash(data);
         data = compress(data);
-        this.data = Base64.encodeToString(data, Base64.DEFAULT).getBytes(Charset.forName("UTF-8"));
+        this.data = Base64.encodeToString(data, Base64.NO_WRAP).getBytes(Charset.forName("UTF-8"));
     }
 
     public ZyncClipData(String encryptionKey, JSONObject obj) throws Exception {
         this.timestamp = obj.getLong("timestamp");
         this.hash = obj.getJSONObject("hash").getString("crc32");
         JSONObject encryption = obj.getJSONObject("encryption");
-        this.iv = Base64.decode(encryption.getString("iv"), Base64.DEFAULT);
-        this.salt = Base64.decode(encryption.getString("salt"), Base64.DEFAULT);
+        this.iv = Base64.decode(encryption.getString("iv"), Base64.NO_WRAP);
+        this.salt = Base64.decode(encryption.getString("salt"), Base64.NO_WRAP);
         this.type = ZyncClipType.valueOf(obj.getString("payload-type").toUpperCase(Locale.US));
-        this.data = Base64.decode(obj.getString("payload"), Base64.DEFAULT);
 
-        try {
-            this.data = decompress(data);
-        } catch (DataFormatException ex) {
-            this.data = null;
+        if (obj.has("payload")) {
+            this.data = Base64.decode(obj.getString("payload"), Base64.NO_WRAP);
+
+            try {
+                this.data = decompress(data);
+            } catch (DataFormatException ex) {
+                this.data = null;
+                return;
+            }
+
+            this.data = ZyncCrypto.decrypt(data, encryptionKey, salt, iv);
         }
-
-        this.data = ZyncCrypto.decrypt(data, encryptionKey, salt, iv);
     }
 
     private static byte[] compress(byte[] data) {
@@ -104,6 +108,10 @@ public class ZyncClipData {
         return data;
     }
 
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
     public ZyncClipType type() {
         return type;
     }
@@ -115,9 +123,9 @@ public class ZyncClipData {
             object.put("timestamp", timestamp);
             object.put("hash", new JSONObject().put("crc32", hash));
             object.put("encryption", new JSONObject()
-                    .put("type", "aes256-gcm-nopadding")
-                    .put("iv", Base64.encodeToString(iv, Base64.DEFAULT))
-                    .put("salt", Base64.encodeToString(salt, Base64.DEFAULT)));
+                    .put("type", "AES256-GCM-NOPADDING")
+                    .put("iv", Base64.encodeToString(iv, Base64.NO_WRAP))
+                    .put("salt", Base64.encodeToString(salt, Base64.NO_WRAP)));
             object.put("payload-type", type.name());
             object.put("payload", new String(data, "UTF-8"));
 

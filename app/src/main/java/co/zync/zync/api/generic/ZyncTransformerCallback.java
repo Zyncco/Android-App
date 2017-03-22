@@ -15,7 +15,17 @@ public class ZyncTransformerCallback<T> implements ZyncAPI.ZyncCallback<JSONObje
 
     @Override
     public void success(JSONObject value) {
-        callback.success(transformer.transform(value));
+        T transformed;
+
+        try {
+            transformed = transformer.transform(value);
+        } catch (Exception ex) {
+            handleError(new ZyncError(-6, "Error transforming value: " +
+                    ex.getClass().getSimpleName() + ":" + ex.getMessage()));
+            return;
+        }
+
+        callback.success(transformed);
     }
 
     @Override

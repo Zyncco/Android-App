@@ -6,5 +6,5 @@ import org.json.JSONObject;
  * @author Mazen Kotb
  */
 public interface ZyncTransformer<T> {
-    T transform(JSONObject obj);
+    T transform(JSONObject obj) throws Exception;
 }

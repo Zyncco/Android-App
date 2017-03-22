@@ -225,11 +225,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(this, HelpActivity.class));
         } else if (id == R.id.logout) {
             getZyncApp().setApi(null);
-            getZyncApp().getPreferences().edit()
-                    .remove("encryption_pass")
-                    .remove("zync_api_token")
-                    .remove("zync_history")
-                    .apply();
+            getZyncApp().clearPreferences();
             stopService(new Intent(this, ZyncClipboardService.class));
             startActivity(new Intent(this, SignInActivity.class));
         } else if (id == R.id.camera) {

@@ -53,7 +53,9 @@ public class ZyncApplication extends Application {
         Set<String> historyText = new HashSet<>(history.size());
 
         for (ZyncClipData data : history) {
-            historyText.add(data.toJson().toString());
+            if (data.data() != null) {
+                historyText.add(data.toJson().toString());
+            }
         }
 
         getPreferences().edit().putStringSet("zync_history", historyText).apply();
@@ -69,6 +71,16 @@ public class ZyncApplication extends Application {
         history.add(data.toJson().toString());
         getPreferences().edit().putStringSet("zync_history", new HashSet<>(history))
                 .apply();
+    }
+
+    public ZyncClipData clipFromTimestamp(long timestamp, List<ZyncClipData> history) {
+        for (ZyncClipData data : history) {
+            if (data.timestamp() == timestamp) {
+                return data;
+            }
+        }
+
+        return null;
     }
 
     public void setupNetwork() {
@@ -219,5 +231,13 @@ public class ZyncApplication extends Application {
 
     public void setApi(ZyncAPI api) {
         this.api = api;
+    }
+
+    public void clearPreferences() {
+        getPreferences().edit()
+                .remove("encryption_pass")
+                .remove("zync_api_token")
+                .remove("zync_history")
+                .apply();
     }
 }

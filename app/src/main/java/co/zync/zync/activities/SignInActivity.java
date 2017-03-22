@@ -110,6 +110,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
                         if (task.isSuccessful()) {
                             String idToken = task.getResult().getToken();
+                            getZyncApp().clearPreferences();
 
                             ZyncAPI.signup(
                                     app.httpRequestQueue(),

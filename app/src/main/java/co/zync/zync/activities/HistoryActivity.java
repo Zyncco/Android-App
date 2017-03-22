@@ -56,32 +56,75 @@ public class HistoryActivity extends AppCompatActivity {
 
         dialog.show();
 
-        getZyncApp().getApi().getHistory(getZyncApp().getEncryptionPass(), new ZyncAPI.ZyncCallback<List<ZyncClipData>>() {
+        final ZyncApplication app = getZyncApp();
+
+        app.getApi().getHistory(app.getEncryptionPass(), new ZyncAPI.ZyncCallback<List<ZyncClipData>>() {
             @Override
-            public void success(List<ZyncClipData> value) {
+            public void success(final List<ZyncClipData> history) {
                 dialog.dismiss();
-                getZyncApp().setLastRequestStatus(true);
-                setHistory(value);
-                getZyncApp().setHistory(value);
+                app.setLastRequestStatus(history != null);
+
+                if (history != null) {
+                    List<ZyncClipData> localHistory = historyFromFile();
+                    List<Long> missingTimestamps = new ArrayList<>();
+
+                    for (ZyncClipData historyEntry : history) {
+                        ZyncClipData local = app.clipFromTimestamp(historyEntry.timestamp(), localHistory);
+
+                        if (local != null) {
+                            historyEntry.setData(local.data());
+                        } else {
+                            missingTimestamps.add(historyEntry.timestamp());
+                        }
+                    }
+
+                    if(!missingTimestamps.isEmpty()) {
+                        app.getApi().getClipboard(getZyncApp().getEncryptionPass(), missingTimestamps, new ZyncAPI.ZyncCallback<List<ZyncClipData>>() {
+                            @Override
+                            public void success(List<ZyncClipData> value) {
+                                for (ZyncClipData clip : value) {
+                                    app.clipFromTimestamp(clip.timestamp(), history).setData(clip.data());
+                                }
+
+                                setHistory(history);
+                                app.setHistory(history);
+                            }
+
+                            @Override
+                            public void handleError(ZyncError error) {
+                                handleHistoryError(dialog, error);
+                            }
+                        });
+                    } else {
+                        setHistory(history);
+                        app.setHistory(history);
+                    }
+                } else {
+                    loadHistoryFromFile();
+                }
             }
 
             @Override
             public void handleError(ZyncError error) {
-                dialog.dismiss();
-                getZyncApp().setLastRequestStatus(false);
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(HistoryActivity.this);
-
-                alertDialog.setTitle(R.string.unable_fetch_history);
-                alertDialog.setMessage(getString(R.string.unable_fetch_history_msg, error.code(), error.message()));
-                alertDialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {}
-                });
-                alertDialog.show();
-
-                loadHistoryFromFile();
+                handleHistoryError(dialog, error);
             }
         });
+    }
+
+    private void handleHistoryError(ProgressDialog dialog, ZyncError error) {
+        dialog.dismiss();
+        getZyncApp().setLastRequestStatus(false);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(HistoryActivity.this);
+
+        alertDialog.setTitle(R.string.unable_fetch_history);
+        alertDialog.setMessage(getString(R.string.unable_fetch_history_msg, error.code(), error.message()));
+        alertDialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {}
+        });
+        alertDialog.show();
+
+        loadHistoryFromFile();
     }
 
     /*       ACTION BAR START         */
@@ -114,6 +157,16 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void loadHistoryFromFile() {
+        final List<ZyncClipData> history = historyFromFile();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setHistory(history);
+            }
+        });
+    }
+
+    private List<ZyncClipData> historyFromFile() {
         Set<String> historyStr = getZyncApp().getPreferences()
                 .getStringSet("zync_history", new HashSet<String>());
         final List<ZyncClipData> history = new ArrayList<>(historyStr.size());
@@ -127,13 +180,7 @@ public class HistoryActivity extends AppCompatActivity {
         }
 
         Collections.sort(history, new ZyncClipData.TimeComparator());
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                setHistory(history);
-            }
-        });
+        return history;
     }
 
     // set history that is being displayed on the activity
@@ -143,6 +190,10 @@ public class HistoryActivity extends AppCompatActivity {
 
         for (int i = 0; i < history.size(); i++) {
             final ZyncClipData data = history.get(i);
+
+            if (data.data() == null) {
+                continue;
+            }
 
             // (allows us to set an onClick listener for the whole region the entry covers)
             RelativeLayout layoutForClip = new RelativeLayout(this);

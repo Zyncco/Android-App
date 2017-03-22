@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.crypto.AEADBadTagException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -67,6 +68,53 @@ public class ZyncAPI {
         queue.add(request);
     }
 
+    public void getClipboard(final String encryptionKey, final List<Long> timestamps,
+                             final ZyncCallback<List<ZyncClipData>> callback) {
+        StringBuilder builder = new StringBuilder();
+
+        for (Long timestamp : timestamps) {
+            builder.append(timestamp.longValue()).append(",");
+        }
+
+        builder.setLength(builder.length() - 1);
+
+        System.out.println("builder: " + builder.toString());
+
+        ZyncAuthenticatedRequest request = new ZyncAuthenticatedRequest(
+                Request.Method.GET,
+                "clipboard/" + builder.toString(),
+                null,
+                token,
+                new ZyncGenericAPIListener(callback, new ZyncTransformer<List<ZyncClipData>>() {
+                    @Override
+                    public List<ZyncClipData> transform(JSONObject obj) throws Exception {
+                        if (timestamps.size() == 1) {
+                            try {
+                                return Collections.singletonList(new ZyncClipData(encryptionKey, obj.getJSONObject("data")));
+                            } catch (AEADBadTagException ignored) {
+                                return Collections.emptyList();
+                            }
+                        } else {
+                            JSONArray clips = obj.getJSONObject("data").getJSONArray("clipboards");
+                            List<ZyncClipData> clipboards = new ArrayList<>(clips.length());
+
+                            for (int i = 0; i < clips.length(); i++) {
+                                try {
+                                    clipboards.add(new ZyncClipData(encryptionKey, clips.getJSONObject(i)));
+                                } catch (AEADBadTagException ignored) {
+                                    // pass is wrong / encryption error, ignore
+                                }
+                            }
+
+                            return clipboards;
+                        }
+                    }
+                })
+        );
+
+        queue.add(request);
+    }
+
     /*
      * Sends a request to get the clipboard from the servers
      * This method handles the decryption, decompression, and hash verification of the data.
@@ -80,12 +128,8 @@ public class ZyncAPI {
                 token,
                 new ZyncGenericAPIListener(callback, new ZyncTransformer<ZyncClipData>() {
                     @Override
-                    public ZyncClipData transform(JSONObject obj) {
-                        try {
-                            return new ZyncClipData(encryptionKey, obj);
-                        } catch (Exception ex) {
-                            return null;
-                        }
+                    public ZyncClipData transform(JSONObject obj) throws Exception {
+                        return new ZyncClipData(encryptionKey, obj.getJSONObject("data"));
                     }
                 })
         );
@@ -102,7 +146,7 @@ public class ZyncAPI {
                     @Override
                     public List<ZyncClipData> transform(JSONObject obj) {
                         try {
-                            JSONArray array = obj.getJSONArray("history");
+                            JSONArray array = obj.getJSONObject("data").getJSONArray("history");
                             List<ZyncClipData> history = new ArrayList<>(array.length());
 
                             for (int i = 0; i < array.length(); i++) {
@@ -112,6 +156,7 @@ public class ZyncAPI {
                             Collections.sort(history, new ZyncClipData.TimeComparator()); // sort by time
                             return history;
                         } catch (Exception ex) {
+                            ex.printStackTrace();
                             return null;
                         }
                     }
