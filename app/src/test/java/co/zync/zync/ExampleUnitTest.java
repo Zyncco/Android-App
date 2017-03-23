@@ -13,15 +13,7 @@ import java.util.Arrays;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() throws Exception {
-        /*String input = "ayylmao";
-        //byte[] salt = ZyncCrypto.generateSalt();
-        byte[] data = ZyncCrypto.encrypt(
-                input.getBytes("UTF-8"),
-                "seCr3_tp4_z",
-                salt
-        );
-
-        System.out.println(Arrays.toString(data));
-        System.out.println(new String(ZyncCrypto.decrypt(data, "seCr3_tp4_z", salt)));*/
+        byte[] data = new byte[] {-126, 9, 79, 108, 106, -103, 81, 88, -101, -122, -77, 67, -34, 44, -44, 96, 83, -72, 112, 96, -128, 38, 61};
+        System.out.println(new String(ZyncCrypto.decrypt(data, "password", "salt".getBytes(), "iv".getBytes())));
     }
 }

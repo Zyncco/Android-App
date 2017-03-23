@@ -13,8 +13,7 @@ import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.firebase.ZyncInstanceIdService;
 import co.zync.zync.firebase.ZyncMessagingService;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
+import okhttp3.OkHttpClient;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,7 +30,7 @@ public class ZyncApplication extends Application {
     /* END NOTIFICATION IDS */
     private AtomicBoolean lastRequestStatus = new AtomicBoolean(true);
     private ZyncPostClipTask.RequestStatusListener requestStatusListener;
-    private RequestQueue httpRequestQueue;
+    private OkHttpClient httpClient;
     private ZyncAPI api;
     private ZyncWifiReceiver receiver; // do not remove, we have to retain the reference
     private final ZyncPreferenceChangeListener preferenceChangeListener = new ZyncPreferenceChangeListener(this);
@@ -88,11 +87,11 @@ public class ZyncApplication extends Application {
         startService(ZyncInstanceIdService.class);
         startService(ZyncMessagingService.class);
 
-        httpRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        httpClient = new OkHttpClient();
 
         if (api != null) {
             enableClipboardService();
-            api.setQueue(httpRequestQueue);
+            api.setClient(httpClient);
         }
     }
 
@@ -100,11 +99,11 @@ public class ZyncApplication extends Application {
         stopService(new Intent(this, ZyncInstanceIdService.class));
         stopService(new Intent(this, ZyncMessagingService.class));
 
-        httpRequestQueue = null;
+        httpClient = null;
 
         if (api != null) {
             disableClipboardService();
-            api.setQueue(null);
+            api.setClient(null);
         }
     }
 
@@ -240,8 +239,8 @@ public class ZyncApplication extends Application {
         return getPreferences().getString("encryption_pass", "default");
     }
 
-    public RequestQueue httpRequestQueue() {
-        return httpRequestQueue;
+    public OkHttpClient httpClient() {
+        return httpClient;
     }
 
     public ZyncAPI getApi() {
@@ -258,7 +257,6 @@ public class ZyncApplication extends Application {
 
     public void clearPreferences() {
         getPreferences().edit()
-                .remove("encryption_pass")
                 .remove("zync_api_token")
                 .remove("zync_history")
                 .apply();

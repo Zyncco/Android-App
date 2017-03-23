@@ -101,9 +101,14 @@ public class HistoryActivity extends AppCompatActivity {
                                     app.clipFromTimestamp(clip.timestamp(), history).setData(clip.data());
                                 }
 
-                                setHistory(history);
-                                app.setHistory(history);
-                                dialog.dismiss();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        setHistory(history);
+                                        app.setHistory(history);
+                                        dialog.dismiss();
+                                    }
+                                });
                             }
 
                             @Override
@@ -112,9 +117,14 @@ public class HistoryActivity extends AppCompatActivity {
                             }
                         });
                     } else {
-                        setHistory(history);
-                        app.setHistory(history);
-                        dialog.dismiss();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setHistory(history);
+                                app.setHistory(history);
+                                dialog.dismiss();
+                            }
+                        });
                     }
                 } else {
                     // if there was an error processing server history, load from file
@@ -132,7 +142,7 @@ public class HistoryActivity extends AppCompatActivity {
     private void handleHistoryError(ProgressDialog dialog, ZyncError error) {
         dialog.dismiss();
         getZyncApp().setLastRequestStatus(false);
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(HistoryActivity.this);
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(HistoryActivity.this);
 
         alertDialog.setTitle(R.string.unable_fetch_history);
         alertDialog.setMessage(getString(R.string.unable_fetch_history_msg, error.code(), error.message()));
@@ -140,7 +150,13 @@ public class HistoryActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
         });
-        alertDialog.show();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                alertDialog.show();
+            }
+        });
 
         loadHistoryFromFile();
     }

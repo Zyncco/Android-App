@@ -15,10 +15,10 @@ public class ZyncWifiReceiver extends BroadcastReceiver {
         boolean useOnData = app.getPreferences().getBoolean("use_on_data", true);
 
         if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-            if (!useOnData && app.httpRequestQueue() == null) {
+            if (!useOnData && app.httpClient() == null) {
                 app.setupNetwork();
             }
-        } else if (app.httpRequestQueue() != null && !useOnData) {
+        } else if (app.httpClient() != null && !useOnData) {
             app.removeNetworkUsages();
         }
     }

@@ -49,18 +49,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
         if (!preferences.contains("seen_intro")) {
             startActivity(new Intent(this, IntroActivity.class));
-            return;
-        }
-
-        /*
-         * If the user has logged in before, set the API variable and continue to settings.
-         */
-        if (preferences.contains("zync_api_token")) {
-            getZyncApp().setApi(ZyncAPI.login(
-                    getZyncApp().httpRequestQueue(),
-                    preferences.getString("zync_api_token", "")
-            ));
-            startActivity(new Intent(this, MainActivity.class));
         }
     }
 
@@ -97,12 +85,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         // Signed in successfully, show authenticated UI.
         System.out.println(result.getEmail() + " is logged in!");
         final ZyncApplication app = getZyncApp();
-        final ProgressDialog dialog = new ProgressDialog(this, R.style.AppTheme);
-        dialog.setIndeterminate(true);
-        dialog.setTitle("");
-        dialog.setMessage(getString(R.string.signing_in));
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.show();
+        final ProgressDialog dialog = createSignInDialog();
 
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
         mUser.getToken(true)
@@ -110,38 +93,11 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
                         if (task.isSuccessful()) {
                             String idToken = task.getResult().getToken();
-                            getZyncApp().clearPreferences();
 
-                            ZyncAPI.signup(
-                                    app.httpRequestQueue(),
+                            ZyncAPI.authenticate(
+                                    app.httpClient(),
                                     idToken,
-                                    new ZyncAPI.ZyncCallback<ZyncAPI>() {
-                                        @Override
-                                        public void success(ZyncAPI api) {
-                                            app.setApi(api);
-                                            app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
-
-
-                                            if (!app.getPreferences().contains("encryption_password")) {
-                                                dialog.dismiss();
-                                                new ZyncPassDialog(SignInActivity.this, getZyncApp(), new ZyncPassDialog.Callback() {
-                                                    @Override
-                                                    public void callback() {
-                                                        signInSuccess();
-                                                    }
-                                                }).promptForPassword();
-                                            } else {
-                                                signInSuccess();
-                                            }
-                                        }
-
-                                        @Override
-                                        public void handleError(ZyncError error) {
-                                            System.out.println(error.toString());
-                                            dialog.dismiss();
-                                            // TODO do something
-                                        }
-                                    }
+                                    new AuthenticateCallback(dialog)
                             );
                             return;
                         }
@@ -155,7 +111,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sign_in_button:
-                if (getZyncApp().httpRequestQueue() != null) {
+                if (getZyncApp().httpClient() != null) {
                     startActivityForResult(
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
@@ -180,6 +136,17 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         }
     }
 
+    private ProgressDialog createSignInDialog() {
+        final ProgressDialog dialog = new ProgressDialog(this, R.style.AppTheme);
+        dialog.setIndeterminate(true);
+        dialog.setTitle("");
+        dialog.setMessage(getString(R.string.signing_in));
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.show();
+
+        return dialog;
+    }
+
     private void signInSuccess() {
         startService(new Intent(this, ZyncClipboardService.class));
         startActivity(new Intent(SignInActivity.this, MainActivity.class));
@@ -188,5 +155,47 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
     private ZyncApplication getZyncApp() {
         return (ZyncApplication) getApplication();
+    }
+
+    private class AuthenticateCallback implements ZyncAPI.ZyncCallback<ZyncAPI> {
+        ProgressDialog dialog;
+        ZyncApplication app;
+
+        AuthenticateCallback(ProgressDialog dialog) {
+            this.dialog = dialog;
+            this.app = getZyncApp();
+        }
+
+        @Override
+        public void success(ZyncAPI api) {
+            app.setApi(api);
+            app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
+
+
+            if (!app.getPreferences().contains("encryption_pass")) {
+                dialog.dismiss();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new ZyncPassDialog(SignInActivity.this, getZyncApp(), new ZyncPassDialog.Callback() {
+                            @Override
+                            public void callback() {
+                                signInSuccess();
+                            }
+                        }).promptForPassword();
+                    }
+                });
+            } else {
+                signInSuccess();
+            }
+        }
+
+        @Override
+        public void handleError(ZyncError error) {
+            System.out.println(error.toString());
+            dialog.dismiss();
+            // TODO do something
+        }
     }
 }

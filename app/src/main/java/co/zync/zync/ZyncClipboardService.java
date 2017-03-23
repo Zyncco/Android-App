@@ -3,7 +3,11 @@ package co.zync.zync;
 import android.app.Notification;
 import android.app.Service;
 import android.content.*;
+import android.os.Build;
 import android.os.IBinder;
+import android.os.PersistableBundle;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
@@ -73,11 +77,29 @@ public class ZyncClipboardService extends Service {
 
         switch (data.getDescription().getMimeType(0)) {
             case ClipDescription.MIMETYPE_TEXT_HTML:
+                if (item.getHtmlText() == null) {
+                    return null;
+                }
+
+                return fromHtml(item.getHtmlText()).toString().getBytes(Charset.forName("UTF-8"));
+
             case ClipDescription.MIMETYPE_TEXT_PLAIN:
+                if (item.getText() == null) {
+                    return null;
+                }
+
                 return item.getText().toString().getBytes(Charset.forName("UTF-8"));
 
             default:
                 return new byte[0];
+        }
+    }
+
+    private Spanned fromHtml(String text) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            return Html.fromHtml(text);
+        } else {
+            return Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT);
         }
     }
 
@@ -107,6 +129,14 @@ public class ZyncClipboardService extends Service {
         @Override
         public void onPrimaryClipChanged() {
             byte[] data = getRawData();
+
+            if (data == null) {
+                return;
+            }
+
+            if ("zync_paste".equals(clipMan.getPrimaryClipDescription().getLabel())) {
+                return;
+            }
 
             if (app.getApi() == null) {
                 return; // they haven't logged in yet
@@ -143,6 +173,8 @@ public class ZyncClipboardService extends Service {
                                     getString(R.string.clipboard_posted_notification_desc)
                             );
                         }
+
+                        System.out.println("posted (" + hashCode() + ")");
 
                         app.setLastRequestStatus(true);
                     }

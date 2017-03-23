@@ -2,15 +2,18 @@ package co.zync.zync.api.generic;
 
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncError;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
 
 /**
  * @author Mazen Kotb
  */
-public class ZyncGenericAPIListener implements Response.Listener<JSONObject>, Response.ErrorListener {
+public class ZyncGenericAPIListener implements Callback {
     private final ZyncAPI.ZyncCallback<JSONObject> responseListener;
 
     public ZyncGenericAPIListener(ZyncAPI.ZyncCallback<JSONObject> responseListener) {
@@ -22,30 +25,33 @@ public class ZyncGenericAPIListener implements Response.Listener<JSONObject>, Re
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
-        if (error.networkResponse != null && error.networkResponse.statusCode != 404) {
-            try {
-                onResponse(new JSONObject(new String(error.networkResponse.data)));
-                return;
-            } catch (JSONException ignored) {
-            }
-        }
-
+    public void onFailure(Call call, IOException e) {
         responseListener.handleError(new ZyncError(-4, "HTTP Error: " +
-                (error.getCause() != null ? error.getCause().getClass().getSimpleName() : "null") + ":" + error.getMessage()));
+                (e.getCause() != null ? e.getCause().getClass().getSimpleName() : "null") + ":" + e.getMessage()));
     }
 
     @Override
-    public void onResponse(JSONObject node) {
+    public void onResponse(Call call, Response response) throws IOException {
+        String originalString = response.body().string();
+        JSONObject node;
+
         try {
-            if (node == null || !node.has("success")) {
+            node = new JSONObject(originalString);
+        } catch (JSONException ex) {
+            responseListener.handleError(new ZyncError(-5, "Server returned body which is not JSON! Body: " + originalString));
+            return;
+        }
+
+        try {
+            // ensure there is the one required field
+            if (!node.has("success")) {
                 responseListener.handleError(new ZyncError(-1, "Server failed to produce a valid response"));
             }
 
             if (node.getBoolean("success")) {
-                responseListener.success(node);
+                responseListener.success(node); // if server says successful, execute callback
                 return;
-            } else if (!node.has("error")) {
+            } else if (!node.has("error")) { // if it's unsuccessful there *must* be error
                 responseListener.handleError(new ZyncError(-2, "Server stated request was unsuccessful but " +
                         "did not provide error"));
                 return;
@@ -53,12 +59,14 @@ public class ZyncGenericAPIListener implements Response.Listener<JSONObject>, Re
 
             JSONObject error = node.getJSONObject("error");
 
+            // check required fields
             if (!error.has("code") || !error.has("message")) {
                 responseListener.handleError(new ZyncError(-3, "Server stated request was unsuccessful but " +
                         "did not provide a proper error"));
                 return;
             }
 
+            // handle error sent by server
             responseListener.handleError(new ZyncError(error.getInt("code"), error.getString("message")));
         } catch (JSONException ignored) {
         }
