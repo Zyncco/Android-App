@@ -78,4 +78,8 @@
     <string name="history_encryption_error">Error decrypting this entry&#8230;</string>
     <string name="history_copy_button">Copy to Clipboard</string>
     <string name="history_clip_updated_msg">Your clipboard has been successfully updated</string>
+
+    <string name="max_size">Max Size</string>
+    <string name="max_size_desc">The max size of a clip that will be synced.\n0 MB = no limit</string>
+    <string name="max_size_number">%1$s MB</string>
 </resources>

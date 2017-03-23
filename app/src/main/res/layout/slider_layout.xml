@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/slider_layout"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:paddingBottom="8dip"
+              android:paddingLeft="16dip"
+              android:paddingRight="16dip"
+              android:paddingTop="8dip" >
+    <SeekBar
+            android:id="@+id/slider_seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="12dip"
+            android:paddingTop="12dip" />
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/ms_slider_text"
+            android:text="10 MB" android:textAppearance="@android:style/TextAppearance.Material.Body1"/>
+
+</LinearLayout>

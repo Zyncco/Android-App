@@ -31,7 +31,8 @@ public class ZyncGenericAPIListener implements Response.Listener<JSONObject>, Re
             }
         }
 
-        responseListener.handleError(new ZyncError(-4, "HTTP Error: " + error.getMessage()));
+        responseListener.handleError(new ZyncError(-4, "HTTP Error: " +
+                (error.getCause() != null ? error.getCause().getClass().getSimpleName() : "null") + ":" + error.getMessage()));
     }
 
     @Override

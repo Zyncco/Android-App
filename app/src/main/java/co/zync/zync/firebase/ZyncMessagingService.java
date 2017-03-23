@@ -49,6 +49,12 @@ public class ZyncMessagingService extends FirebaseMessagingService {
         }
 
         // todo filter by size
+        long size = Long.valueOf(remoteMessage.getData().get("size"));
+        long maxSize = application.getMaxSize();
+
+        if (maxSize != 0 && size > maxSize) {
+            return;
+        }
 
         application.syncDown();
         application.sendNotification(

@@ -55,7 +55,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         /*
          * If the user has logged in before, set the API variable and continue to settings.
          */
-        if (preferences.contains("zync_api_token") && !BuildConfig.DEBUG) {
+        if (preferences.contains("zync_api_token")) {
             getZyncApp().setApi(ZyncAPI.login(
                     getZyncApp().httpRequestQueue(),
                     preferences.getString("zync_api_token", "")
@@ -122,7 +122,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                                             app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
 
 
-                                            if (!app.getPreferences().contains("encryption_password") || BuildConfig.DEBUG) {
+                                            if (!app.getPreferences().contains("encryption_password")) {
                                                 dialog.dismiss();
                                                 new ZyncPassDialog(SignInActivity.this, getZyncApp(), new ZyncPassDialog.Callback() {
                                                     @Override

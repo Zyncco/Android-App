@@ -61,23 +61,38 @@ public class HistoryActivity extends AppCompatActivity {
         app.getApi().getHistory(app.getEncryptionPass(), new ZyncAPI.ZyncCallback<List<ZyncClipData>>() {
             @Override
             public void success(final List<ZyncClipData> history) {
-                dialog.dismiss();
                 app.setLastRequestStatus(history != null);
 
                 if (history != null) {
+                    /*
+                     * Load history from file and compare with server.
+                     *
+                     * If the client has the data for the clipboard entry locally, load from there.
+                     * Otherwise, add the timestamp to a list that we will request the payload for.
+                     */
                     List<ZyncClipData> localHistory = historyFromFile();
                     List<Long> missingTimestamps = new ArrayList<>();
 
                     for (ZyncClipData historyEntry : history) {
                         ZyncClipData local = app.clipFromTimestamp(historyEntry.timestamp(), localHistory);
 
-                        if (local != null) {
+                        if (local != null && local.data() != null) {
                             historyEntry.setData(local.data());
                         } else {
                             missingTimestamps.add(historyEntry.timestamp());
                         }
                     }
 
+                    /*
+                     * If we are missing data (if we have been offline for some time or some other reason):
+                     *
+                     * Request the clip data from the server
+                     * add the data to our list
+                     * Update history in local storage
+                     * Display history on Activity
+                     *
+                     * Otherwise, display local history on activity
+                     */
                     if(!missingTimestamps.isEmpty()) {
                         app.getApi().getClipboard(getZyncApp().getEncryptionPass(), missingTimestamps, new ZyncAPI.ZyncCallback<List<ZyncClipData>>() {
                             @Override
@@ -88,6 +103,7 @@ public class HistoryActivity extends AppCompatActivity {
 
                                 setHistory(history);
                                 app.setHistory(history);
+                                dialog.dismiss();
                             }
 
                             @Override
@@ -98,8 +114,10 @@ public class HistoryActivity extends AppCompatActivity {
                     } else {
                         setHistory(history);
                         app.setHistory(history);
+                        dialog.dismiss();
                     }
                 } else {
+                    // if there was an error processing server history, load from file
                     loadHistoryFromFile();
                 }
             }
@@ -192,6 +210,7 @@ public class HistoryActivity extends AppCompatActivity {
             final ZyncClipData data = history.get(i);
 
             if (data.data() == null) {
+                System.out.println(data.timestamp() + " is ignored due to null data");
                 continue;
             }
 

@@ -116,6 +116,12 @@ public class ZyncClipboardService extends Service {
                 return;
             }
 
+            long maxSize = app.getMaxSize();
+
+            if (maxSize != 0 && data.length > maxSize) {
+                return;
+            }
+
             if (data.length != 0) {
                 ZyncClipData clipData;
 

@@ -161,7 +161,22 @@ public class ZyncApplication extends Application {
         startService(intent);
     }
 
+    public PendingIntent createPendingIntent(Intent intent, Class<? extends Activity> activityClass) {
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(activityClass);
+        stackBuilder.addNextIntent(intent);
+
+        return stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+    }
+
     public void sendNotification(int id, String title, String text) {
+        sendNotification(id, title, text, null);
+    }
+
+    public void sendNotification(int id, String title, String text, PendingIntent intent) {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -171,6 +186,10 @@ public class ZyncApplication extends Application {
         builder.setSmallIcon(R.drawable.notification_icon);
         builder.setContentTitle(title);
         builder.setContentText(text);
+
+        if (intent != null) {
+            builder.setContentIntent(intent);
+        }
 
         notificationManager.notify(id, builder.build());
     }
@@ -189,7 +208,7 @@ public class ZyncApplication extends Application {
                             && isTypeSupported(value.type())) {
                         if (value.type() == ZyncClipType.TEXT) {
                             ZyncClipboardService.getInstance().writeToClip(new String(data), false);
-                        } // todo notify user of image thing
+                        }
                     }
                 }
 
@@ -199,6 +218,10 @@ public class ZyncApplication extends Application {
                 }
             });
         }
+    }
+
+    public long getMaxSize() {
+        return getPreferences().getInt("max_size", 10) * 1000000;
     }
 
     public boolean isTypeSupported(ZyncClipType type) {
