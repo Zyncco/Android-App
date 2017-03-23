@@ -7,6 +7,7 @@ import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
+
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
 
@@ -38,7 +39,8 @@ public class ZyncPassDialog {
         passwordDialogBuilder.setMessage(R.string.encryption_pass_sum);
         passwordDialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {}
+            public void onClick(DialogInterface dialog, int which) {
+            }
         });
 
         passwordDialog = passwordDialogBuilder.show();
@@ -56,7 +58,7 @@ public class ZyncPassDialog {
     private boolean handlePassword(EditText view) {
         String enteredPass = view.getText().toString();
 
-        if (enteredPass.length() <= 10) {
+        if (enteredPass.length() < 10) {
             view.setError(app.getString(R.string.password_insufficient));
             return false;
         }
@@ -71,6 +73,6 @@ public class ZyncPassDialog {
     }
 
     public interface Callback {
-       void callback();
+        void callback();
     }
 }
