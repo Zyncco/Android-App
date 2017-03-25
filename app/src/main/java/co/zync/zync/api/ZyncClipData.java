@@ -5,6 +5,7 @@ import co.zync.zync.utils.ZyncCrypto;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.crypto.AEADBadTagException;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -30,9 +31,9 @@ public class ZyncClipData {
         this.iv = ZyncCrypto.generateSecureIv();
         this.salt = ZyncCrypto.generateSecureSalt();
 
+        data = compress(data);
         data = ZyncCrypto.encrypt(data, encryptionKey, salt, iv);
         this.hash = hash(data);
-        data = compress(data);
         this.data = Base64.encodeToString(data, Base64.NO_WRAP).getBytes(Charset.forName("UTF-8"));
     }
 
@@ -48,13 +49,11 @@ public class ZyncClipData {
             this.data = Base64.decode(obj.getString("payload"), Base64.NO_WRAP);
 
             try {
+                this.data = ZyncCrypto.decrypt(data, encryptionKey, salt, iv);
                 this.data = decompress(data);
-            } catch (DataFormatException ex) {
+            } catch (DataFormatException | AEADBadTagException ex) {
                 this.data = null;
-                return;
             }
-
-            this.data = ZyncCrypto.decrypt(data, encryptionKey, salt, iv);
         }
     }
 
