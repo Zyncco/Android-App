@@ -5,6 +5,7 @@ import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
+import org.json.JSONException;
 
 /**
  * Task which when given the appropriate variables
@@ -61,7 +62,7 @@ public class ZyncPostClipTask extends AsyncTask<Void, Void, Void> {
                     data,
                     listener
             );
-        } catch (Exception ignored) {
+        } catch (JSONException ignored) {
         }
 
         return null;

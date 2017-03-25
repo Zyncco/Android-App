@@ -27,9 +27,12 @@ import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.utils.NullDialogClickListener;
+import co.zync.zync.utils.ZyncExceptionInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.crypto.AEADBadTagException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -146,10 +149,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         alertDialog.setTitle(R.string.unable_fetch_history);
         alertDialog.setMessage(getString(R.string.unable_fetch_history_msg, error.code(), error.message()));
-        alertDialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {}
-        });
+        alertDialog.setPositiveButton(R.string.ok, new NullDialogClickListener());
 
         runOnUiThread(new Runnable() {
             @Override
@@ -210,6 +210,10 @@ public class HistoryActivity extends AppCompatActivity {
                 history.add(new ZyncClipData(getZyncApp().getEncryptionPass(), new JSONObject(json)));
             } catch (Exception e) {
                 e.printStackTrace();
+
+                if (!(e instanceof AEADBadTagException)) {
+                    ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(e, "decoding history from file"));
+                }
             }
         }
 
@@ -330,7 +334,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         view.setId(id);
         setLayout(view, 30f, 30f, 3);
-        view.setImageDrawable(getDrawable(R.drawable.ic_content_copy_black));
+        view.setImageDrawable(getDrawable(R.drawable.ic_content_copy));
         view.setContentDescription(getString(R.string.history_copy_button));
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(view.getLayoutParams());
@@ -361,7 +365,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         view.setId(id);
         setLayout(view, 30f, 30f, 3);
-        view.setImageDrawable(getDrawable(R.drawable.ic_share_black));
+        view.setImageDrawable(getDrawable(R.drawable.ic_share));
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(view.getLayoutParams());
 

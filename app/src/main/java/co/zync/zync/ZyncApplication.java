@@ -5,7 +5,9 @@ import android.content.*;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.preference.PreferenceActivity;
+import android.util.Log;
 import co.zync.zync.activities.SettingsActivity;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
@@ -13,15 +15,19 @@ import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.firebase.ZyncInstanceIdService;
 import co.zync.zync.firebase.ZyncMessagingService;
+import co.zync.zync.utils.ZyncExceptionInfo;
 import okhttp3.OkHttpClient;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ZyncApplication extends Application {
+    public static final List<String> SENSITIVE_PREFERENCE_FIELDS = Arrays.asList("zync_history", "zync_api_token", "encryption_pass");
+    public static final List<ZyncExceptionInfo> LOGGED_EXCEPTIONS = Collections.synchronizedList(new ArrayList<ZyncExceptionInfo>());
     /* START NOTIFICATION IDS */
     public static int CLIPBOARD_UPDATED_ID = 281902;
     public static int CLIPBOARD_POSTED_ID = 213812;
@@ -260,5 +266,95 @@ public class ZyncApplication extends Application {
                 .remove("zync_api_token")
                 .remove("zync_history")
                 .apply();
+    }
+
+    public File createInfoFile() throws IOException {
+        File file = new File(new File(getFilesDir(), "attachments/"), "zync_debug_info.txt");
+        if (file.exists()) {
+            file.delete();
+        }
+
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+
+        file.createNewFile();
+        FileOutputStream fos = new FileOutputStream(file);
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("---------------------------------------------\n");
+        builder.append("Zync for Android Info report\n");
+        builder.append("Unix time report generated: ").append(System.currentTimeMillis()).append('\n');
+        builder.append("App Version: ").append(BuildConfig.VERSION_NAME).append('\n');
+        builder.append("API Version: ").append(ZyncAPI.VERSION).append('\n');
+        builder.append("API Base URL: ").append(ZyncAPI.BASE).append('\n');
+        builder.append("Debug mode: ").append(BuildConfig.DEBUG).append("\n\n");
+
+        builder.append("Device info:\n");
+        builder.append("- Android Version: ").append(Build.VERSION.SDK_INT).append('\n');
+        builder.append("- Device: ").append(Build.DEVICE).append('\n');
+        builder.append("- Model: ").append(Build.MODEL).append('\n');
+        builder.append("- Product: ").append(Build.PRODUCT).append('\n');
+        builder.append("- User-Agent: ").append(System.getProperty("http.agent")).append("\n\n");
+
+        builder.append("ZyncAPI initialized: ").append(api != null).append('\n');
+
+        if (api != null) {
+            builder.append("Zync Token: ").append(api.getToken()).append("\n");
+        }
+
+        builder.append('\n');
+        builder.append("Zync Settings:\n");
+        Map<String, ?> prefs = getPreferences().getAll();
+
+        for (String key : prefs.keySet()) {
+            // do NOT include sensitive information such as their history or encryption password
+            if (SENSITIVE_PREFERENCE_FIELDS.contains(key.toLowerCase())) {
+                continue;
+            }
+
+            builder.append("- ").append(key).append("=").append(prefs.get(key).toString()).append('\n');
+        }
+
+        builder.append('\n');
+        builder.append("---------------------------------------------\n\n");
+
+        if (LOGGED_EXCEPTIONS.isEmpty()) {
+            builder.append("No exceptions to be found!");
+        } else {
+            builder.append("Listing exceptions...\n\n");
+
+            for (ZyncExceptionInfo exceptionInfo : LOGGED_EXCEPTIONS) {
+                builder.append("---------------------------------\n");
+                builder.append("Exception Type: ").append(exceptionInfo.ex().getClass().getName()).append('\n');
+
+                if (exceptionInfo.ex().getMessage() != null) {
+                    builder.append("Message: ").append(exceptionInfo.ex().getMessage()).append('\n');
+                }
+
+                builder.append("Exception at ").append(exceptionInfo.timestamp()).append('\n');
+
+                if ("Unknown".equals(exceptionInfo.action())) {
+                    builder.append("Attempted action is unknown\n");
+                } else {
+                    builder.append("Application was attempting to ").append(exceptionInfo.action()).append('\n');
+                }
+
+                builder.append("\nFull Stacktrace:\n");
+                builder.append(Log.getStackTraceString(exceptionInfo.ex())).append('\n');
+            }
+
+            builder.append("---------------------------------\n");
+        }
+
+        String fileContents = builder.toString();
+        builder = null; // memory
+
+        fos.write(fileContents.getBytes(Charset.forName("UTF-8")));
+        fos.flush();
+        fos.close();
+
+        return file;
     }
 }

@@ -13,7 +13,9 @@ import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.utils.ZyncExceptionInfo;
 
+import javax.crypto.AEADBadTagException;
 import java.nio.charset.Charset;
 
 /**
@@ -159,6 +161,7 @@ public class ZyncClipboardService extends Service {
                     clipData = new ZyncClipData(app.getEncryptionPass(), ZyncClipType.TEXT, data);
                 } catch (Exception ex) {
                     ex.printStackTrace();
+                    ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "create ClipData from copy"));
                     app.setLastRequestStatus(false);
                     return;
                 }

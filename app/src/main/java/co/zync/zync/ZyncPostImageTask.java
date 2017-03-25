@@ -8,6 +8,7 @@ import android.provider.MediaStore;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.utils.ZyncExceptionInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class ZyncPostImageTask extends AsyncTask<Uri, Void, Void> {
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(resolver, params[0]);
             } catch (IOException ex) {
+                ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "generate bitmap from content resolver"));
                 // somehow notify user that there was an error
                 return null;
             }
@@ -76,6 +78,7 @@ public class ZyncPostImageTask extends AsyncTask<Uri, Void, Void> {
                     -5,
                     "Exception=" + ex.getClass().getSimpleName() + ": " + ex.getMessage()
             ));
+            ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "post image clip using PostClipTask"));
         }
         return null;
     }

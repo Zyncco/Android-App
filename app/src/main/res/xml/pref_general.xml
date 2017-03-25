@@ -18,6 +18,10 @@
 
         <SwitchPreference
                 android:defaultValue="true"
+                android:title="@string/persistent_notification" android:key="enable_persistent_notification"
+                android:summary="@string/persistent_notification_desc"/>
+        <SwitchPreference
+                android:defaultValue="true"
                 android:title="@string/sync_up" android:key="sync_up" android:summary="@string/sync_up_sum"/>
         <SwitchPreference
                 android:defaultValue="true"
@@ -26,10 +30,6 @@
     <PreferenceCategory
             android:title="@string/notifications">
 
-        <SwitchPreference
-                android:defaultValue="true"
-                android:title="@string/persistent_notification" android:key="enable_persistent_notification"
-                android:summary="@string/persistent_notification_desc"/>
         <SwitchPreference
                 android:defaultValue="true"
                 android:title="@string/clipboard_change_notification" android:key="clipboard_change_notification"
@@ -46,5 +46,16 @@
                 android:title="@string/max_size" android:key="max_size"
                 android:summary="@string/max_size_desc"
                 android:dialogMessage="@string/max_size_desc"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/general_settings">
+        <Preference android:title="@string/feedback_settings"
+                    android:key="feedback"
+                    android:icon="@drawable/ic_feedback"/>
+        <Preference android:title="@string/github_repository"
+                    android:key="github"
+                    android:icon="@drawable/ic_github_logo" />
+        <Preference android:title="@string/credits_settings"
+                    android:key="credits"
+                    android:icon="@drawable/ic_credits" />
     </PreferenceCategory>
 </PreferenceScreen>

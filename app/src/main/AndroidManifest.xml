@@ -9,9 +9,8 @@
             android:name="android.hardware.camera"
             android:required="false"/>
     <!-- Allow us to write images to folder, only for <=18 as folder is private to app -->
-    <uses-permission
-            android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-            android:maxSdkVersion="18"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+                     android:maxSdkVersion="18"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application

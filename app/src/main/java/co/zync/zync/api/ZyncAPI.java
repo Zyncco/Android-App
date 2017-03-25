@@ -1,8 +1,10 @@
 package co.zync.zync.api;
 
+import co.zync.zync.ZyncApplication;
 import co.zync.zync.api.generic.ZyncGenericAPIListener;
 import co.zync.zync.api.generic.ZyncNullTransformer;
 import co.zync.zync.api.generic.ZyncTransformer;
+import co.zync.zync.utils.ZyncExceptionInfo;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -155,13 +157,18 @@ public class ZyncAPI {
                             List<ZyncClipData> history = new ArrayList<>(array.length());
 
                             for (int i = 0; i < array.length(); i++) {
-                                history.add(new ZyncClipData(encryptionKey, array.getJSONObject(i)));
+                                try {
+                                    history.add(new ZyncClipData(encryptionKey, array.getJSONObject(i)));
+                                } catch (Exception ex) {
+                                    if (!(ex instanceof AEADBadTagException)) {
+                                        ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "Decode clip entry from server"));
+                                    }
+                                }
                             }
 
                             Collections.sort(history, new ZyncClipData.TimeComparator()); // sort by time
                             return history;
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
+                        } catch (JSONException ex) {
                             return null;
                         }
                     }

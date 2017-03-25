@@ -28,6 +28,7 @@ import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.utils.ZyncCircleView;
+import co.zync.zync.utils.ZyncExceptionInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +74,9 @@ public class MainActivity extends AppCompatActivity
                                 sharedText.getBytes(Charset.forName("UTF-8")),
                                 ZyncClipType.TEXT
                         ).execute();
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(e, "post clip from share"));
+                        // todo complain to user
                     }
                 }
             } else {
@@ -239,6 +242,7 @@ public class MainActivity extends AppCompatActivity
                     photoFile = createImageFile();
                 } catch (IOException ex) {
                     ex.printStackTrace();
+                    ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "create image file for camera feature"));
                     // unable to create image file. TODO: Complain to user
                 }
 
