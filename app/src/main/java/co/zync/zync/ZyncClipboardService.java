@@ -5,7 +5,6 @@ import android.app.Service;
 import android.content.*;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.PersistableBundle;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
@@ -15,7 +14,6 @@ import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.utils.ZyncExceptionInfo;
 
-import javax.crypto.AEADBadTagException;
 import java.nio.charset.Charset;
 
 /**

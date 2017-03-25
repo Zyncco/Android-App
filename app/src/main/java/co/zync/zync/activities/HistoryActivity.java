@@ -239,7 +239,7 @@ public class HistoryActivity extends AppCompatActivity {
             layoutForClip.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
             // prepare the title
-            TextView title = new TextView(this);
+            final TextView title = new TextView(this);
 
             // set title, layout params, and appearance of title
             title.setId(nextId++);
@@ -249,6 +249,35 @@ public class HistoryActivity extends AppCompatActivity {
             title.setTextSize(20);
 
             layoutForClip.addView(title);
+
+            // add click listener to main layout
+            layoutForClip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    switch (data.type()) {
+                        case TEXT:
+                            AlertDialog.Builder preview = new AlertDialog.Builder(HistoryActivity.this);
+
+                            preview.setTitle(getString(R.string.history_entry_title, getString(data.type().presentableName())));
+                            preview.setMessage(new String(data.data()));
+                            preview.setPositiveButton(R.string.copy, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    copyTextToClip(data.data(), title);
+                                }
+                            });
+                            preview.setNegativeButton(R.string.share, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    shareText(data.data());
+                                }
+                            });
+                            preview.show();
+                            break;
+                    }
+                }
+            });
+
 
             // prepare buttons
             layoutForClip.addView(createShareButton(
@@ -333,7 +362,7 @@ public class HistoryActivity extends AppCompatActivity {
         final ImageView view = new ImageView(this);
 
         view.setId(id);
-        setLayout(view, 30f, 30f, 3);
+        setLayout(view, 40f, 40f, 1);
         view.setImageDrawable(getDrawable(R.drawable.ic_content_copy));
         view.setContentDescription(getString(R.string.history_copy_button));
 
@@ -347,24 +376,28 @@ public class HistoryActivity extends AppCompatActivity {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // update clipboard and display snackbar
-                ZyncClipboardService.getInstance().writeToClip(new String(data.data()), false);
-                Snackbar.make(
-                        v,
-                        R.string.history_clip_updated_msg,
-                        Snackbar.LENGTH_LONG
-                ).show();
+                copyTextToClip(data.data(), v);
             }
         });
 
         return view;
     }
 
+    private void copyTextToClip(byte[] data, View v) {
+        // update clipboard and display snackbar
+        ZyncClipboardService.getInstance().writeToClip(new String(data), false);
+        Snackbar.make(
+                v,
+                R.string.history_clip_updated_msg,
+                Snackbar.LENGTH_LONG
+        ).show();
+    }
+
     private ImageView createShareButton(final ZyncClipData data, TextView title, int id) {
         final ImageView view = new ImageView(this);
 
         view.setId(id);
-        setLayout(view, 30f, 30f, 3);
+        setLayout(view, 40f, 40f, 1);
         view.setImageDrawable(getDrawable(R.drawable.ic_share));
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(view.getLayoutParams());
@@ -378,11 +411,7 @@ public class HistoryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 switch (data.type()) {
                     case TEXT:
-                        Intent sendIntent = new Intent();
-                        sendIntent.setAction(Intent.ACTION_SEND);
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, new String(data.data()));
-                        sendIntent.setType("text/plain");
-                        startActivity(sendIntent);
+                        shareText(data.data());
                         break;
 
                     case IMAGE:
@@ -392,6 +421,14 @@ public class HistoryActivity extends AppCompatActivity {
         });
 
         return view;
+    }
+
+    private void shareText(byte[] data) {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, new String(data));
+        sendIntent.setType("text/plain");
+        startActivity(sendIntent);
     }
 
     private void setTextAppearance(TextView view, int resId) {

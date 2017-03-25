@@ -90,4 +90,6 @@
     <string name="error">Error</string>
     <string name="no_emailc_or_web">No email app or browser was found to direct you to a place where you can send feedback!</string>
     <string name="no_emailc">No email app!</string>
+    <string name="copy">Copy</string>
+    <string name="share">Share</string>
 </resources>
