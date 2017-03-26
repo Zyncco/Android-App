@@ -91,14 +91,14 @@ public class ZyncCircleView extends View {
     }
 
     private int rectBound() {
-        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.02);
+        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.0075);
     }
 
     private static int modify(int color, float fraction) {
         int red = modifyColor(Color.red(color), fraction);
         int green = modifyColor(Color.green(color), fraction);
         int blue = modifyColor(Color.blue(color), fraction);
-        int alpha = modifyColor(Color.alpha(color), fraction / 5);
+        int alpha = modifyColor(Color.alpha(color), (fraction / 3));
 
         return Color.argb(alpha, red, green, blue);
     }

@@ -1,12 +1,9 @@
 package co.zync.zync.activities;
 
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -15,10 +12,8 @@ import android.preference.PreferenceFragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
-import co.zync.zync.utils.NullDialogClickListener;
 import co.zync.zync.utils.ZyncExceptionInfo;
 import co.zync.zync.utils.ZyncPassDialog;
 
@@ -155,7 +150,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     if (emailIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                         startActivity(emailIntent);
                     } else {
-                        directToLink("https://github.com/Zyncco/Android-App/issues/new", R.string.no_emailc_or_web);
+                        ((ZyncApplication) getActivity().getApplication()).directToLink("https://github.com/Zyncco/Android-App/issues/new", R.string.no_emailc_or_web);
                     }
                     return true;
                 }
@@ -164,29 +159,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             findPreference("github").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    directToLink("https://github.com/Zyncco/Android-App/", R.string.no_emailc);
+                    ((ZyncApplication) getActivity().getApplication()).directToLink("https://github.com/Zyncco/Android-App/", R.string.no_webc);
                     return true;
                 }
             });
 
-            // TODO credits
-        }
-
-        private void directToLink(String url, int errorMessage) {
-            Uri webpage = Uri.parse(url);
-            Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
-
-            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                startActivity(intent);
-            } else {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity().getApplicationContext());
-
-                dialog.setTitle(R.string.error);
-                dialog.setMessage(errorMessage);
-                dialog.setPositiveButton(R.string.ok, new NullDialogClickListener());
-
-                dialog.show();
-            }
+            findPreference("credits").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    startActivity(new Intent(getActivity(), CreditActivity.class));
+                    return true;
+                }
+            });
         }
     }
 }

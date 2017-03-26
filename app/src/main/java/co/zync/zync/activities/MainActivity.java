@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity
             circleSizeChangeTask = new ZyncCircleView.SizeChangeTask(
                     this,
                     (ZyncCircleView) findViewById(R.id.zync_circle),
-                    60
+                    120
             );
 
             TIMER.scheduleAtFixedRate(circleColorChangeTask, 50, 50);
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_settings) {
-            getZyncApp().openSettings(this);
+            getZyncApp().openSettings();
         } else if (id == R.id.history) {
             startActivity(new Intent(this, HistoryActivity.class));
         } else if (id == R.id.nav_help) {

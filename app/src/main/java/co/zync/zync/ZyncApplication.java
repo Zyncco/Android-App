@@ -5,6 +5,7 @@ import android.content.*;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceActivity;
 import android.util.Log;
@@ -15,6 +16,7 @@ import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.firebase.ZyncInstanceIdService;
 import co.zync.zync.firebase.ZyncMessagingService;
+import co.zync.zync.utils.NullDialogClickListener;
 import co.zync.zync.utils.ZyncExceptionInfo;
 import okhttp3.OkHttpClient;
 
@@ -233,8 +235,8 @@ public class ZyncApplication extends Application {
         return type == ZyncClipType.TEXT;
     }
 
-    public void openSettings(Context context) {
-        Intent settingsIntent = new Intent(context, SettingsActivity.class);
+    public void openSettings() {
+        Intent settingsIntent = new Intent(        getApplicationContext(), SettingsActivity.class);
 
         settingsIntent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, SettingsActivity.GeneralPreferenceFragment.class.getName());
         settingsIntent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true);
@@ -356,5 +358,22 @@ public class ZyncApplication extends Application {
         fos.close();
 
         return file;
+    }
+
+    public void directToLink(String url, int errorMessage) {
+        Uri webpage = Uri.parse(url);
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getApplicationContext());
+
+            dialog.setTitle(R.string.error);
+            dialog.setMessage(errorMessage);
+            dialog.setPositiveButton(R.string.ok, new NullDialogClickListener());
+
+            dialog.show();
+        }
     }
 }

@@ -54,7 +54,7 @@
         <Preference android:title="@string/github_repository"
                     android:key="github"
                     android:icon="@drawable/ic_github_logo" />
-        <Preference android:title="@string/credits_settings"
+        <Preference android:title="@string/credits"
                     android:key="credits"
                     android:icon="@drawable/ic_credits" />
     </PreferenceCategory>

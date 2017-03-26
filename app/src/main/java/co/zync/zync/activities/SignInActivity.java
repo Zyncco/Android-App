@@ -149,8 +149,9 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
     private void signInSuccess() {
         startService(new Intent(this, ZyncClipboardService.class));
-        startActivity(new Intent(SignInActivity.this, MainActivity.class));
+        startActivity(new Intent(getApplicationContext(), MainActivity.class));
         getZyncApp().syncDown();
+        finish();
     }
 
     private ZyncApplication getZyncApp() {

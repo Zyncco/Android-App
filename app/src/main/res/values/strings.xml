@@ -5,6 +5,46 @@
     <string name="zync_binary">Binary</string>
 
     <string name="app_name">Zync</string>
+    <string name="zync_team">Zync Team</string>
+
+    <string name="telegram_logo">Telegram Logo</string>
+    <string name="github_logo">GitHub Logo</string>
+    <string name="keybase_logo">Keybase Logo</string>
+    <string name="twitter_logo">Twitter Logo</string>
+    <string name="linkedin_logo">LinkedIn Logo</string>
+
+    <string name="mazen_name">Mazen Kotb</string>
+    <string name="mazen_title">Java Software Engineer (Android Developer)</string>
+    <string name="mazen_bio">I\'m currently a Canadian Software Engineer and have been programming for 6 years since I was young.
+        Although I\'ve stuck in my hand in around everything, my expertise primarily resides in using JVM languages for backend infrastructures.
+        Outside of Computer Science, I love writing, talking (in front of large groups), and exploring around Vancouver.
+        If you want to chat, feel free to hit me up a message on Telegram.</string>
+
+    <string name="amir_name">Amir Omidi</string>
+    <string name="amir_title">Project Lead and Developer</string>
+    <string name="amir_bio">I\'m a student studying Computer Sciences at Drexel University. I love trying out new technologies, frameworks, and gadgets.
+        My career goal is to be a software engineer at a top tech firm.</string>
+
+    <string name="brandon_name">Brandon</string>
+    <string name="brandon_title">Developer \n(Chrome Extension)</string>
+    <string name="brandon_bio">I am a self-taught, self-employed software developer living in the United Kingdom, primarily working with command line /
+        backend applications. I know Java, C#, Python and a handful of other non-programming languages.</string>
+
+    <string name="vilsol_name">Vilsol</string>
+    <string name="vilsol_title">Caffeine to Uptime Converter\n(Zync Server)</string>
+    <string name="vilsol_bio">A software engineer with a passion for virtualization. Mostly spent time as a full-stack developer in many languages, frameworks
+        and platforms, but recently more focused on systems, operations and infrastructure. Left university to pursue my career as well as many side projects
+        including this one.</string>
+
+    <string name="mattrick_name">Matthew McCune</string>
+    <string name="mattrick_title">Web Developer\nGraphic Designer</string>
+    <string name="mattrick_bio">I\'m a designer and developer from sunny Southern California. I mostly work with web stuff.</string>
+
+    <string name="mark_name">Mark Hendricks</string>
+    <string name="mark_title">Backend Developer</string>
+    <string name="mark_bio">I\'m a Computer Science student at University of Technology in Eindhoven, mainly spending my time experimenting with new solutions and
+        new languages, always aiming for fast and scale-able.</string>
+
     <string name="zync_settings">Zync Settings</string>
     <string name="encryption">Encryption</string>
     <string name="encryption_pass">Encryption Password</string>
@@ -86,10 +126,12 @@
     <string name="general_settings">General</string>
     <string name="feedback_settings">Feedback</string>
     <string name="github_repository">Find us on GitHub!</string>
-    <string name="credits_settings">Credits</string>
+    <string name="credits">Credits</string>
     <string name="error">Error</string>
-    <string name="no_emailc_or_web">No email app or browser was found to direct you to a place where you can send feedback!</string>
-    <string name="no_emailc">No email app!</string>
+    <string name="no_emailc_or_web">No email app or browser was found to direct you to a place where you can send
+        feedback!
+    </string>
+    <string name="no_webc">No browser app!</string>
     <string name="copy">Copy</string>
     <string name="share">Share</string>
 </resources>
