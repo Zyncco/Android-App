@@ -1,7 +1,10 @@
 package co.zync.zync.api.generic;
 
+import co.zync.zync.ZyncApplication;
 import co.zync.zync.api.ZyncAPI;
+import co.zync.zync.api.ZyncAPIException;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.utils.ZyncExceptionInfo;
 import org.json.JSONObject;
 
 public class ZyncTransformerCallback<T> implements ZyncAPI.ZyncCallback<JSONObject> {
@@ -30,6 +33,7 @@ public class ZyncTransformerCallback<T> implements ZyncAPI.ZyncCallback<JSONObje
 
     @Override
     public void handleError(ZyncError error) {
+        ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(new ZyncAPIException(error)));
         callback.handleError(error);
     }
 }

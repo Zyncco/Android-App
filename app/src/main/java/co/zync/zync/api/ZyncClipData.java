@@ -18,7 +18,7 @@ import java.util.zip.Inflater;
 
 public class ZyncClipData {
     private final long timestamp;
-    private final String hash;
+    private String hash;
     private final byte[] iv;
     private final byte[] salt;
     private final ZyncClipType type;
@@ -31,10 +31,12 @@ public class ZyncClipData {
         this.iv = ZyncCrypto.generateSecureIv();
         this.salt = ZyncCrypto.generateSecureSalt();
 
-        data = compress(data);
-        data = ZyncCrypto.encrypt(data, encryptionKey, salt, iv);
-        this.hash = hash(data);
-        this.data = Base64.encodeToString(data, Base64.NO_WRAP).getBytes(Charset.forName("UTF-8"));
+        if (data != null) {
+            data = compress(data);
+            data = ZyncCrypto.encrypt(data, encryptionKey, salt, iv);
+            this.hash = hash(data);
+            this.data = Base64.encodeToString(data, Base64.NO_WRAP).getBytes(Charset.forName("UTF-8"));
+        }
     }
 
     public ZyncClipData(String encryptionKey, JSONObject obj) throws Exception {
@@ -99,6 +101,14 @@ public class ZyncClipData {
         return Long.toHexString(crc.getValue());
     }
 
+    public byte[] iv() {
+        return iv;
+    }
+
+    public byte[] salt() {
+        return salt;
+    }
+
     public long timestamp() {
         return timestamp;
     }
@@ -120,13 +130,16 @@ public class ZyncClipData {
             JSONObject object = new JSONObject();
 
             object.put("timestamp", timestamp);
-            object.put("hash", new JSONObject().put("crc32", hash));
             object.put("encryption", new JSONObject()
                     .put("type", "AES256-GCM-NOPADDING")
                     .put("iv", Base64.encodeToString(iv, Base64.NO_WRAP))
                     .put("salt", Base64.encodeToString(salt, Base64.NO_WRAP)));
             object.put("payload-type", type.name());
-            object.put("payload", new String(data, "UTF-8"));
+
+            if (data != null) {
+                object.put("hash", new JSONObject().put("crc32", hash));
+                object.put("payload", new String(data, "UTF-8"));
+            }
 
             return object;
         } catch (JSONException | UnsupportedEncodingException ignored) {

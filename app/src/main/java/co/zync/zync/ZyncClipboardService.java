@@ -167,26 +167,13 @@ public class ZyncClipboardService extends Service {
                 new ZyncPostClipTask(app, clipData, new ZyncAPI.ZyncCallback<Void>() {
                     @Override
                     public void success(Void value) {
-                        if (app.getPreferences().getBoolean("clipboard_change_notification", true)) {
-                            app.sendNotification(
-                                    ZyncApplication.CLIPBOARD_POSTED_ID,
-                                    getString(R.string.clipboard_posted_notification),
-                                    getString(R.string.clipboard_posted_notification_desc)
-                            );
-                        }
-
-                        System.out.println("posted (" + hashCode() + ")");
-
+                        app.sendClipPostedNotification();
                         app.setLastRequestStatus(true);
                     }
 
                     @Override
                     public void handleError(ZyncError error) {
-                        app.sendNotification(
-                                ZyncApplication.CLIPBOARD_ERROR_ID,
-                                getString(R.string.clipboard_post_error_notification),
-                                getString(R.string.clipboard_post_error_notification_desc)
-                        );
+                        app.sendClipErrorNotification();
                         app.setLastRequestStatus(false);
                         Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
                                 + error.code() + " : " + error.message());

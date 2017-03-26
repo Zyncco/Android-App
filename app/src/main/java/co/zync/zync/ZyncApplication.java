@@ -168,6 +168,24 @@ public class ZyncApplication extends Application {
         startService(intent);
     }
 
+    public void sendClipErrorNotification() {
+        sendNotification(
+                CLIPBOARD_ERROR_ID,
+                getString(R.string.clipboard_post_error_notification),
+                getString(R.string.clipboard_post_error_notification_desc)
+        );
+    }
+
+    public void sendClipPostedNotification() {
+        if (getPreferences().getBoolean("clipboard_change_notification", true)) {
+            sendNotification(
+                    CLIPBOARD_POSTED_ID,
+                    getString(R.string.clipboard_posted_notification),
+                    getString(R.string.clipboard_posted_notification_desc)
+            );
+        }
+    }
+
     public PendingIntent createPendingIntent(Intent intent, Class<? extends Activity> activityClass) {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(activityClass);

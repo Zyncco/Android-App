@@ -19,7 +19,7 @@ public class ZyncCrypto {
         return rng.generateSeed(16);
     }
 
-    public static byte[] encrypt(byte[] data, String encryptionKey, byte[] salt, byte[] iv) throws Exception {
+    public static Cipher getCipher(int mode, String encryptionKey, byte[] salt, byte[] iv) throws Exception {
         PBEKeySpec spec = new PBEKeySpec(
                 encryptionKey.toCharArray(),
                 salt,
@@ -30,22 +30,15 @@ public class ZyncCrypto {
         SecretKey key = new SecretKeySpec(tmp.getEncoded(), "AES");
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
-        cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, iv));
-        return cipher.doFinal(data);
+        cipher.init(mode, key, new GCMParameterSpec(128, iv));
+        return cipher;
+    }
+
+    public static byte[] encrypt(byte[] data, String encryptionKey, byte[] salt, byte[] iv) throws Exception {
+        return getCipher(Cipher.ENCRYPT_MODE, encryptionKey, salt, iv).doFinal(data);
     }
 
     public static byte[] decrypt(byte[] data, String encryptionKey, byte[] salt, byte[] iv) throws Exception {
-        PBEKeySpec spec = new PBEKeySpec(
-                encryptionKey.toCharArray(),
-                salt,
-                1000,
-                256
-        );
-        SecretKey tmp = SecretKeyFactory.getInstance("PBKDF2withHmacSHA1").generateSecret(spec);
-        SecretKey key = new SecretKeySpec(tmp.getEncoded(), "AES");
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-
-        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
-        return cipher.doFinal(data);
+        return getCipher(Cipher.DECRYPT_MODE, encryptionKey, salt, iv).doFinal(data);
     }
 }

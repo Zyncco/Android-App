@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import co.zync.zync.*;
 import co.zync.zync.api.ZyncAPI;
+import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.utils.ZyncCircleView;
@@ -48,45 +49,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        /*
-         * SHARE START
-         *
-         * If the share feature was used with Zync,
-         * read the data and act accordingly
-         */
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        String type = intent.getType();
-
-        if (Intent.ACTION_SEND.equals(action) && type != null) {
-            if (getZyncApp().getApi() != null) {
-                if (type.startsWith("image/")) {
-                    Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                    new ZyncPostImageTask(getZyncApp(), getContentResolver())
-                            .execute(imageUri);
-                } else if ("text/plain".equals(type)) {
-                    String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-
-                    try {
-                        new ZyncPostClipTask(
-                                getZyncApp(),
-                                sharedText.getBytes(Charset.forName("UTF-8")),
-                                ZyncClipType.TEXT
-                        ).execute();
-                    } catch (Exception e) {
-                        ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(e, "post clip from share"));
-                        // todo complain to user
-                    }
-                }
-            } else {
-                startActivity(new Intent(this, SignInActivity.class));
-            }
-
-            return;
-        }
-
-        /*                            SHARE END                           */
+        checkIntent();
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -282,46 +245,117 @@ public class MainActivity extends AppCompatActivity
         return image;
     }
 
+    private ProgressDialog createUploadingDialog() {
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setTitle(R.string.uploading_image);
+        dialog.setMessage(getString(R.string.please_wait));
+        dialog.setIndeterminate(true);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.show();
+
+        return dialog;
+    }
+
     @Override
+    // method called back when a picture is taken through the cam feature
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE && resultCode == RESULT_OK) {
-            final ProgressDialog dialog = new ProgressDialog(this);
-            dialog.setTitle(R.string.uploading_image);
-            dialog.setMessage(getString(R.string.please_wait));
-            dialog.setIndeterminate(true);
-            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            dialog.show();
+            final ProgressDialog dialog = createUploadingDialog();
+            File file = new File(currentPhotoPath);
 
-            // post image to zync async
-            new ZyncPostImageTask(
-                    getZyncApp(),
-                    BitmapFactory.decodeFile(currentPhotoPath),
-                    new ZyncAPI.ZyncCallback<Void>() {
-                        @Override
-                        public void success(Void value) {
-                            dialog.dismiss();
-                            if (getZyncApp().getPreferences().getBoolean("clipboard_change_notification", true)) {
-                                getZyncApp().sendNotification(
-                                        ZyncApplication.CLIPBOARD_POSTED_ID,
-                                        getString(R.string.clipboard_posted_notification),
-                                        getString(R.string.clipboard_posted_notification_desc)
-                                );
+            try {
+                // post image to zync async
+                new ZyncPostImageTask(
+                        getZyncApp(),
+                        file,
+                        new ZyncClipData(getZyncApp().getEncryptionPass(), ZyncClipType.IMAGE, null),
+                        new ZyncAPI.ZyncCallback<Void>() {
+                            @Override
+                            public void success(Void value) {
+                                dialog.dismiss();
+                                getZyncApp().sendClipPostedNotification();
+                            }
+
+                            @Override
+                            public void handleError(ZyncError error) {
+                                dialog.dismiss();
+                                getZyncApp().sendClipErrorNotification();
+                                Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
+                                        + error.code() + " : " + error.message());
                             }
                         }
-
-                        @Override
-                        public void handleError(ZyncError error) {
-                            dialog.dismiss();
-                            getZyncApp().sendNotification(
-                                    ZyncApplication.CLIPBOARD_ERROR_ID,
-                                    getString(R.string.clipboard_post_error_notification),
-                                    getString(R.string.clipboard_post_error_notification_desc)
-                            );
-                            Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
-                                    + error.code() + " : " + error.message());
-                        }
-                    }).execute(); // we do not need to give it a URI since we already provided the bitmap
+                ).execute(Uri.fromFile(file));
+            } catch (Exception ignored) {
+                // ex here would be due to an encryption error from ZyncClipData
+                // so it's not quite possible as we didn't provide any data
+            }
         }
+    }
+
+    private boolean checkIntent() {
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if (getZyncApp().getApi() != null) {
+                if (type.startsWith("image/")) {
+                    final ProgressDialog uploadingDialog = createUploadingDialog();
+
+                    try {
+                        Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                        File writingFile = createImageFile();
+
+                        new ZyncPostImageTask(
+                                getZyncApp(),
+                                writingFile,
+                                new ZyncClipData(getZyncApp().getEncryptionPass(), ZyncClipType.IMAGE, null),
+                                new ZyncAPI.ZyncCallback<Void>() {
+                                    @Override
+                                    public void success(Void value) {
+                                        uploadingDialog.dismiss();
+                                        getZyncApp().sendClipPostedNotification();
+                                    }
+
+                                    @Override
+                                    public void handleError(ZyncError error) {
+                                        uploadingDialog.dismiss();
+                                        getZyncApp().sendClipErrorNotification();
+                                    }
+                                }
+                        ).execute(imageUri);
+                    } catch (IOException ex) {
+                        uploadingDialog.dismiss();
+                        getZyncApp().sendNotification(
+                                ZyncApplication.CLIPBOARD_ERROR_ID,
+                                getString(R.string.clipboard_post_error_notification),
+                                getString(R.string.clipboard_post_error_notification_desc)
+                        );
+                    } catch (Exception ignored) {
+                    }
+                } else if ("text/plain".equals(type)) {
+                    String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+
+                    try {
+                        new ZyncPostClipTask(
+                                getZyncApp(),
+                                sharedText.getBytes(Charset.forName("UTF-8")),
+                                ZyncClipType.TEXT
+                        ).execute();
+                        getZyncApp().sendClipPostedNotification();
+                    } catch (Exception e) {
+                        ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(e, "post clip from share"));
+                        getZyncApp().sendClipErrorNotification();
+                    }
+                }
+            } else {
+                startActivity(new Intent(this, SignInActivity.class));
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     private ZyncApplication getZyncApp() {

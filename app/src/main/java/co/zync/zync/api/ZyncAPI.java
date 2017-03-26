@@ -14,12 +14,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.crypto.AEADBadTagException;
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class ZyncAPI {
+    private static final MediaType OCTET_STREAM_TYPE = MediaType.parse("application/octet-stream");
     private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json");
+    public static final String API_DOMAIN = "api.zync.co"; // used for verification purposes
     public static final String BASE = "https://api.zync.co/v";
     public static final int VERSION = 0;
     private OkHttpClient client;
@@ -43,6 +47,7 @@ public class ZyncAPI {
             @Override
             public void handleError(ZyncError error) {
                 callback.handleError(error);
+                ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(new ZyncAPIException(error), "authenticate"));
             }
         });
         Request request = new Request.Builder()
@@ -174,6 +179,33 @@ public class ZyncAPI {
                     }
                 }
         );
+    }
+
+    // request a URL to upload our encrypted large file
+    public void requestUploadUrl(ZyncClipData data, final ZyncCallback<URL> callback) {
+        executeAuthenticatedRequest(
+                "GET",
+                "requestUpload", // todo verify with vilsol
+                data.toJson(),
+                callback,
+                new ZyncTransformer<URL>() {
+                    @Override
+                    public URL transform(JSONObject obj) throws Exception {
+                        return new URL(obj.getJSONObject("data").getString("url"));
+                    }
+                }
+        );
+    }
+
+    public void upload(File file, URL url, final ZyncCallback<Void> callback) {
+        Request request = new Request.Builder()
+                .url(url)
+                .post(RequestBody.create(OCTET_STREAM_TYPE, file))
+                .addHeader("X-ZYNC-TOKEN", token)
+                .addHeader("User-Agent", System.getProperty("http.agent"))
+                .build();
+
+        client.newCall(request).enqueue(new ZyncGenericAPIListener(callback, new ZyncNullTransformer<Void>()));
     }
 
     public String getToken() {
