@@ -1,16 +1,39 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 tools:context="co.zync.zync.activities.intro.pages.SecondIntroFragment">
-
-    <TextView
-            android:id="@+id/section_label"
+    <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="Diagram explaining the app and stuff"/>
-
+            android:layout_height="wrap_content" app:srcCompat="@drawable/zync_cloud"
+            android:layout_marginTop="45dp" android:id="@+id/intro_two_diagram"
+            android:cropToPadding="false"
+            android:adjustViewBounds="true" android:scaleType="fitCenter"
+            android:contentDescription="@string/accessibility_logo"
+            android:maxWidth="400dp"
+            android:maxHeight="350dp"
+            android:layout_centerHorizontal="true"
+    />
+    <TextView
+            android:text="@string/intro_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/intro_two_description"
+            android:textAppearance="@android:style/TextAppearance.Material.Body1"
+            android:textAlignment="center"
+            android:textColor="@android:color/white" android:textSize="16sp"
+            android:layout_marginTop="68dp"
+            android:layout_below="@+id/intro_two_diagram" android:layout_alignParentStart="true"/>
+    <Button
+            android:id="@+id/start_app_button"
+            android:text="@string/start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            style="@android:style/Widget.Material.Light.Button.Borderless.Colored"
+            android:background="@android:color/white" android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
 </RelativeLayout>

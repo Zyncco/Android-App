@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.BitmapFactory;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.net.Uri;
@@ -81,13 +80,13 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        ViewGroup.LayoutParams params = findViewById(R.id.imageView2).getLayoutParams();
+        ViewGroup.LayoutParams params = findViewById(R.id.main_logo).getLayoutParams();
         int imageSize = (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.75);
 
         params.height = imageSize;
         params.width = imageSize;
 
-        findViewById(R.id.imageView2).requestLayout();
+        findViewById(R.id.main_logo).requestLayout();
     }
 
     @Override
@@ -103,15 +102,11 @@ public class MainActivity extends AppCompatActivity
                     (ZyncCircleView) findViewById(R.id.zync_circle),
                     30
             );
-            circleSizeChangeTask = new ZyncCircleView.SizeChangeTask(
-                    this,
-                    (ZyncCircleView) findViewById(R.id.zync_circle),
-                    120
-            );
 
             TIMER.scheduleAtFixedRate(circleColorChangeTask, 50, 50);
-            TIMER.scheduleAtFixedRate(circleSizeChangeTask, 75, 75);
         }
+
+        scheduleCircleSizeTask();
 
         getZyncApp().setRequestStatusListener(new ZyncPostClipTask.RequestStatusListener() {
             @Override
@@ -126,6 +121,18 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    private void scheduleCircleSizeTask() {
+        if (circleSizeChangeTask == null) {
+            circleSizeChangeTask = new ZyncCircleView.SizeChangeTask(
+                    this,
+                    (ZyncCircleView) findViewById(R.id.zync_circle),
+                    120
+            );
+
+            TIMER.scheduleAtFixedRate(circleSizeChangeTask, 75, 75);
+        }
+    }
+
     private void updateCircleColor() {
         ZyncCircleView circle = (ZyncCircleView) findViewById(R.id.zync_circle);
 
@@ -134,16 +141,23 @@ public class MainActivity extends AppCompatActivity
             matrix.setSaturation(0);
 
             ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
-            ((ImageView) findViewById(R.id.imageView2)).setColorFilter(filter);
+            ((ImageView) findViewById(R.id.main_logo)).setColorFilter(filter);
 
             circle.setColor(ZyncCircleView.GRAY_OFF);
             getZyncApp().disableClipboardService();
+
+            if (circleSizeChangeTask != null) {
+                circleSizeChangeTask.cancel();
+                circleSizeChangeTask = null;
+            }
+
             return;
         } else {
             circle.setColor(ZyncCircleView.GREEN_OK);
 
-            ((ImageView) findViewById(R.id.imageView2)).setColorFilter(null);
+            ((ImageView) findViewById(R.id.main_logo)).setColorFilter(null);
             getZyncApp().enableClipboardService();
+            scheduleCircleSizeTask();
         }
 
         if (!getZyncApp().lastRequestStatus()) {
@@ -156,9 +170,11 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         if (circleColorChangeTask != null) {
             circleColorChangeTask.cancel();
-            circleSizeChangeTask.cancel();
-
             circleColorChangeTask = null;
+        }
+
+        if (circleSizeChangeTask != null) {
+            circleSizeChangeTask.cancel();
             circleSizeChangeTask = null;
         }
     }

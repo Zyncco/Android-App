@@ -1,5 +1,6 @@
 package co.zync.zync.activities.intro;
 
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -9,10 +10,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
+import android.view.WindowManager;
 import co.zync.zync.R;
+import co.zync.zync.ZyncApplication;
 import co.zync.zync.activities.intro.pages.FirstIntroFragment;
 import co.zync.zync.activities.intro.pages.SecondIntroFragment;
-import co.zync.zync.activities.intro.pages.ThirdIntroFragment;
 
 public class IntroActivity extends AppCompatActivity {
 
@@ -35,6 +37,15 @@ public class IntroActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
+        setTheme(R.style.AppTheme_NoActionBar);
+        int baseColor = ((ZyncApplication) getApplication()).getColorSafe(R.color.colorPrimary);
+
+        getWindow().getDecorView().setBackgroundColor(baseColor);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().setStatusBarColor(baseColor);
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -63,18 +74,15 @@ public class IntroActivity extends AppCompatActivity {
                 case 0:
                     return new FirstIntroFragment();
 
-                case 1:
-                    return new SecondIntroFragment();
-
                 default:
-                    return new ThirdIntroFragment();
+                    return new SecondIntroFragment();
             }
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 2;
         }
 
         @Override

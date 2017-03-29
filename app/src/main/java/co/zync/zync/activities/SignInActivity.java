@@ -47,7 +47,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
         SharedPreferences preferences = getZyncApp().getPreferences();
 
-        if (!preferences.contains("seen_intro")) {
+        if (!preferences.contains("seen_intro") || (BuildConfig.DEBUG && !getIntent().hasExtra("intro_direct"))) {
             startActivity(new Intent(this, IntroActivity.class));
         }
     }
@@ -172,10 +172,9 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             app.setApi(api);
             app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
 
+            dialog.dismiss();
 
             if (!app.getPreferences().contains("encryption_pass")) {
-                dialog.dismiss();
-
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

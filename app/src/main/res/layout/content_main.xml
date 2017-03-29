@@ -20,7 +20,7 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"/>
     <ImageView
-            app:srcCompat="@drawable/logo" android:id="@+id/imageView2"
+            app:srcCompat="@drawable/logo" android:id="@+id/main_logo"
             android:layout_width="320dp" android:layout_height="320dp"
             android:layout_centerHorizontal="true"
             android:contentDescription="@string/accessibility_logo"

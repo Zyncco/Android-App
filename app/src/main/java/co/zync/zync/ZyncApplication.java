@@ -2,6 +2,7 @@ package co.zync.zync;
 
 import android.app.*;
 import android.content.*;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
@@ -183,6 +184,14 @@ public class ZyncApplication extends Application {
                     getString(R.string.clipboard_posted_notification),
                     getString(R.string.clipboard_posted_notification_desc)
             );
+        }
+    }
+
+    public int getColorSafe(int colorRes) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return getColor(colorRes);
+        } else {
+            return getResources().getColor(colorRes);
         }
     }
 

@@ -1,5 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
+                xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -8,9 +8,40 @@
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 tools:context="co.zync.zync.activities.intro.pages.FirstIntroFragment">
 
-    <TextView
-            android:id="@+id/section_label"
+    <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="Welcoming to Zync and a small slogan/description"/>
+            android:layout_height="wrap_content" app:srcCompat="@drawable/zync_white"
+            android:layout_marginTop="90dp" android:id="@+id/intro_one_logo"
+            android:cropToPadding="false"
+            android:adjustViewBounds="true" android:scaleType="fitCenter"
+            android:contentDescription="@string/accessibility_logo"
+            android:maxWidth="225dp"
+            android:maxHeight="225dp"
+            android:layout_centerHorizontal="true"/>
+    <TextView
+            android:text="@string/app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_below="@+id/intro_one_logo"
+            android:layout_centerHorizontal="true" android:layout_marginTop="50dp" android:id="@+id/intro_one_name"
+            android:textAppearance="@android:style/TextAppearance.Material.Headline" android:textColor="@android:color/white"
+            android:textSize="26sp"/>
+    <TextView
+            android:text="@string/intro_slogan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp" android:id="@+id/intro_caption"
+            android:textAppearance="@android:style/TextAppearance.Material.Caption"
+            android:layout_below="@+id/intro_one_name" android:layout_centerHorizontal="true"
+            android:textColor="@android:color/white" android:textSize="14sp"/>
+    <TextView
+            android:text="@string/intro_welcome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/intro_app_welcome"
+            android:textAppearance="@android:style/TextAppearance.Material.Body1"
+            android:textAlignment="center"
+            android:textColor="@android:color/white" android:textSize="17sp"
+            android:layout_marginBottom="24dp"
+            android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>
