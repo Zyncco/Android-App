@@ -309,10 +309,19 @@ public class ZyncApplication extends Application {
 
         file.createNewFile();
         FileOutputStream fos = new FileOutputStream(file);
+        String fileContents = debugInfo();
 
+        fos.write(fileContents.getBytes(Charset.forName("UTF-8")));
+        fos.flush();
+        fos.close();
+
+        return file;
+    }
+
+    public String debugInfo() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("---------------------------------------------\n");
+        builder.append("-----------------------------------------\n");
         builder.append("Zync for Android Info report\n");
         builder.append("Unix time report generated: ").append(System.currentTimeMillis()).append('\n');
         builder.append("App Version: ").append(BuildConfig.VERSION_NAME).append('\n');
@@ -347,7 +356,7 @@ public class ZyncApplication extends Application {
         }
 
         builder.append('\n');
-        builder.append("---------------------------------------------\n\n");
+        builder.append("-----------------------------------------\n\n");
 
         if (LOGGED_EXCEPTIONS.isEmpty()) {
             builder.append("No exceptions to be found!");
@@ -377,14 +386,7 @@ public class ZyncApplication extends Application {
             builder.append("---------------------------------\n");
         }
 
-        String fileContents = builder.toString();
-        builder = null; // memory
-
-        fos.write(fileContents.getBytes(Charset.forName("UTF-8")));
-        fos.flush();
-        fos.close();
-
-        return file;
+        return builder.toString();
     }
 
     public void directToLink(String url, int errorMessage) {

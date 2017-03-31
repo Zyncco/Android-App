@@ -80,6 +80,16 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        if (BuildConfig.DEBUG) {
+            findViewById(R.id.zync_circle).setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    startActivity(new Intent(MainActivity.this, DebugActivity.class));
+                    return true;
+                }
+            });
+        }
+
         ViewGroup.LayoutParams params = findViewById(R.id.main_logo).getLayoutParams();
         int imageSize = (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.75);
 

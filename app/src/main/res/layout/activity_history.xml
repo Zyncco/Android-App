@@ -5,12 +5,12 @@
         android:id="@+id/activity_history"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
         android:orientation="vertical"
         tools:context="co.zync.zync.activities.HistoryActivity">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                   android:id="@+id/history_layout"
+                  android:paddingLeft="@dimen/activity_horizontal_margin"
+                  android:paddingRight="@dimen/activity_horizontal_margin"
                   android:orientation="vertical">
     </LinearLayout>
 </ScrollView>

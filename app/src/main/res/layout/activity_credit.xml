@@ -1,379 +1,374 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/activity_credit"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
         tools:context="co.zync.zync.activities.CreditActivity">
-    <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/creditScrollView">
-        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:orientation="vertical">
-            <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" app:srcCompat="@drawable/logo"
-                    android:cropToPadding="false"
-                    android:adjustViewBounds="true" android:scaleType="fitCenter"
-                    android:contentDescription="@string/accessibility_logo"
-                    android:id="@+id/credit_logo" android:layout_centerHorizontal="true" android:maxWidth="225dp"
-                    android:maxHeight="225dp" android:longClickable="true"/>
-            <TextView
-                    android:text="@string/zync_team"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_below="@+id/credit_logo"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
-                    android:id="@+id/credit_app_name" android:elevation="14dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Headline"
-                    android:textSize="24sp"/>
-            <ImageView
-                    android:contentDescription="@string/separator"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:src="#d3d3d3"
-                    android:layout_marginTop="14dp"
-                    android:id="@+id/main_separator"
-                    android:layout_below="@+id/credit_app_name" android:layout_alignParentStart="true"/>
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:orientation="vertical">
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" app:srcCompat="@drawable/logo"
+                android:cropToPadding="false"
+                android:adjustViewBounds="true" android:scaleType="fitCenter"
+                android:contentDescription="@string/accessibility_logo"
+                android:id="@+id/credit_logo" android:layout_centerHorizontal="true" android:maxWidth="225dp"
+                android:maxHeight="225dp" android:longClickable="true"/>
+        <TextView
+                android:text="@string/zync_team"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_below="@+id/credit_logo"
+                android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
+                android:id="@+id/credit_app_name" android:elevation="14dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Headline"
+                android:textSize="24sp"/>
+        <ImageView
+                android:contentDescription="@string/separator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:src="#d3d3d3"
+                android:layout_marginTop="14dp"
+                android:id="@+id/main_separator"
+                android:layout_below="@+id/credit_app_name" android:layout_alignParentStart="true"/>
 
-            <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
-                                                          android:layout_height="175dp"
-                                                          android:id="@+id/mazen_logo"
-                                                          android:src="@drawable/mazen_logo"
-                                                          android:cropToPadding="false"
-                                                          android:layout_centerHorizontal="true"
-                                                          android:layout_marginTop="25dp"
-                                                          android:layout_below="@+id/main_separator"/>
-            <TextView
-                    android:text="@string/mazen_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_below="@+id/mazen_logo"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
-                    android:id="@+id/mazen_name" android:elevation="14dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Headline"
-                    android:textSize="24sp"/>
-            <TextView
-                    android:text="@string/mazen_title"
-                    android:layout_width="170dp"
-                    android:layout_height="wrap_content" android:layout_below="@+id/mazen_name"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
-                    android:id="@+id/mazen_title" android:elevation="12dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textAlignment="center" android:textSize="14sp"/>
-            <TextView
-                    android:text="@string/mazen_bio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:layout_below="@+id/mazen_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/mazen_bio"
-                    android:textAlignment="center"/>
+        <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
+                                                      android:layout_height="175dp"
+                                                      android:id="@+id/mazen_logo"
+                                                      android:src="@drawable/mazen_logo"
+                                                      android:cropToPadding="false"
+                                                      android:layout_centerHorizontal="true"
+                                                      android:layout_marginTop="25dp"
+                                                      android:layout_below="@+id/main_separator"/>
+        <TextView
+                android:text="@string/mazen_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_below="@+id/mazen_logo"
+                android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
+                android:id="@+id/mazen_name" android:elevation="14dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Headline"
+                android:textSize="24sp"/>
+        <TextView
+                android:text="@string/mazen_title"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content" android:layout_below="@+id/mazen_name"
+                android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
+                android:id="@+id/mazen_title" android:elevation="12dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                android:textAlignment="center" android:textSize="14sp"/>
+        <TextView
+                android:text="@string/mazen_bio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_below="@+id/mazen_title"
+                android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
+                android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/mazen_bio"
+                android:textAlignment="center"/>
 
-            <ImageView
-                    android:id="@+id/mazen_github"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_github_logo"
-                    android:contentDescription="@string/github_logo"
-                    android:layout_below="@+id/mazen_bio" android:layout_alignStart="@+id/mazen_name"/>
+        <ImageView
+                android:id="@+id/mazen_github"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_github_logo"
+                android:contentDescription="@string/github_logo"
+                android:layout_below="@+id/mazen_bio" android:layout_alignStart="@+id/mazen_name"/>
 
-            <ImageView
-                    android:id="@+id/mazen_telegram"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_telegram_logo"
-                    android:contentDescription="@string/telegram_logo"
-                    android:layout_below="@+id/mazen_bio" android:layout_alignEnd="@+id/mazen_name"/>
+        <ImageView
+                android:id="@+id/mazen_telegram"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_telegram_logo"
+                android:contentDescription="@string/telegram_logo"
+                android:layout_below="@+id/mazen_bio" android:layout_alignEnd="@+id/mazen_name"/>
 
-            <ImageView
-                    android:contentDescription="@string/separator"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:src="#d3d3d3"
-                    android:layout_marginTop="5dp"
-                    android:id="@+id/mazen_separator"
-                    android:layout_below="@+id/mazen_github" android:layout_alignParentStart="true"/>
+        <ImageView
+                android:contentDescription="@string/separator"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:src="#d3d3d3"
+                android:layout_marginTop="5dp"
+                android:id="@+id/mazen_separator"
+                android:layout_below="@+id/mazen_github" android:layout_alignParentStart="true"/>
 
-            <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
-                                                          android:layout_height="175dp"
-                                                          android:id="@+id/amir_logo"
-                                                          android:src="@drawable/amir_logo"
-                                                          android:cropToPadding="false"
-                                                          android:layout_centerHorizontal="true"
-                                                          android:layout_marginTop="25dp"
-                                                          android:layout_below="@+id/mazen_separator"/>
-            <TextView
-                    android:text="@string/amir_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_below="@+id/amir_logo"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
-                    android:id="@+id/amir_name" android:elevation="14dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Headline"
-                    android:textSize="24sp"/>
-            <TextView
-                    android:text="@string/amir_title"
-                    android:layout_width="170dp"
-                    android:layout_height="wrap_content" android:layout_below="@+id/amir_name"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
-                    android:id="@+id/amir_title" android:elevation="12dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textAlignment="center" android:textSize="14sp"/>
-            <TextView
-                    android:text="@string/amir_bio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:layout_below="@+id/amir_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/amir_bio"
-                    android:textAlignment="center"/>
+        <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
+                                                      android:layout_height="175dp"
+                                                      android:id="@+id/amir_logo"
+                                                      android:src="@drawable/amir_logo"
+                                                      android:cropToPadding="false"
+                                                      android:layout_centerHorizontal="true"
+                                                      android:layout_marginTop="25dp"
+                                                      android:layout_below="@+id/mazen_separator"/>
+        <TextView
+                android:text="@string/amir_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_below="@+id/amir_logo"
+                android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
+                android:id="@+id/amir_name" android:elevation="14dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Headline"
+                android:textSize="24sp"/>
+        <TextView
+                android:text="@string/amir_title"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content" android:layout_below="@+id/amir_name"
+                android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
+                android:id="@+id/amir_title" android:elevation="12dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                android:textAlignment="center" android:textSize="14sp"/>
+        <TextView
+                android:text="@string/amir_bio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_below="@+id/amir_title"
+                android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
+                android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/amir_bio"
+                android:textAlignment="center"/>
 
-            <ImageView
-                    android:id="@+id/amir_github"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_github_logo"
-                    android:contentDescription="@string/github_logo"
-                    android:layout_below="@+id/amir_bio" android:layout_centerHorizontal="true"/>
+        <ImageView
+                android:id="@+id/amir_github"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_github_logo"
+                android:contentDescription="@string/github_logo"
+                android:layout_below="@+id/amir_bio" android:layout_centerHorizontal="true"/>
 
-            <ImageView
-                    android:contentDescription="@string/separator"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:src="#d3d3d3"
-                    android:layout_marginTop="5dp"
-                    android:id="@+id/amir_separator"
-                    android:layout_below="@+id/amir_github" android:layout_alignParentStart="true"/>
+        <ImageView
+                android:contentDescription="@string/separator"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:src="#d3d3d3"
+                android:layout_marginTop="5dp"
+                android:id="@+id/amir_separator"
+                android:layout_below="@+id/amir_github" android:layout_alignParentStart="true"/>
 
-            <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
-                                                          android:layout_height="175dp"
-                                                          android:id="@+id/brandon_logo"
-                                                          android:src="@drawable/brandon_logo"
-                                                          android:cropToPadding="false"
-                                                          android:layout_centerHorizontal="true"
-                                                          android:layout_marginTop="25dp"
-                                                          android:layout_below="@+id/amir_separator"/>
-            <TextView
-                    android:text="@string/brandon_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_below="@+id/brandon_logo"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
-                    android:id="@+id/brandon_name" android:elevation="14dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Headline"
-                    android:textSize="24sp"/>
-            <TextView
-                    android:text="@string/brandon_title"
-                    android:layout_width="170dp"
-                    android:layout_height="wrap_content" android:layout_below="@+id/brandon_name"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
-                    android:id="@+id/brandon_title" android:elevation="12dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textAlignment="center" android:textSize="14sp"/>
-            <TextView
-                    android:text="@string/brandon_bio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:layout_below="@+id/brandon_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/brandon_bio"
-                    android:textAlignment="center"/>
+        <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
+                                                      android:layout_height="175dp"
+                                                      android:id="@+id/brandon_logo"
+                                                      android:src="@drawable/brandon_logo"
+                                                      android:cropToPadding="false"
+                                                      android:layout_centerHorizontal="true"
+                                                      android:layout_marginTop="25dp"
+                                                      android:layout_below="@+id/amir_separator"/>
+        <TextView
+                android:text="@string/brandon_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_below="@+id/brandon_logo"
+                android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
+                android:id="@+id/brandon_name" android:elevation="14dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Headline"
+                android:textSize="24sp"/>
+        <TextView
+                android:text="@string/brandon_title"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content" android:layout_below="@+id/brandon_name"
+                android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
+                android:id="@+id/brandon_title" android:elevation="12dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                android:textAlignment="center" android:textSize="14sp"/>
+        <TextView
+                android:text="@string/brandon_bio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_below="@+id/brandon_title"
+                android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
+                android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/brandon_bio"
+                android:textAlignment="center"/>
 
-            <ImageView
-                    android:id="@+id/brandon_github"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_github_logo"
-                    android:contentDescription="@string/github_logo"
-                    android:layout_below="@+id/brandon_bio" android:layout_centerHorizontal="true"/>
+        <ImageView
+                android:id="@+id/brandon_github"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_github_logo"
+                android:contentDescription="@string/github_logo"
+                android:layout_below="@+id/brandon_bio" android:layout_centerHorizontal="true"/>
 
-            <ImageView
-                    android:contentDescription="@string/separator"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:src="#d3d3d3"
-                    android:layout_marginTop="5dp"
-                    android:id="@+id/brandon_separator"
-                    android:layout_below="@+id/brandon_github" android:layout_alignParentStart="true"/>
+        <ImageView
+                android:contentDescription="@string/separator"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:src="#d3d3d3"
+                android:layout_marginTop="5dp"
+                android:id="@+id/brandon_separator"
+                android:layout_below="@+id/brandon_github" android:layout_alignParentStart="true"/>
 
-            <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
-                                                          android:layout_height="175dp"
-                                                          android:id="@+id/vilsol_logo"
-                                                          android:src="@drawable/vilsol_logo"
-                                                          android:cropToPadding="false"
-                                                          android:layout_centerHorizontal="true"
-                                                          android:layout_marginTop="25dp"
-                                                          android:layout_below="@+id/brandon_separator"/>
-            <TextView
-                    android:text="@string/vilsol_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_below="@+id/vilsol_logo"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
-                    android:id="@+id/vilsol_name" android:elevation="14dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Headline"
-                    android:textSize="24sp"/>
-            <TextView
-                    android:text="@string/vilsol_title"
-                    android:layout_width="170dp"
-                    android:layout_height="wrap_content" android:layout_below="@+id/vilsol_name"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
-                    android:id="@+id/vilsol_title" android:elevation="12dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textAlignment="center" android:textSize="14sp"/>
-            <TextView
-                    android:text="@string/vilsol_bio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:layout_below="@+id/vilsol_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/vilsol_bio"
-                    android:textAlignment="center"/>
+        <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
+                                                      android:layout_height="175dp"
+                                                      android:id="@+id/vilsol_logo"
+                                                      android:src="@drawable/vilsol_logo"
+                                                      android:cropToPadding="false"
+                                                      android:layout_centerHorizontal="true"
+                                                      android:layout_marginTop="25dp"
+                                                      android:layout_below="@+id/brandon_separator"/>
+        <TextView
+                android:text="@string/vilsol_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_below="@+id/vilsol_logo"
+                android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
+                android:id="@+id/vilsol_name" android:elevation="14dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Headline"
+                android:textSize="24sp"/>
+        <TextView
+                android:text="@string/vilsol_title"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content" android:layout_below="@+id/vilsol_name"
+                android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
+                android:id="@+id/vilsol_title" android:elevation="12dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                android:textAlignment="center" android:textSize="14sp"/>
+        <TextView
+                android:text="@string/vilsol_bio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_below="@+id/vilsol_title"
+                android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
+                android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/vilsol_bio"
+                android:textAlignment="center"/>
 
-            <ImageView
-                    android:id="@+id/vilsol_github"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_github_logo"
-                    android:contentDescription="@string/github_logo"
-                    android:layout_below="@+id/vilsol_bio" android:layout_alignStart="@+id/mazen_name"/>
+        <ImageView
+                android:id="@+id/vilsol_github"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_github_logo"
+                android:contentDescription="@string/github_logo"
+                android:layout_below="@+id/vilsol_bio" android:layout_alignStart="@+id/mazen_name"/>
 
-            <ImageView
-                    android:id="@+id/vilsol_keybase"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_keybase_logo"
-                    android:contentDescription="@string/keybase_logo"
-                    android:layout_below="@+id/vilsol_bio" android:layout_alignEnd="@+id/mazen_name"/>
+        <ImageView
+                android:id="@+id/vilsol_keybase"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_keybase_logo"
+                android:contentDescription="@string/keybase_logo"
+                android:layout_below="@+id/vilsol_bio" android:layout_alignEnd="@+id/mazen_name"/>
 
-            <ImageView
-                    android:contentDescription="@string/separator"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:src="#d3d3d3"
-                    android:layout_marginTop="5dp"
-                    android:id="@+id/vilsol_separator"
-                    android:layout_below="@+id/vilsol_github" android:layout_alignParentStart="true"/>
+        <ImageView
+                android:contentDescription="@string/separator"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:src="#d3d3d3"
+                android:layout_marginTop="5dp"
+                android:id="@+id/vilsol_separator"
+                android:layout_below="@+id/vilsol_github" android:layout_alignParentStart="true"/>
 
-            <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
-                                                          android:layout_height="175dp"
-                                                          android:id="@+id/mattrick_logo"
-                                                          android:src="@drawable/mattrick_logo"
-                                                          android:cropToPadding="false"
-                                                          android:layout_centerHorizontal="true"
-                                                          android:layout_marginTop="25dp"
-                                                          android:layout_below="@+id/vilsol_separator"/>
-            <TextView
-                    android:text="@string/mattrick_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_below="@+id/mattrick_logo"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
-                    android:id="@+id/mattrick_name" android:elevation="14dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Headline"
-                    android:textSize="24sp"/>
-            <TextView
-                    android:text="@string/mattrick_title"
-                    android:layout_width="170dp"
-                    android:layout_height="wrap_content" android:layout_below="@+id/mattrick_name"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
-                    android:id="@+id/mattrick_title" android:elevation="12dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textAlignment="center" android:textSize="14sp"/>
-            <TextView
-                    android:text="@string/mattrick_bio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:layout_below="@+id/mattrick_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/mattrick_bio"
-                    android:textAlignment="center"/>
+        <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
+                                                      android:layout_height="175dp"
+                                                      android:id="@+id/mattrick_logo"
+                                                      android:src="@drawable/mattrick_logo"
+                                                      android:cropToPadding="false"
+                                                      android:layout_centerHorizontal="true"
+                                                      android:layout_marginTop="25dp"
+                                                      android:layout_below="@+id/vilsol_separator"/>
+        <TextView
+                android:text="@string/mattrick_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_below="@+id/mattrick_logo"
+                android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
+                android:id="@+id/mattrick_name" android:elevation="14dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Headline"
+                android:textSize="24sp"/>
+        <TextView
+                android:text="@string/mattrick_title"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content" android:layout_below="@+id/mattrick_name"
+                android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
+                android:id="@+id/mattrick_title" android:elevation="12dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                android:textAlignment="center" android:textSize="14sp"/>
+        <TextView
+                android:text="@string/mattrick_bio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_below="@+id/mattrick_title"
+                android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
+                android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/mattrick_bio"
+                android:textAlignment="center"/>
 
-            <ImageView
-                    android:id="@+id/mattrick_github"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_github_logo"
-                    android:contentDescription="@string/github_logo"
-                    android:layout_below="@+id/mattrick_bio" android:layout_alignStart="@+id/mattrick_logo"/>
+        <ImageView
+                android:id="@+id/mattrick_github"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_github_logo"
+                android:contentDescription="@string/github_logo"
+                android:layout_below="@+id/mattrick_bio" android:layout_alignStart="@+id/mattrick_logo"/>
 
-            <ImageView
-                    android:id="@+id/mattrick_twitter"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_twitter_logo"
-                    android:contentDescription="@string/twitter_logo"
-                    android:layout_below="@id/mattrick_bio" android:layout_centerHorizontal="true" />
+        <ImageView
+                android:id="@+id/mattrick_twitter"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_twitter_logo"
+                android:contentDescription="@string/twitter_logo"
+                android:layout_below="@id/mattrick_bio" android:layout_centerHorizontal="true" />
 
-            <ImageView
-                    android:id="@+id/mattrick_keybase"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_keybase_logo"
-                    android:contentDescription="@string/telegram_logo"
-                    android:layout_below="@+id/mattrick_bio" android:layout_alignEnd="@+id/mattrick_logo"/>
+        <ImageView
+                android:id="@+id/mattrick_keybase"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_keybase_logo"
+                android:contentDescription="@string/telegram_logo"
+                android:layout_below="@+id/mattrick_bio" android:layout_alignEnd="@+id/mattrick_logo"/>
 
-            <ImageView
-                    android:contentDescription="@string/separator"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:src="#d3d3d3"
-                    android:layout_marginTop="5dp"
-                    android:id="@+id/mattrick_separator"
-                    android:layout_below="@+id/mattrick_github" android:layout_alignParentStart="true"/>
+        <ImageView
+                android:contentDescription="@string/separator"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:src="#d3d3d3"
+                android:layout_marginTop="5dp"
+                android:id="@+id/mattrick_separator"
+                android:layout_below="@+id/mattrick_github" android:layout_alignParentStart="true"/>
 
-            <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
-                                                          android:layout_height="175dp"
-                                                          android:id="@+id/mark_logo"
-                                                          android:src="@drawable/mark_logo"
-                                                          android:cropToPadding="false"
-                                                          android:layout_centerHorizontal="true"
-                                                          android:layout_marginTop="25dp"
-                                                          android:layout_below="@+id/mattrick_separator"/>
-            <TextView
-                    android:text="@string/mark_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_below="@+id/mark_logo"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
-                    android:id="@+id/mark_name" android:elevation="14dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Headline"
-                    android:textSize="24sp"/>
-            <TextView
-                    android:text="@string/mark_title"
-                    android:layout_width="170dp"
-                    android:layout_height="wrap_content" android:layout_below="@+id/mark_name"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
-                    android:id="@+id/mark_title" android:elevation="12dp"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textAlignment="center" android:textSize="14sp"/>
-            <TextView
-                    android:text="@string/mark_bio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:layout_below="@+id/mark_title"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/mark_bio"
-                    android:textAlignment="center"/>
+        <de.hdodenhof.circleimageview.CircleImageView android:layout_width="175dp"
+                                                      android:layout_height="175dp"
+                                                      android:id="@+id/mark_logo"
+                                                      android:src="@drawable/mark_logo"
+                                                      android:cropToPadding="false"
+                                                      android:layout_centerHorizontal="true"
+                                                      android:layout_marginTop="25dp"
+                                                      android:layout_below="@+id/mattrick_separator"/>
+        <TextView
+                android:text="@string/mark_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_below="@+id/mark_logo"
+                android:layout_centerHorizontal="true" android:layout_marginTop="13dp"
+                android:id="@+id/mark_name" android:elevation="14dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Headline"
+                android:textSize="24sp"/>
+        <TextView
+                android:text="@string/mark_title"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content" android:layout_below="@+id/mark_name"
+                android:layout_centerHorizontal="true" android:layout_marginTop="2dp"
+                android:id="@+id/mark_title" android:elevation="12dp"
+                android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                android:textAlignment="center" android:textSize="14sp"/>
+        <TextView
+                android:text="@string/mark_bio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_below="@+id/mark_title"
+                android:textAppearance="@android:style/TextAppearance.Material.Body1" android:textSize="13sp"
+                android:layout_centerHorizontal="true" android:layout_marginTop="22dp" android:id="@+id/mark_bio"
+                android:textAlignment="center"/>
 
-            <ImageView
-                    android:id="@+id/mark_github"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_github_logo"
-                    android:contentDescription="@string/github_logo"
-                    android:layout_below="@+id/mark_bio" android:layout_alignStart="@+id/mazen_name"/>
+        <ImageView
+                android:id="@+id/mark_github"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_github_logo"
+                android:contentDescription="@string/github_logo"
+                android:layout_below="@+id/mark_bio" android:layout_alignStart="@+id/mazen_name"/>
 
-            <ImageView
-                    android:id="@+id/mark_linkedin"
-                    android:layout_marginTop="15dp"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"
-                    android:src="@drawable/ic_linkedin_logo"
-                    android:contentDescription="@string/linkedin_logo"
-                    android:layout_below="@+id/mark_bio" android:layout_alignEnd="@+id/mazen_name"/>
-        </RelativeLayout>
-    </ScrollView>
-</RelativeLayout>
+        <ImageView
+                android:id="@+id/mark_linkedin"
+                android:layout_marginTop="15dp"
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:src="@drawable/ic_linkedin_logo"
+                android:contentDescription="@string/linkedin_logo"
+                android:layout_below="@+id/mark_bio" android:layout_alignEnd="@+id/mazen_name"/>
+    </RelativeLayout>
+</ScrollView>

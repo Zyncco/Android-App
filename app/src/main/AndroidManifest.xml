@@ -93,6 +93,11 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".activities.SettingsActivity"/>
         </activity>
+        <activity android:name=".activities.DebugActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".activities.MainActivity"/>
+        </activity>
     </application>
 
 </manifest>

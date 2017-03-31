@@ -3,7 +3,8 @@
     <string name="intro_welcome">Welcome to Zync! Swipe left to continue!</string>
     <string name="intro_description">Zync securely synchronizes the copy/paste function across all your devices,
         like phones, laptops, and tablets! Simply install, login, you\'re ready to go! Click the button below
-        to get started!</string>
+        to get started!
+    </string>
 
     <string name="zync_text">Text</string>
     <string name="zync_image">Image</string>
@@ -21,35 +22,49 @@
 
     <string name="mazen_name">Mazen Kotb</string>
     <string name="mazen_title">Java Software Engineer (Android Developer)</string>
-    <string name="mazen_bio">I\'m currently a Canadian Software Engineer and have been programming for 6 years since I was young.
-        Although I\'ve stuck in my hand in around everything, my expertise primarily resides in using JVM languages for backend infrastructures.
+    <string name="mazen_bio">I\'m currently a Canadian Software Engineer and have been programming for 6 years since I
+        was young.
+        Although I\'ve stuck in my hand in around everything, my expertise primarily resides in using JVM languages for
+        backend infrastructures.
         Outside of Computer Science, I love writing, talking (in front of large groups), and exploring around Vancouver.
-        If you want to chat, feel free to hit me up a message on Telegram.</string>
+        If you want to chat, feel free to hit me up a message on Telegram.
+    </string>
 
     <string name="amir_name">Amir Omidi</string>
     <string name="amir_title">Project Lead and Developer</string>
-    <string name="amir_bio">I\'m a student studying Computer Sciences at Drexel University. I love trying out new technologies, frameworks, and gadgets.
-        My career goal is to be a software engineer at a top tech firm.</string>
+    <string name="amir_bio">I\'m a student studying Computer Sciences at Drexel University. I love trying out new
+        technologies, frameworks, and gadgets.
+        My career goal is to be a software engineer at a top tech firm.
+    </string>
 
     <string name="brandon_name">Brandon</string>
     <string name="brandon_title">Developer \n(Chrome Extension)</string>
-    <string name="brandon_bio">I am a self-taught, self-employed software developer living in the United Kingdom, primarily working with command line /
-        backend applications. I know Java, C#, Python and a handful of other non-programming languages.</string>
+    <string name="brandon_bio">I am a self-taught, self-employed software developer living in the United Kingdom,
+        primarily working with command line /
+        backend applications. I know Java, C#, Python and a handful of other non-programming languages.
+    </string>
 
     <string name="vilsol_name">Vilsol</string>
     <string name="vilsol_title">Caffeine to Uptime Converter\n(Zync Server)</string>
-    <string name="vilsol_bio">A software engineer with a passion for virtualization. Mostly spent time as a full-stack developer in many languages, frameworks
-        and platforms, but recently more focused on systems, operations and infrastructure. Left university to pursue my career as well as many side projects
-        including this one.</string>
+    <string name="vilsol_bio">A software engineer with a passion for virtualization. Mostly spent time as a full-stack
+        developer in many languages, frameworks
+        and platforms, but recently more focused on systems, operations and infrastructure. Left university to pursue my
+        career as well as many side projects
+        including this one.
+    </string>
 
     <string name="mattrick_name">Matthew McCune</string>
     <string name="mattrick_title">Web Developer\nGraphic Designer</string>
-    <string name="mattrick_bio">I\'m a designer and developer from sunny Southern California. I mostly work with web stuff.</string>
+    <string name="mattrick_bio">I\'m a designer and developer from sunny Southern California. I mostly work with web
+        stuff.
+    </string>
 
     <string name="mark_name">Mark Hendricks</string>
     <string name="mark_title">Backend Developer</string>
-    <string name="mark_bio">I\'m a Computer Science student at University of Technology in Eindhoven, mainly spending my time experimenting with new solutions and
-        new languages, always aiming for fast and scale-able.</string>
+    <string name="mark_bio">I\'m a Computer Science student at University of Technology in Eindhoven, mainly spending my
+        time experimenting with new solutions and
+        new languages, always aiming for fast and scale-able.
+    </string>
 
     <string name="zync_settings">Zync Settings</string>
     <string name="encryption">Encryption</string>
@@ -140,4 +155,7 @@
     <string name="no_webc">No browser app!</string>
     <string name="copy">Copy</string>
     <string name="share">Share</string>
+
+    <string name="debug">Debug</string>
+    <string name="debug_copied">Debug info copied to clipboard!</string>
 </resources>
