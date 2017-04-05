@@ -23,8 +23,8 @@ import java.util.List;
 public class ZyncAPI {
     private static final MediaType OCTET_STREAM_TYPE = MediaType.parse("application/octet-stream");
     private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json");
-    public static final String API_DOMAIN = "api.zync.co"; // used for verification purposes
-    public static final String BASE = "https://api.zync.co/v";
+    public static final String API_DOMAIN = "beta-api.zync.co"; // used for verification purposes
+    public static final String BASE = "https://beta-api.zync.co/v";
     public static final int VERSION = 0;
     private OkHttpClient client;
     private final String token;
