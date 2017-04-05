@@ -4,21 +4,25 @@ import co.zync.zync.ZyncApplication;
 import co.zync.zync.api.generic.ZyncGenericAPIListener;
 import co.zync.zync.api.generic.ZyncNullTransformer;
 import co.zync.zync.api.generic.ZyncTransformer;
+import co.zync.zync.utils.ZyncCrypto;
 import co.zync.zync.utils.ZyncExceptionInfo;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.crypto.AEADBadTagException;
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class ZyncAPI {
     private static final MediaType OCTET_STREAM_TYPE = MediaType.parse("application/octet-stream");
@@ -71,7 +75,7 @@ public class ZyncAPI {
     }
 
     /*
-     * Sends a request using the Volley library to post a postClipboard update
+     * Sends a request to post a clipboard update
      */
     public void postClipboard(ZyncClipData clipData,
                               final ZyncCallback<Void> responseListener) throws JSONException {
@@ -179,6 +183,95 @@ public class ZyncAPI {
                     }
                 }
         );
+    }
+
+    // if a payload is too large due to it being an image
+    // or greater of a certain threshold, this method will be used
+    // to download the clip and stream it to file
+    // NOTE: Only throws InterruptedException if blocking = true
+    public void downloadLarge(final String encryptionPass, final File file,
+                              final ZyncClipData data, // only contains metadata
+                              long timestamp, final ZyncCallback<File> callback,
+                              final boolean blocking) throws InterruptedException {
+        // prepare latch to use if blocking
+        final CountDownLatch latch = blocking ? new CountDownLatch(1) : null;
+
+        // create file if it doesn't exist
+        if (!file.exists()) {
+            try {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            } catch (IOException ex) {
+                callback.handleError(new ZyncError(-7, "Unable to create file " +
+                        file.getName() + " for downloading due to IOException: " + ex.getMessage()));
+                return;
+            }
+        }
+
+        Request request = new Request.Builder()
+                .url(BASE + VERSION + "/clipboard/download/" + timestamp)
+                .post(RequestBody.create(OCTET_STREAM_TYPE, file))
+                .addHeader("X-ZYNC-TOKEN", token)
+                .addHeader("User-Agent", System.getProperty("http.agent"))
+                .build();
+
+        // perform request async regardless of blocking
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                onFailure(call, e);
+            }
+
+            private void onFailure(Call call, Exception e) {
+                callback.handleError(new ZyncError(-4, "HTTP Error: " +
+                        (e.getCause() != null ? e.getCause().getClass().getSimpleName() : "null") + ":" + e.getMessage()));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                // create stream from http response
+                InputStream source = response.body().byteStream();
+                // prepare cipher to streamline decryption
+                Cipher cipher;
+
+                try {
+                    cipher = ZyncCrypto.getCipher(Cipher.DECRYPT_MODE, encryptionPass, data.salt(), data.iv());
+                } catch (Exception ex) {
+                    onFailure(call, ex);
+                    return;
+                }
+
+                CipherOutputStream os = new CipherOutputStream(new FileOutputStream(file), cipher);
+                byte[] buffer = new byte[4096];
+                int last = 4096;
+
+                /*
+                 * Stream payload to file in
+                 * batches of 4096 bytes
+                 */
+                while (last == 4096) {
+                    last = source.read(buffer);
+                    os.write(buffer);
+                }
+
+                // flush and cleanup
+                os.flush();
+                os.close();
+                source.close();
+
+                // execute callback
+                callback.success(file);
+
+                // count down latch if calling thread is waiting
+                if (blocking) {
+                    latch.countDown();
+                }
+            }
+        });
+
+        if (blocking) {
+            latch.await();
+        }
     }
 
     // request a URL to upload our encrypted large file

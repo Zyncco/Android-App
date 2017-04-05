@@ -249,31 +249,48 @@ public class HistoryActivity extends AppCompatActivity {
         for (int i = 0; i < history.size(); i++) {
             final ZyncClipData data = history.get(i);
 
-            if (data.data() == null) {
-                System.out.println(data.timestamp() + " is ignored due to null data");
+            // check if encryption failed with text, if it did, ignore and continue
+            if (data.type() == ZyncClipType.TEXT && data.data() == null) {
                 continue;
             }
+
+            // todo load images from file
 
             LinearLayout mainLayout = (LinearLayout) findViewById(R.id.history_layout);
             boolean even = (i % 2) == 0;
             boolean joining = false;
 
+            /*
+             * Check if we are in queue to be joined with another
+             * entry in the same row
+             */
             if (even && prevLayout != null) {
                 mainLayout = prevLayout;
                 prevLayout = null;
                 joining = true;
-            } else if (!even && canJoin(data) && i != historySize && canJoin(history.get(i + 1))) {
+            }
+
+            /*
+             * Check if the current data entry and the next are able to be joined
+             * on the same row, if so, create the layout that the items will go under
+             * and set the appropriate variables for the next entry to be added
+             */
+            if (!even && canJoin(data) && i != historySize && canJoin(history.get(i + 1))) {
                 LinearLayout layout = new LinearLayout(this);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, cardLayoutHeight);
                 layout.setLayoutParams(params);
                 layout.setPadding(overallPadding, cardTopMargin, overallPadding, cardBottomMargin);
-                layout.setOutlineProvider(ViewOutlineProvider.BOUNDS);
 
+                // entries' weights must add up to 2
+                layout.setWeightSum(2);
+
+                // odd stuff to fix card shadows from being cut off due to boundries
+                layout.setOutlineProvider(ViewOutlineProvider.BOUNDS);
                 layout.setOrientation(LinearLayout.HORIZONTAL);
                 layout.setClipToPadding(false);
-                layout.setWeightSum(2);
                 layout.setBackgroundColor(getZyncApp().getColorSafe(android.R.color.background_light));
 
+                // set variables for next entry
                 prevLayout = layout;
                 mainLayout.addView(layout);
                 mainLayout = layout;
@@ -285,13 +302,18 @@ public class HistoryActivity extends AppCompatActivity {
             layoutParams.weight = 1;
 
             if (!joining) {
+                // we aren't joining, thus must set the margins for
+                // ourselves instead of using the padding that would
+                // have been added in our parent LinearLayout
                 layoutParams.width = LayoutParams.MATCH_PARENT;
                 layoutParams.setMarginStart(overallPadding);
                 layoutParams.setMarginEnd(overallPadding);
                 layoutParams.topMargin = cardTopMargin;
             } else {
+                // bottom margin for shadows
                 layoutParams.bottomMargin = cardBottomMargin;
 
+                // if we are even (and joining), add a start margin to separate the two entries
                 if (even) {
                     layoutParams.setMarginStart(cardStartMargin);
                 }
