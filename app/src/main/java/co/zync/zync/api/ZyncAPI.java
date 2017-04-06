@@ -191,7 +191,7 @@ public class ZyncAPI {
     // NOTE: Only throws InterruptedException if blocking = true
     public void downloadLarge(final String encryptionPass, final File file,
                               final ZyncClipData data, // only contains metadata
-                              long timestamp, final ZyncCallback<File> callback,
+                              final ZyncCallback<File> callback,
                               final boolean blocking) throws InterruptedException {
         // prepare latch to use if blocking
         final CountDownLatch latch = blocking ? new CountDownLatch(1) : null;
@@ -209,7 +209,7 @@ public class ZyncAPI {
         }
 
         Request request = new Request.Builder()
-                .url(BASE + VERSION + "/clipboard/download/" + timestamp)
+                .url(BASE + VERSION + "/clipboard/download/" + data.timestamp())
                 .post(RequestBody.create(OCTET_STREAM_TYPE, file))
                 .addHeader("X-ZYNC-TOKEN", token)
                 .addHeader("User-Agent", System.getProperty("http.agent"))
@@ -269,6 +269,7 @@ public class ZyncAPI {
             }
         });
 
+        // if we're blocking, await
         if (blocking) {
             latch.await();
         }
@@ -316,5 +317,16 @@ public class ZyncAPI {
     public interface ZyncCallback<T> {
         void success(T value);
         void handleError(ZyncError error);
+    }
+
+    // literally does absolutely nothing
+    public static class NullZyncCallback<T> implements ZyncCallback<T> {
+        @Override
+        public void success(T value) {
+        }
+
+        @Override
+        public void handleError(ZyncError error) {
+        }
     }
 }

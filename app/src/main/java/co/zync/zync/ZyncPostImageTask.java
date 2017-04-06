@@ -79,6 +79,7 @@ public class ZyncPostImageTask extends AsyncTask<Uri, Void, Void> {
                         @Override
                         public void success(Void value) {
                             callback.success(value);
+                            file.delete();
                         }
 
                         @Override

@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
@@ -15,6 +17,7 @@ import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.view.*;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.*;
@@ -33,6 +36,7 @@ import javax.crypto.AEADBadTagException;
 import java.util.*;
 
 public class HistoryActivity extends AppCompatActivity {
+    private SparseArray<BitmapFactory.Options> imageOptions = new SparseArray<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,7 +220,22 @@ public class HistoryActivity extends AppCompatActivity {
         return history;
     }
 
-    private boolean canJoin(ZyncClipData data) {
+    private boolean canJoin(int index, ZyncClipData data) {
+        if (data.type() == ZyncClipType.IMAGE) {
+            BitmapFactory.Options bitMapOption = imageOptions.get(index);
+
+            if (bitMapOption == null) {
+                bitMapOption = new BitmapFactory.Options();
+                bitMapOption.inJustDecodeBounds = true;
+
+                BitmapFactory.decodeFile(getZyncApp().dataManager().load(data, true).getAbsolutePath(), bitMapOption);
+                imageOptions.append(index, bitMapOption);
+            }
+
+            return Math.round(bitMapOption.outHeight / bitMapOption.outWidth) == 1 ||
+                    (bitMapOption.outHeight < 700 && bitMapOption.outWidth < 700);
+        }
+
         return data.type() == ZyncClipType.TEXT && new String(data.data()).length() < 350;
     }
 
@@ -254,8 +273,6 @@ public class HistoryActivity extends AppCompatActivity {
                 continue;
             }
 
-            // todo load images from file
-
             LinearLayout mainLayout = (LinearLayout) findViewById(R.id.history_layout);
             boolean even = (i % 2) == 0;
             boolean joining = false;
@@ -275,7 +292,7 @@ public class HistoryActivity extends AppCompatActivity {
              * on the same row, if so, create the layout that the items will go under
              * and set the appropriate variables for the next entry to be added
              */
-            if (!even && canJoin(data) && i != historySize && canJoin(history.get(i + 1))) {
+            if (!even && canJoin(i, data) && i != historySize && canJoin(i + 1, history.get(i + 1))) {
                 LinearLayout layout = new LinearLayout(this);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, cardLayoutHeight);
                 layout.setLayoutParams(params);
@@ -323,6 +340,9 @@ public class HistoryActivity extends AppCompatActivity {
             card.setCardElevation(cardElevation);
             card.setRadius(cardCorner); // card corner radius for rounded card
 
+            // add layout for this entry to the main linear layout
+            mainLayout.addView(card);
+
             // setup data preview
             switch (data.type()) {
                 case TEXT:
@@ -346,6 +366,37 @@ public class HistoryActivity extends AppCompatActivity {
                     textPreview.setText(text);
                     card.addView(textPreview);
                     break;
+
+                case IMAGE:
+                    BitmapFactory.Options bitmapOptions = imageOptions.get(i);
+
+                    if (bitmapOptions == null) {
+                        canJoin(i, data); // will load and insert loaded info to imageOptions
+                        bitmapOptions = imageOptions.get(i);
+                    }
+
+                    bitmapOptions.inJustDecodeBounds = false; // we want the image this time
+
+                    // todo test if card.getWidth() will give a valid response
+                    System.out.println("card width: " + card.getWidth());
+
+                    // calculate sample size to reduce loaded image size in memory
+                    // if possible; scaling down appropriately to card dimensions
+                    // on screen
+                    bitmapOptions.inSampleSize = calculateInSampleSize(bitmapOptions, card.getWidth(), imageHeight);
+
+                    Bitmap bitmap = BitmapFactory.decodeFile(
+                            // image must already be loaded as we are already making calculations with it
+                            getZyncApp().dataManager().load(data, false).getAbsolutePath(),
+                            bitmapOptions
+                    );
+                    ImageView imagePreview = new ImageView(this);
+
+                    setLayout(imagePreview, LayoutParams.MATCH_PARENT, cardHeight, -1);
+                    imagePreview.setImageBitmap(bitmap);
+                    imagePreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                    card.addView(imagePreview);
             }
 
             if (data.type() == ZyncClipType.TEXT) {
@@ -386,9 +437,6 @@ public class HistoryActivity extends AppCompatActivity {
             if (data.type() == ZyncClipType.TEXT) {
                 card.addView(createCopyButton(data, buttonDimension, buttonTopMargin, copyEndMargin));
             }
-
-            // add layout for this entry to the main linear layout
-            mainLayout.addView(card);
         }
     }
 
@@ -489,5 +537,26 @@ public class HistoryActivity extends AppCompatActivity {
         Resources resources = getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
         return (int) Math.floor(dp * (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 }

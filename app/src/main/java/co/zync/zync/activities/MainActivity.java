@@ -41,9 +41,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final Timer TIMER = new Timer();
     public static int REQUEST_IMAGE = 23212;
-    private String currentPhotoPath;
+    private ZyncClipData currentClip;
     private ZyncCircleView.ColorChangeTask circleColorChangeTask;
-    private ZyncCircleView.SizeChangeTask circleSizeChangeTask;
+    private ZyncCircleView.SizeChangeTask circleBreathingTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity
             navigationView.removeView(navigationView.findViewById(R.id.camera));
         }
 
+        // circle toggle
         findViewById(R.id.zync_circle).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // debug menu
         if (BuildConfig.DEBUG) {
             findViewById(R.id.zync_circle).setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -132,14 +134,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void scheduleCircleSizeTask() {
-        if (circleSizeChangeTask == null) {
-            circleSizeChangeTask = new ZyncCircleView.SizeChangeTask(
+        if (circleBreathingTask == null) {
+            circleBreathingTask = new ZyncCircleView.SizeChangeTask(
                     this,
                     (ZyncCircleView) findViewById(R.id.zync_circle),
                     120
             );
 
-            TIMER.scheduleAtFixedRate(circleSizeChangeTask, 75, 75);
+            TIMER.scheduleAtFixedRate(circleBreathingTask, 75, 75);
         }
     }
 
@@ -147,18 +149,22 @@ public class MainActivity extends AppCompatActivity
         ZyncCircleView circle = (ZyncCircleView) findViewById(R.id.zync_circle);
 
         if (!getZyncApp().getPreferences().getBoolean("zync_on", true)) {
+            // make circle gray start
             ColorMatrix matrix = new ColorMatrix();
             matrix.setSaturation(0);
 
             ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
             ((ImageView) findViewById(R.id.main_logo)).setColorFilter(filter);
+            // make circle gray end
 
+            // update color of "border"
             circle.setColor(ZyncCircleView.GRAY_OFF);
             getZyncApp().disableClipboardService();
 
-            if (circleSizeChangeTask != null) {
-                circleSizeChangeTask.cancel();
-                circleSizeChangeTask = null;
+            // stop breathing of circle
+            if (circleBreathingTask != null) {
+                circleBreathingTask.cancel();
+                circleBreathingTask = null;
             }
 
             return;
@@ -183,9 +189,9 @@ public class MainActivity extends AppCompatActivity
             circleColorChangeTask = null;
         }
 
-        if (circleSizeChangeTask != null) {
-            circleSizeChangeTask.cancel();
-            circleSizeChangeTask = null;
+        if (circleBreathingTask != null) {
+            circleBreathingTask.cancel();
+            circleBreathingTask = null;
         }
     }
 
@@ -202,6 +208,20 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
+    }
+
+    // creates a temporary image file used when capturing images
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "PNG_" + timeStamp + "_";
+        File storageDir = new File(getFilesDir(), "images/");
+        storageDir.mkdirs();
+        return File.createTempFile(
+                imageFileName,  /* prefix */
+                ".png",         /* suffix */
+                storageDir      /* directory */
+        );
     }
 
     @Override
@@ -228,8 +248,9 @@ public class MainActivity extends AppCompatActivity
                 File photoFile = null;
 
                 try {
-                    photoFile = createImageFile();
-                } catch (IOException ex) {
+                    currentClip = new ZyncClipData(getZyncApp().getEncryptionPass(), ZyncClipType.IMAGE, null);
+                    photoFile = getZyncApp().dataManager().fileFor(currentClip, true);
+                } catch (Exception ex) {
                     ex.printStackTrace();
                     ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "create image file for camera feature"));
                     // unable to create image file. TODO: Complain to user
@@ -253,24 +274,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    // creates a temporary image file used when capturing images
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "PNG_" + timeStamp + "_";
-        File storageDir = new File(getFilesDir(), "images/");
-        storageDir.mkdirs();
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".png",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
     private ProgressDialog createUploadingDialog() {
         final ProgressDialog dialog = new ProgressDialog(this);
         dialog.setTitle(R.string.uploading_image);
@@ -287,14 +290,13 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE && resultCode == RESULT_OK) {
             final ProgressDialog dialog = createUploadingDialog();
-            File file = new File(currentPhotoPath);
 
             try {
                 // post image to zync async
                 new ZyncPostImageTask(
                         getZyncApp(),
-                        file,
-                        new ZyncClipData(getZyncApp().getEncryptionPass(), ZyncClipType.IMAGE, null),
+                        createImageFile(), // temporary
+                        currentClip,
                         new ZyncAPI.ZyncCallback<Void>() {
                             @Override
                             public void success(Void value) {
@@ -310,7 +312,7 @@ public class MainActivity extends AppCompatActivity
                                         + error.code() + " : " + error.message());
                             }
                         }
-                ).execute(Uri.fromFile(file));
+                ).execute(Uri.fromFile(getZyncApp().dataManager().fileFor(currentClip, false)));
             } catch (Exception ignored) {
                 // ex here would be due to an encryption error from ZyncClipData
                 // so it's not quite possible as we didn't provide any data
@@ -330,12 +332,13 @@ public class MainActivity extends AppCompatActivity
 
                     try {
                         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                        File writingFile = createImageFile();
+                        ZyncClipData clip = new ZyncClipData(getZyncApp().getEncryptionPass(), ZyncClipType.IMAGE, null);
+                        getZyncApp().dataManager().saveImage(clip, imageUri);
 
                         new ZyncPostImageTask(
                                 getZyncApp(),
-                                writingFile,
-                                new ZyncClipData(getZyncApp().getEncryptionPass(), ZyncClipType.IMAGE, null),
+                                createImageFile(),
+                                clip,
                                 new ZyncAPI.ZyncCallback<Void>() {
                                     @Override
                                     public void success(Void value) {

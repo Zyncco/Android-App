@@ -22,6 +22,7 @@ public class ZyncClipData {
     private final byte[] iv;
     private final byte[] salt;
     private final ZyncClipType type;
+    // ONLY exists if type=TEXT, otherwise stored in file
     private byte[] data; // encoded in base 64
 
     public ZyncClipData(String encryptionKey,

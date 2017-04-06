@@ -37,9 +37,11 @@ public class ZyncApplication extends Application {
     public static int CLIPBOARD_ERROR_ID = 9308312;
     public static int PERSISTENT_NOTIFICATION_ID = 329321;
     /* END NOTIFICATION IDS */
+    // whether the last request was successful or not
     private AtomicBoolean lastRequestStatus = new AtomicBoolean(true);
     private ZyncPostClipTask.RequestStatusListener requestStatusListener;
     private OkHttpClient httpClient;
+    private ZyncDataManager dataManager;
     private ZyncAPI api;
     private ZyncWifiReceiver receiver; // do not remove, we have to retain the reference
     private final ZyncPreferenceChangeListener preferenceChangeListener = new ZyncPreferenceChangeListener(this);
@@ -48,15 +50,26 @@ public class ZyncApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        // if we are connected to wifi or allowed to use data, setup Zync network services
         if (isWifiConnected() || getPreferences().getBoolean("use_on_data", true)) {
             setupNetwork();
         }
 
+        dataManager = new ZyncDataManager(this);
+
+        // setup wifi receiver to get updates on network changes
         receiver = new ZyncWifiReceiver();
         registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        // set a preference listener to make changes to activity when user changes setting
         getPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
     }
 
+    public ZyncDataManager dataManager() {
+        return dataManager;
+    }
+
+    // Set the history that is stored on file
     public void setHistory(List<ZyncClipData> history) {
         Set<String> historyText = new HashSet<>(history.size());
 
@@ -69,6 +82,7 @@ public class ZyncApplication extends Application {
         getPreferences().edit().putStringSet("zync_history", historyText).apply();
     }
 
+    // adds an item to history and writes changes to file
     public void addToHistory(ZyncClipData data) {
         List<String> history = new ArrayList<>(getPreferences().getStringSet("zync_history", new HashSet<String>()));
 
@@ -81,6 +95,7 @@ public class ZyncApplication extends Application {
                 .apply();
     }
 
+    // utility method to effectively -> filter(timestamp).findFirst()
     public ZyncClipData clipFromTimestamp(long timestamp, List<ZyncClipData> history) {
         for (ZyncClipData data : history) {
             if (data.timestamp() == timestamp) {
@@ -104,6 +119,7 @@ public class ZyncApplication extends Application {
         }
     }
 
+    // remove network services
     public void removeNetworkUsages() {
         stopService(new Intent(this, ZyncInstanceIdService.class));
         stopService(new Intent(this, ZyncMessagingService.class));
@@ -116,6 +132,7 @@ public class ZyncApplication extends Application {
         }
     }
 
+    // go across all networks and test if the device is connected to the internet
     public boolean isWifiConnected() {
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         boolean connected = false;
@@ -164,10 +181,23 @@ public class ZyncApplication extends Application {
         return lastRequestStatus.get();
     }
 
+    // utility method to start a service
     private void startService(Class<? extends Service> cls) {
         Intent intent = new Intent(this, cls);
         startService(intent);
     }
+
+    // utility method to get a color which uses the best method
+    // to get a color from resources based on version of device
+    public int getColorSafe(int colorRes) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return getColor(colorRes);
+        } else {
+            return getResources().getColor(colorRes);
+        }
+    }
+
+    /*       NOTIFICATION METHODS START        */
 
     public void sendClipErrorNotification() {
         sendNotification(
@@ -187,14 +217,7 @@ public class ZyncApplication extends Application {
         }
     }
 
-    public int getColorSafe(int colorRes) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return getColor(colorRes);
-        } else {
-            return getResources().getColor(colorRes);
-        }
-    }
-
+    // utility method to create a pending intent for a notification
     public PendingIntent createPendingIntent(Intent intent, Class<? extends Activity> activityClass) {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(activityClass);
@@ -210,6 +233,7 @@ public class ZyncApplication extends Application {
         sendNotification(id, title, text, null);
     }
 
+    // sends a notification to the system with a general template
     public void sendNotification(int id, String title, String text, PendingIntent intent) {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -227,6 +251,8 @@ public class ZyncApplication extends Application {
 
         notificationManager.notify(id, builder.build());
     }
+
+    /*       NOTIFICATION METHODS END        */
 
     /*
      * Sync cloud clipboard to local
@@ -254,16 +280,21 @@ public class ZyncApplication extends Application {
         }
     }
 
+    // max size of a payload allowed based on settings in bytes
     public long getMaxSize() {
         return getPreferences().getInt("max_size", 10) * 1000000;
     }
 
+    // check if the clip type is supported in the app
+    // modification will cause odd behaviour and errors
+    // in the app
     public boolean isTypeSupported(ZyncClipType type) {
         return type == ZyncClipType.TEXT;
     }
 
+    // utility method to open settings directly
     public void openSettings() {
-        Intent settingsIntent = new Intent(        getApplicationContext(), SettingsActivity.class);
+        Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
 
         settingsIntent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, SettingsActivity.GeneralPreferenceFragment.class.getName());
         settingsIntent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true);
@@ -297,6 +328,7 @@ public class ZyncApplication extends Application {
                 .apply();
     }
 
+    // creates the info file (zync_debug_info.txt) and fills it with a debug report
     public File createInfoFile() throws IOException {
         File file = new File(new File(getFilesDir(), "attachments/"), "zync_debug_info.txt");
         if (file.exists()) {
@@ -318,6 +350,7 @@ public class ZyncApplication extends Application {
         return file;
     }
 
+    // creates debug report to figure out issues with bugs
     public String debugInfo() {
         StringBuilder builder = new StringBuilder();
 
@@ -389,6 +422,9 @@ public class ZyncApplication extends Application {
         return builder.toString();
     }
 
+    // open the prompt to direct the user to a URL
+    // in their preferred web application
+    // errorMessage=res id
     public void directToLink(String url, int errorMessage) {
         Uri webpage = Uri.parse(url);
         Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
