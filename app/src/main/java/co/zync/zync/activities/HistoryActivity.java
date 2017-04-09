@@ -48,6 +48,7 @@ public class HistoryActivity extends AppCompatActivity {
         super.onStart();
         setContentView(R.layout.activity_history);
         setupActionBar();
+        getWindow().getDecorView().setBackgroundColor(getZyncApp().getColorSafe(android.R.color.background_light));
 
         final ProgressDialog dialog = new ProgressDialog(this);
 
@@ -241,9 +242,9 @@ public class HistoryActivity extends AppCompatActivity {
 
     // set history that is being displayed on the activity
     // this will not override any pre-existing entries
-    private void setHistory(List<ZyncClipData> history) {
+    private void setHistory(List<ZyncClipData> systemHistory) {
+        List<ZyncClipData> history = new ArrayList<>(systemHistory.size());
         LinearLayout prevLayout = null; // ha
-        int historySize = history.size() - 1;
         // define variables to be used
         int cardElevation = convertDpToPixel(3);
         int cardCorner = convertDpToPixel(4);
@@ -265,16 +266,22 @@ public class HistoryActivity extends AppCompatActivity {
         int buttonTopMargin = convertDpToPixel(165);
         int overallPadding = convertDpToPixel(16);
 
-        for (int i = 0; i < history.size(); i++) {
-            final ZyncClipData data = history.get(i);
-
+        for (ZyncClipData data : systemHistory) {
             // check if encryption failed with text, if it did, ignore and continue
             if (data.type() == ZyncClipType.TEXT && data.data() == null) {
                 continue;
             }
 
+            history.add(data);
+        }
+
+        int historySize = history.size() - 1;
+
+        for (int i = 0; i < history.size(); i++) {
+            final ZyncClipData data = history.get(i);
+
             LinearLayout mainLayout = (LinearLayout) findViewById(R.id.history_layout);
-            boolean even = (i % 2) == 0;
+            boolean even = (i % 2) == 0 && i != 0;
             boolean joining = false;
 
             /*
@@ -292,7 +299,8 @@ public class HistoryActivity extends AppCompatActivity {
              * on the same row, if so, create the layout that the items will go under
              * and set the appropriate variables for the next entry to be added
              */
-            if (!even && canJoin(i, data) && i != historySize && canJoin(i + 1, history.get(i + 1))) {
+            if (prevLayout == null && !even && canJoin(i, data) &&
+                    i != historySize && canJoin(i + 1, history.get(i + 1))) {
                 LinearLayout layout = new LinearLayout(this);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, cardLayoutHeight);
                 layout.setLayoutParams(params);
@@ -397,6 +405,7 @@ public class HistoryActivity extends AppCompatActivity {
                     imagePreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
                     card.addView(imagePreview);
+                    break;
             }
 
             if (data.type() == ZyncClipType.TEXT) {

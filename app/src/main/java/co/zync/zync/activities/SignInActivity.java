@@ -30,6 +30,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import org.json.JSONException;
 
 /*
  * Activity presented to the user when they are signing in (with google)
@@ -95,12 +96,15 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                         if (task.isSuccessful()) {
                             String idToken = task.getResult().getToken();
 
-                            ZyncAPI.authenticate(
-                                    app.httpClient(),
-                                    idToken,
-                                    new AuthenticateCallback(dialog)
-                            );
-                            return;
+                            try {
+                                getZyncApp().setAuthenticateCallback(new AuthenticateCallback(SignInActivity.this, dialog));
+                                ZyncAPI.authenticate(
+                                        app.httpClient(),
+                                        idToken,
+                                        getZyncApp().authenticateCallback()
+                                );
+                            } catch (JSONException ignored) {
+                            }
                         }
 
                         // todo handle error
@@ -159,37 +163,19 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         return (ZyncApplication) getApplication();
     }
 
-    private class AuthenticateCallback implements ZyncCallback<ZyncAPI> {
+    public static class AuthenticateCallback implements ZyncCallback<Void> {
+        SignInActivity activity;
         ProgressDialog dialog;
         ZyncApplication app;
 
-        AuthenticateCallback(ProgressDialog dialog) {
+        AuthenticateCallback(SignInActivity activity, ProgressDialog dialog) {
             this.dialog = dialog;
-            this.app = getZyncApp();
+            this.activity = activity;
+            this.app = activity.getZyncApp();
         }
 
         @Override
-        public void success(ZyncAPI api) {
-            app.setApi(api);
-            app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
-
-            dialog.dismiss();
-
-            if (!app.getPreferences().contains("encryption_pass")) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        new ZyncPassDialog(SignInActivity.this, getZyncApp(), new ZyncPassDialog.Callback() {
-                            @Override
-                            public void callback() {
-                                signInSuccess();
-                            }
-                        }).promptForPassword();
-                    }
-                });
-            } else {
-                signInSuccess();
-            }
+        public void success(Void api) {
         }
 
         @Override
@@ -197,6 +183,29 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             System.out.println(error.toString());
             dialog.dismiss();
             // TODO do something
+        }
+
+        public void callback(ZyncAPI api) {
+            app.setApi(api);
+            app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
+
+            dialog.dismiss();
+
+            if (!app.getPreferences().contains("encryption_pass")) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new ZyncPassDialog(activity, app, new ZyncPassDialog.Callback() {
+                            @Override
+                            public void callback() {
+                                activity.signInSuccess();
+                            }
+                        }).promptForPassword();
+                    }
+                });
+            } else {
+                activity.signInSuccess();
+            }
         }
     }
 }

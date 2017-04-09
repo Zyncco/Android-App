@@ -2,13 +2,13 @@ package co.zync.zync.firebase;
 
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
-import co.zync.zync.ZyncClipboardService;
 import co.zync.zync.api.ZyncAPI;
-import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.api.callback.ZyncCallback;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import org.json.JSONException;
 
 /**
  * Listens for messages from Firebase and acts accordingly
@@ -25,7 +25,28 @@ public class ZyncMessagingService extends FirebaseMessagingService {
             return;
         }
 
-        ZyncApplication application = ((ZyncApplication) getApplication());
+        final ZyncApplication application = ((ZyncApplication) getApplication());
+
+        if (remoteMessage.getData().containsKey("zync-token")) {
+            String zyncToken = remoteMessage.getData().get("zync-token");
+            String randomToken = remoteMessage.getData().get("random-token");
+
+            try {
+                ZyncAPI.validateDevice(application.httpClient(), zyncToken, randomToken, new ZyncCallback<ZyncAPI>() {
+                    @Override
+                    public void success(ZyncAPI value) {
+                        application.setApi(value);
+                        application.authenticateCallback().callback(value);
+                    }
+
+                    @Override
+                    public void handleError(ZyncError error) {
+                    }
+                });
+            } catch (JSONException ignord) {
+            }
+            return;
+        }
 
         if (!application.getPreferences().getBoolean("sync_down", true)) {
             return;
@@ -35,6 +56,8 @@ public class ZyncMessagingService extends FirebaseMessagingService {
                 !remoteMessage.getData().containsKey("size")) {
             return;
         }
+
+        // TODO filter if already in history
 
         ZyncClipType clipType;
 

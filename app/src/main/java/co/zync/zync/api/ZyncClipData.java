@@ -36,6 +36,7 @@ public class ZyncClipData {
         this.salt = ZyncCrypto.generateSecureSalt();
 
         if (data != null) {
+            this.data = data;
             encrypt(encryptionKey);
         }
     }
@@ -131,16 +132,18 @@ public class ZyncClipData {
             try {
                 byte[] data = this.data;
 
-                compress(data);
+                data = compress(data);
                 data = ZyncCrypto.encrypt(data, key, salt, iv);
                 this.hash = hash(data);
                 this.data = Base64.encodeToString(data, Base64.NO_WRAP).getBytes(Charset.forName("UTF-8"));
-
-                return encrypted = true;
+                encrypted = true;
             } catch (Exception ex) {
+                ex.printStackTrace();
                 this.data = null;
-                return false;
+                encrypted = false;
             }
+
+            return encrypted;
         } else {
             return true;
         }

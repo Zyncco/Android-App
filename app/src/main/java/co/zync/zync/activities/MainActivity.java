@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
@@ -292,39 +293,51 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == REQUEST_IMAGE && resultCode == RESULT_OK) {
             final ProgressDialog dialog = createUploadingDialog();
 
-            try {
-                // compress, encrypt, hash, and create clip data
-                ZyncClipData clipData = getZyncApp().dataManager().saveImage(new FileInputStream(currentFile));
-                File clipFile = getZyncApp().dataManager().fileFor(clipData, false);
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    executeCameraCallback(dialog);
+                    return null;
+                }
+            }.execute();
+        }
+    }
 
-                currentFile.delete(); // remove unencrypted file
-                currentFile = null; // reset current file
+    private void executeCameraCallback(final ProgressDialog dialog) {
+        try {
+            // compress, encrypt, hash, and create clip data
+            ZyncClipData clipData = getZyncApp().dataManager().saveImage(new FileInputStream(currentFile));
+            File clipFile = getZyncApp().dataManager().fileFor(clipData, false);
 
-                // post image to zync async
-                ZyncPostImage.exec(
-                        getZyncApp(),
-                        clipFile, // temporary
-                        clipData,
-                        new ZyncCallback<Void>() {
-                            @Override
-                            public void success(Void value) {
-                                dialog.dismiss();
-                                getZyncApp().sendClipPostedNotification();
-                            }
+            currentFile.delete(); // remove unencrypted file
+            currentFile = null; // reset current file
 
-                            @Override
-                            public void handleError(ZyncError error) {
-                                dialog.dismiss();
-                                getZyncApp().sendClipErrorNotification();
-                                Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
-                                        + error.code() + " : " + error.message());
-                            }
+            // post image to zync async
+            ZyncPostImage.exec(
+                    getZyncApp(),
+                    clipFile, // temporary
+                    clipData,
+                    new ZyncCallback<Void>() {
+                        @Override
+                        public void success(Void value) {
+                            dialog.dismiss();
+                            getZyncApp().sendClipPostedNotification();
                         }
-                );
-            } catch (Exception ignored) {
-                // ex here would be due to an encryption error from ZyncClipData
-                // so it's not quite possible as we didn't provide any data
-            }
+
+                        @Override
+                        public void handleError(ZyncError error) {
+                            dialog.dismiss();
+                            getZyncApp().sendClipErrorNotification();
+                            Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
+                                    + error.code() + " : " + error.message());
+                        }
+                    }
+            );
+
+            getZyncApp().addToHistory(clipData);
+        } catch (Exception ignored) {
+            // ex here would be due to an encryption error from ZyncClipData
+            // so it's not quite possible as we didn't provide any data
         }
     }
 
@@ -361,6 +374,8 @@ public class MainActivity extends AppCompatActivity
                                 clip,
                                 callback
                         );
+
+                        getZyncApp().addToHistory(clip);
                     } catch (IOException ex) {
                         uploadingDialog.dismiss();
                         getZyncApp().sendNotification(

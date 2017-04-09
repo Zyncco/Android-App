@@ -32,7 +32,6 @@ public final class ZyncPostImage {
                         @Override
                         public void success(Void value) {
                             callback.success(value);
-                            app.addToHistory(data);
                         }
 
                         @Override

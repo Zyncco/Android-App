@@ -7,6 +7,7 @@ import co.zync.zync.api.generic.NullZyncTransformer;
 import co.zync.zync.api.generic.ZyncTransformer;
 import co.zync.zync.utils.ZyncCrypto;
 import co.zync.zync.utils.ZyncExceptionInfo;
+import com.google.firebase.iid.FirebaseInstanceId;
 import okhttp3.*;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,14 +40,10 @@ public class ZyncAPI {
         this.token = token;
     }
 
-    public static void authenticate(final OkHttpClient client, String idToken, final ZyncCallback<ZyncAPI> callback) {
+    public static void authenticate(final OkHttpClient client, String idToken, final ZyncCallback<Void> callback) throws JSONException {
         ZyncGenericAPIListener listener = new ZyncGenericAPIListener(new ZyncCallback<JSONObject>() {
             @Override
             public void success(JSONObject node) {
-                try {
-                    callback.success(new ZyncAPI(client, node.getJSONObject("data").getString("zync_token")));
-                } catch (JSONException ignored) {
-                }
             }
 
             @Override
@@ -55,11 +52,41 @@ public class ZyncAPI {
                 ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(new ZyncAPIException(error), "authenticate"));
             }
         });
+
+        JSONObject data = new JSONObject()
+                .put("device-id", FirebaseInstanceId.getInstance().getToken())
+                .put("firebase-token", idToken);
         Request request = new Request.Builder()
-                .url(BASE + VERSION + "/user/authenticate?token=" + idToken)
+                .url(BASE + VERSION + "/user/authenticate")
+                .post(RequestBody.create(
+                        JSON_MEDIA_TYPE,
+                        new JSONObject().put("data", data).toString()
+                ))
                 .addHeader("User-Agent", System.getProperty("http.agent"))
                 .build();
         client.newCall(request).enqueue(listener);
+    }
+
+    public static void validateDevice(final OkHttpClient client, final String token, String randomToken, final ZyncCallback<ZyncAPI> callback) throws JSONException {
+        JSONObject data = new JSONObject()
+                .put("device-id", FirebaseInstanceId.getInstance().getToken())
+                .put("random-token", randomToken);
+        Request request = new Request.Builder()
+                .url(BASE + VERSION + "/device/validate")
+                .post(RequestBody.create(
+                        JSON_MEDIA_TYPE,
+                        new JSONObject().put("data", data).toString()
+                ))
+                .addHeader("X-ZYNC-TOKEN", token)
+                .addHeader("User-Agent", System.getProperty("http.agent"))
+                .build();
+
+        client.newCall(request).enqueue(new ZyncGenericAPIListener(callback, new ZyncTransformer<ZyncAPI>() {
+            @Override
+            public ZyncAPI transform(JSONObject obj) throws Exception {
+                return new ZyncAPI(client, token);
+            }
+        }));
     }
 
     public <T> void executeAuthenticatedRequest(String httpMethod, String method, JSONObject body,
@@ -173,6 +200,8 @@ public class ZyncAPI {
                                     if (!(ex instanceof AEADBadTagException)) {
                                         ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "Decode clip entry from server"));
                                     }
+
+                                    ex.printStackTrace();
                                 }
                             }
 
@@ -279,7 +308,7 @@ public class ZyncAPI {
     // request a URL to upload our encrypted large file
     public void requestUploadUrl(ZyncClipData data, final ZyncCallback<URL> callback) {
         executeAuthenticatedRequest(
-                "GET",
+                "POST",
                 "requestUpload", // todo verify with vilsol
                 data.toJson(),
                 callback,

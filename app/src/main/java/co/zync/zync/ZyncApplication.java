@@ -10,6 +10,7 @@ import android.os.Build;
 import android.preference.PreferenceActivity;
 import android.util.Log;
 import co.zync.zync.activities.SettingsActivity;
+import co.zync.zync.activities.SignInActivity;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
@@ -45,6 +46,7 @@ public class ZyncApplication extends Application {
     private ZyncDataManager dataManager;
     private ZyncAPI api;
     private ZyncWifiReceiver receiver; // do not remove, we have to retain the reference
+    private SignInActivity.AuthenticateCallback authenticateCallback;
     private final ZyncPreferenceChangeListener preferenceChangeListener = new ZyncPreferenceChangeListener(this);
 
     @Override
@@ -75,7 +77,10 @@ public class ZyncApplication extends Application {
         Set<String> historyText = new HashSet<>(history.size());
 
         for (ZyncClipData data : history) {
-            data.encrypt(getEncryptionPass());
+            if (data.data() != null) {
+                data.encrypt(getEncryptionPass());
+            }
+
             historyText.add(data.toJson().toString());
         }
 
@@ -90,7 +95,10 @@ public class ZyncApplication extends Application {
             history.remove(9);
         }
 
-        data.encrypt(getEncryptionPass());
+        if (data.data() != null) {
+            data.encrypt(getEncryptionPass());
+        }
+
         history.add(data.toJson().toString());
         getPreferences().edit().putStringSet("zync_history", new HashSet<>(history))
                 .apply();
@@ -304,6 +312,14 @@ public class ZyncApplication extends Application {
 
     public String getEncryptionPass() {
         return getPreferences().getString("encryption_pass", "default");
+    }
+
+    public SignInActivity.AuthenticateCallback authenticateCallback() {
+        return authenticateCallback;
+    }
+
+    public void setAuthenticateCallback(SignInActivity.AuthenticateCallback authenticateCallback) {
+        this.authenticateCallback = authenticateCallback;
     }
 
     public OkHttpClient httpClient() {
