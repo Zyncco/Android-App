@@ -1,14 +1,18 @@
 package co.zync.zync;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
-import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
+import co.zync.zync.api.ZyncClipType;
+import co.zync.zync.api.callback.NullZyncCallback;
+import co.zync.zync.api.callback.ZyncCallback;
+import co.zync.zync.utils.ZyncCrypto;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import java.io.*;
 
 /**
  * Manager class for large data stored in the clipboard
@@ -47,7 +51,7 @@ public class ZyncDataManager {
      *
      * if the file exists, it will be returned and data can be loaded from there
      */
-    public File load(ZyncClipData data, boolean dl, ZyncAPI.ZyncCallback<File> handler) {
+    public File load(ZyncClipData data, boolean dl, ZyncCallback<File> handler) {
         File file = fileFor(data, false);
 
         if (!file.exists() && dl) {
@@ -56,7 +60,7 @@ public class ZyncDataManager {
                         app.getEncryptionPass(),
                         file,
                         data,
-                        handler == null ? new ZyncAPI.NullZyncCallback<File>() : handler,
+                        handler == null ? new NullZyncCallback<File>() : handler,
                         true
                 );
             } catch (InterruptedException ignored) {
@@ -71,7 +75,11 @@ public class ZyncDataManager {
     }
 
     public File fileFor(ZyncClipData data, boolean create) {
-        File file = new File(clipboardDir, data.timestamp() + ".zclip");
+        return fileFor(data.timestamp(), create);
+    }
+
+    public File fileFor(long timestamp, boolean create) {
+        File file = new File(clipboardDir, timestamp + ".zclip");
 
         if (create && !file.exists()) {
             try {
@@ -85,14 +93,34 @@ public class ZyncDataManager {
         return file;
     }
 
+    public ZyncClipData saveImage(InputStream is) throws Exception {
+        return saveImage(BitmapFactory.decodeStream(is));
+    }
+
+    public ZyncClipData saveImage(Uri uri) throws Exception {
+        return saveImage(MediaStore.Images.Media.getBitmap(app.getContentResolver(), uri));
+    }
+
     // save image to file
-    public void saveImage(ZyncClipData data, Uri uri) throws IOException {
-        Bitmap bitmap = MediaStore.Images.Media.getBitmap(app.getContentResolver(), uri);
-        FileOutputStream fos = new FileOutputStream(fileFor(data, true));
+    public ZyncClipData saveImage(Bitmap bitmap) throws Exception {
+        // preparing clip data
+        long timestamp = System.currentTimeMillis();
+        byte[] salt = ZyncCrypto.generateSecureSalt();
+        byte[] iv = ZyncCrypto.generateSecureIv();
+        File clipFile = fileFor(timestamp, true);
 
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        // converting to PNG creates a universal file format
+        // and does ZLIB compression for us, great!
+        Cipher cipher = ZyncCrypto.getCipher(Cipher.ENCRYPT_MODE, app.getEncryptionPass(), salt, iv);
+        // use this output stream to encrypt the data of the image to file
+        // saves another round of I/O
+        CipherOutputStream output = new CipherOutputStream(new FileOutputStream(clipFile), cipher);
 
-        fos.flush();
-        fos.close();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, output);
+
+        output.flush();
+        output.close();
+
+        return new ZyncClipData(timestamp, ZyncClipType.IMAGE, iv, salt, new FileInputStream(clipFile));
     }
 }

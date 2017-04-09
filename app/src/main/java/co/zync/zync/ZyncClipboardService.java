@@ -8,11 +8,10 @@ import android.os.IBinder;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
-import co.zync.zync.api.ZyncAPI;
-import co.zync.zync.api.ZyncClipData;
-import co.zync.zync.api.ZyncClipType;
-import co.zync.zync.api.ZyncError;
+import co.zync.zync.api.*;
+import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.ZyncExceptionInfo;
+import org.json.JSONException;
 
 import java.nio.charset.Charset;
 
@@ -164,21 +163,25 @@ public class ZyncClipboardService extends Service {
                     return;
                 }
 
-                new ZyncPostClipTask(app, clipData, new ZyncAPI.ZyncCallback<Void>() {
-                    @Override
-                    public void success(Void value) {
-                        app.sendClipPostedNotification();
-                        app.setLastRequestStatus(true);
-                    }
+                try {
+                    app.getApi().postClipboard(clipData, new ZyncCallback<Void>() {
+                        @Override
+                        public void success(Void value) {
+                            app.sendClipPostedNotification();
+                            app.setLastRequestStatus(true);
+                        }
 
-                    @Override
-                    public void handleError(ZyncError error) {
-                        app.sendClipErrorNotification();
-                        app.setLastRequestStatus(false);
-                        Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
-                                + error.code() + " : " + error.message());
-                    }
-                }).execute();
+                        @Override
+                        public void handleError(ZyncError error) {
+                            app.sendClipErrorNotification();
+                            app.setLastRequestStatus(false);
+                            ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(new ZyncAPIException(error), "post clipboard"));
+                            Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
+                                    + error.code() + " : " + error.message());
+                        }
+                    });
+                } catch (JSONException ignored) {
+                }
 
                 app.addToHistory(clipData);
             }

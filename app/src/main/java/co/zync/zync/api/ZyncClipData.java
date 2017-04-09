@@ -7,6 +7,8 @@ import org.json.JSONObject;
 
 import javax.crypto.AEADBadTagException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Comparator;
@@ -24,6 +26,7 @@ public class ZyncClipData {
     private final ZyncClipType type;
     // ONLY exists if type=TEXT, otherwise stored in file
     private byte[] data; // encoded in base 64
+    private boolean encrypted = false; // is data[] encrypted?
 
     public ZyncClipData(String encryptionKey,
                         ZyncClipType type, byte[] data) throws Exception {
@@ -33,11 +36,31 @@ public class ZyncClipData {
         this.salt = ZyncCrypto.generateSecureSalt();
 
         if (data != null) {
-            data = compress(data);
-            data = ZyncCrypto.encrypt(data, encryptionKey, salt, iv);
-            this.hash = hash(data);
-            this.data = Base64.encodeToString(data, Base64.NO_WRAP).getBytes(Charset.forName("UTF-8"));
+            encrypt(encryptionKey);
         }
+    }
+
+    // only for large files
+    public ZyncClipData(long timestamp, ZyncClipType type,
+                        byte[] iv, byte[] salt,
+                        InputStream is) throws IOException {
+        this.timestamp = timestamp;
+        this.type = type;
+        this.iv = iv;
+        this.salt = salt;
+
+        // generate hash efficiently
+        // (load data and update hash in 4096 blocks)
+        CRC32 crc = new CRC32();
+        byte[] buff = new byte[4096];
+        int last = 4096;
+
+        while (last == 4096) {
+            last = is.read(buff);
+            crc.update(buff, 0, last);
+        }
+
+        this.hash = Long.toHexString(crc.getValue());
     }
 
     public ZyncClipData(String encryptionKey, JSONObject obj) throws Exception {
@@ -102,6 +125,27 @@ public class ZyncClipData {
         return Long.toHexString(crc.getValue());
     }
 
+    // returns whether it was successful
+    public boolean encrypt(String key) {
+        if (!encrypted) {
+            try {
+                byte[] data = this.data;
+
+                compress(data);
+                data = ZyncCrypto.encrypt(data, key, salt, iv);
+                this.hash = hash(data);
+                this.data = Base64.encodeToString(data, Base64.NO_WRAP).getBytes(Charset.forName("UTF-8"));
+
+                return encrypted = true;
+            } catch (Exception ex) {
+                this.data = null;
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
     public byte[] iv() {
         return iv;
     }
@@ -136,9 +180,9 @@ public class ZyncClipData {
                     .put("iv", Base64.encodeToString(iv, Base64.NO_WRAP))
                     .put("salt", Base64.encodeToString(salt, Base64.NO_WRAP)));
             object.put("payload-type", type.name());
+            object.put("hash", new JSONObject().put("crc32", hash));
 
             if (data != null) {
-                object.put("hash", new JSONObject().put("crc32", hash));
                 object.put("payload", new String(data, "UTF-8"));
             }
 

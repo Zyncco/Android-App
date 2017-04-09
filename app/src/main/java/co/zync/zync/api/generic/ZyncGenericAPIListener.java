@@ -1,7 +1,7 @@
 package co.zync.zync.api.generic;
 
-import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.api.callback.ZyncCallback;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -14,13 +14,13 @@ import java.io.IOException;
  * @author Mazen Kotb
  */
 public class ZyncGenericAPIListener implements Callback {
-    private final ZyncAPI.ZyncCallback<JSONObject> responseListener;
+    private final ZyncCallback<JSONObject> responseListener;
 
-    public ZyncGenericAPIListener(ZyncAPI.ZyncCallback<JSONObject> responseListener) {
+    public ZyncGenericAPIListener(ZyncCallback<JSONObject> responseListener) {
         this.responseListener = responseListener;
     }
 
-    public <T> ZyncGenericAPIListener(ZyncAPI.ZyncCallback<T> callback, ZyncTransformer<T> transformer) {
+    public <T> ZyncGenericAPIListener(ZyncCallback<T> callback, ZyncTransformer<T> transformer) {
         this.responseListener = new ZyncTransformerCallback<>(callback, transformer);
     }
 

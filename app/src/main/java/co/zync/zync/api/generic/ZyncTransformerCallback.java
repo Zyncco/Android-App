@@ -1,17 +1,17 @@
 package co.zync.zync.api.generic;
 
 import co.zync.zync.ZyncApplication;
-import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncAPIException;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.ZyncExceptionInfo;
 import org.json.JSONObject;
 
-public class ZyncTransformerCallback<T> implements ZyncAPI.ZyncCallback<JSONObject> {
+public class ZyncTransformerCallback<T> implements ZyncCallback<JSONObject> {
     private final ZyncTransformer<T> transformer;
-    private final ZyncAPI.ZyncCallback<T> callback;
+    private final ZyncCallback<T> callback;
 
-    public ZyncTransformerCallback(ZyncAPI.ZyncCallback<T> callback, ZyncTransformer<T> transformer) {
+    public ZyncTransformerCallback(ZyncCallback<T> callback, ZyncTransformer<T> transformer) {
         this.transformer = transformer;
         this.callback = callback;
     }

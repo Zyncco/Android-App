@@ -24,10 +24,10 @@ import android.widget.*;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
 import co.zync.zync.ZyncClipboardService;
-import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.NullDialogClickListener;
 import co.zync.zync.utils.ZyncExceptionInfo;
 import org.json.JSONObject;
@@ -60,7 +60,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         final ZyncApplication app = getZyncApp();
 
-        app.getApi().getHistory(app.getEncryptionPass(), new ZyncAPI.ZyncCallback<List<ZyncClipData>>() {
+        app.getApi().getHistory(app.getEncryptionPass(), new ZyncCallback<List<ZyncClipData>>() {
             @Override
             public void success(final List<ZyncClipData> history) {
                 app.setLastRequestStatus(history != null);
@@ -96,7 +96,7 @@ public class HistoryActivity extends AppCompatActivity {
                      * Otherwise, display local history on activity
                      */
                     if(!missingTimestamps.isEmpty()) {
-                        app.getApi().getClipboard(getZyncApp().getEncryptionPass(), missingTimestamps, new ZyncAPI.ZyncCallback<List<ZyncClipData>>() {
+                        app.getApi().getClipboard(getZyncApp().getEncryptionPass(), missingTimestamps, new ZyncCallback<List<ZyncClipData>>() {
                             @Override
                             public void success(List<ZyncClipData> value) {
                                 for (ZyncClipData clip : value) {

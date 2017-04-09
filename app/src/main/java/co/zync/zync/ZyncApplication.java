@@ -2,7 +2,6 @@ package co.zync.zync;
 
 import android.app.*;
 import android.content.*;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
@@ -15,9 +14,11 @@ import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.firebase.ZyncInstanceIdService;
 import co.zync.zync.firebase.ZyncMessagingService;
 import co.zync.zync.utils.NullDialogClickListener;
+import co.zync.zync.utils.RequestStatusListener;
 import co.zync.zync.utils.ZyncExceptionInfo;
 import okhttp3.OkHttpClient;
 
@@ -39,7 +40,7 @@ public class ZyncApplication extends Application {
     /* END NOTIFICATION IDS */
     // whether the last request was successful or not
     private AtomicBoolean lastRequestStatus = new AtomicBoolean(true);
-    private ZyncPostClipTask.RequestStatusListener requestStatusListener;
+    private RequestStatusListener requestStatusListener;
     private OkHttpClient httpClient;
     private ZyncDataManager dataManager;
     private ZyncAPI api;
@@ -74,9 +75,8 @@ public class ZyncApplication extends Application {
         Set<String> historyText = new HashSet<>(history.size());
 
         for (ZyncClipData data : history) {
-            if (data.data() != null) {
-                historyText.add(data.toJson().toString());
-            }
+            data.encrypt(getEncryptionPass());
+            historyText.add(data.toJson().toString());
         }
 
         getPreferences().edit().putStringSet("zync_history", historyText).apply();
@@ -90,6 +90,7 @@ public class ZyncApplication extends Application {
             history.remove(9);
         }
 
+        data.encrypt(getEncryptionPass());
         history.add(data.toJson().toString());
         getPreferences().edit().putStringSet("zync_history", new HashSet<>(history))
                 .apply();
@@ -165,7 +166,7 @@ public class ZyncApplication extends Application {
         }
     }
 
-    public void setRequestStatusListener(ZyncPostClipTask.RequestStatusListener requestStatusListener) {
+    public void setRequestStatusListener(RequestStatusListener requestStatusListener) {
         this.requestStatusListener = requestStatusListener;
     }
 
@@ -259,7 +260,7 @@ public class ZyncApplication extends Application {
      */
     public void syncDown() {
         if (getPreferences().getBoolean("sync_down", true)) {
-            api.getClipboard(getEncryptionPass(), new ZyncAPI.ZyncCallback<ZyncClipData>() {
+            api.getClipboard(getEncryptionPass(), new ZyncCallback<ZyncClipData>() {
                 @Override
                 public void success(ZyncClipData value) {
                     byte[] data;

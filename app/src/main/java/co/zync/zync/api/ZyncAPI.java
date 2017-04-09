@@ -1,8 +1,9 @@
 package co.zync.zync.api;
 
 import co.zync.zync.ZyncApplication;
+import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.api.generic.ZyncGenericAPIListener;
-import co.zync.zync.api.generic.ZyncNullTransformer;
+import co.zync.zync.api.generic.NullZyncTransformer;
 import co.zync.zync.api.generic.ZyncTransformer;
 import co.zync.zync.utils.ZyncCrypto;
 import co.zync.zync.utils.ZyncExceptionInfo;
@@ -85,7 +86,7 @@ public class ZyncAPI {
                 "clipboard",
                 body,
                 responseListener,
-                new ZyncNullTransformer<Void>()
+                new NullZyncTransformer<Void>()
         );
     }
 
@@ -251,7 +252,7 @@ public class ZyncAPI {
                  */
                 while (last == 4096) {
                     last = source.read(buffer);
-                    os.write(buffer);
+                    os.write(buffer, 0, last);
                 }
 
                 // flush and cleanup
@@ -299,7 +300,7 @@ public class ZyncAPI {
                 .addHeader("User-Agent", System.getProperty("http.agent"))
                 .build();
 
-        client.newCall(request).enqueue(new ZyncGenericAPIListener(callback, new ZyncNullTransformer<Void>()));
+        client.newCall(request).enqueue(new ZyncGenericAPIListener(callback, new NullZyncTransformer<Void>()));
     }
 
     public String getToken() {
@@ -314,19 +315,4 @@ public class ZyncAPI {
         this.client = client;
     }
 
-    public interface ZyncCallback<T> {
-        void success(T value);
-        void handleError(ZyncError error);
-    }
-
-    // literally does absolutely nothing
-    public static class NullZyncCallback<T> implements ZyncCallback<T> {
-        @Override
-        public void success(T value) {
-        }
-
-        @Override
-        public void handleError(ZyncError error) {
-        }
-    }
 }

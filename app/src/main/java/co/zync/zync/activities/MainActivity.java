@@ -23,14 +23,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import co.zync.zync.*;
-import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
+import co.zync.zync.api.callback.ZyncCallback;
+import co.zync.zync.utils.RequestStatusListener;
 import co.zync.zync.utils.ZyncCircleView;
 import co.zync.zync.utils.ZyncExceptionInfo;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final Timer TIMER = new Timer();
     public static int REQUEST_IMAGE = 23212;
-    private ZyncClipData currentClip;
+    private File currentFile;
     private ZyncCircleView.ColorChangeTask circleColorChangeTask;
     private ZyncCircleView.SizeChangeTask circleBreathingTask;
 
@@ -120,7 +122,7 @@ public class MainActivity extends AppCompatActivity
 
         scheduleCircleSizeTask();
 
-        getZyncApp().setRequestStatusListener(new ZyncPostClipTask.RequestStatusListener() {
+        getZyncApp().setRequestStatusListener(new RequestStatusListener() {
             @Override
             public void onStatusChange(boolean value) {
                 runOnUiThread(new Runnable() {
@@ -248,8 +250,7 @@ public class MainActivity extends AppCompatActivity
                 File photoFile = null;
 
                 try {
-                    currentClip = new ZyncClipData(getZyncApp().getEncryptionPass(), ZyncClipType.IMAGE, null);
-                    photoFile = getZyncApp().dataManager().fileFor(currentClip, true);
+                    photoFile = currentFile = createImageFile();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "create image file for camera feature"));
@@ -292,12 +293,19 @@ public class MainActivity extends AppCompatActivity
             final ProgressDialog dialog = createUploadingDialog();
 
             try {
+                // compress, encrypt, hash, and create clip data
+                ZyncClipData clipData = getZyncApp().dataManager().saveImage(new FileInputStream(currentFile));
+                File clipFile = getZyncApp().dataManager().fileFor(clipData, false);
+
+                currentFile.delete(); // remove unencrypted file
+                currentFile = null; // reset current file
+
                 // post image to zync async
-                new ZyncPostImageTask(
+                ZyncPostImage.exec(
                         getZyncApp(),
-                        createImageFile(), // temporary
-                        currentClip,
-                        new ZyncAPI.ZyncCallback<Void>() {
+                        clipFile, // temporary
+                        clipData,
+                        new ZyncCallback<Void>() {
                             @Override
                             public void success(Void value) {
                                 dialog.dismiss();
@@ -312,7 +320,7 @@ public class MainActivity extends AppCompatActivity
                                         + error.code() + " : " + error.message());
                             }
                         }
-                ).execute(Uri.fromFile(getZyncApp().dataManager().fileFor(currentClip, false)));
+                );
             } catch (Exception ignored) {
                 // ex here would be due to an encryption error from ZyncClipData
                 // so it's not quite possible as we didn't provide any data
@@ -327,32 +335,32 @@ public class MainActivity extends AppCompatActivity
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if (getZyncApp().getApi() != null) {
-                if (type.startsWith("image/")) {
-                    final ProgressDialog uploadingDialog = createUploadingDialog();
+                final ProgressDialog uploadingDialog = createUploadingDialog();
+                ZyncCallback<Void> callback = new ZyncCallback<Void>() {
+                    @Override
+                    public void success(Void value) {
+                        uploadingDialog.dismiss();
+                        getZyncApp().sendClipPostedNotification();
+                    }
 
+                    @Override
+                    public void handleError(ZyncError error) {
+                        uploadingDialog.dismiss();
+                        getZyncApp().sendClipErrorNotification();
+                    }
+                };
+
+                if (type.startsWith("image/")) {
                     try {
                         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                        ZyncClipData clip = new ZyncClipData(getZyncApp().getEncryptionPass(), ZyncClipType.IMAGE, null);
-                        getZyncApp().dataManager().saveImage(clip, imageUri);
+                        ZyncClipData clip = getZyncApp().dataManager().saveImage(imageUri);
 
-                        new ZyncPostImageTask(
+                        ZyncPostImage.exec(
                                 getZyncApp(),
-                                createImageFile(),
+                                getZyncApp().dataManager().fileFor(clip, false),
                                 clip,
-                                new ZyncAPI.ZyncCallback<Void>() {
-                                    @Override
-                                    public void success(Void value) {
-                                        uploadingDialog.dismiss();
-                                        getZyncApp().sendClipPostedNotification();
-                                    }
-
-                                    @Override
-                                    public void handleError(ZyncError error) {
-                                        uploadingDialog.dismiss();
-                                        getZyncApp().sendClipErrorNotification();
-                                    }
-                                }
-                        ).execute(imageUri);
+                                callback
+                        );
                     } catch (IOException ex) {
                         uploadingDialog.dismiss();
                         getZyncApp().sendNotification(
@@ -366,11 +374,11 @@ public class MainActivity extends AppCompatActivity
                     String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
 
                     try {
-                        new ZyncPostClipTask(
-                                getZyncApp(),
-                                sharedText.getBytes(Charset.forName("UTF-8")),
-                                ZyncClipType.TEXT
-                        ).execute();
+                        getZyncApp().getApi().postClipboard(new ZyncClipData(
+                                getZyncApp().getEncryptionPass(),
+                                ZyncClipType.TEXT,
+                                sharedText.getBytes(Charset.forName("UTF-8"))
+                        ), callback);
                         getZyncApp().sendClipPostedNotification();
                     } catch (Exception e) {
                         ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(e, "post clip from share"));

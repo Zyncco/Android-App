@@ -12,6 +12,7 @@ import android.view.View;
 
 import co.zync.zync.*;
 import co.zync.zync.activities.intro.IntroActivity;
+import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.ZyncPassDialog;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
@@ -158,7 +159,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         return (ZyncApplication) getApplication();
     }
 
-    private class AuthenticateCallback implements ZyncAPI.ZyncCallback<ZyncAPI> {
+    private class AuthenticateCallback implements ZyncCallback<ZyncAPI> {
         ProgressDialog dialog;
         ZyncApplication app;
 
