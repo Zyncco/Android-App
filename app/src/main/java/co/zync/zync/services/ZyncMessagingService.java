@@ -1,4 +1,4 @@
-package co.zync.zync.firebase;
+package co.zync.zync.services;
 
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
@@ -48,7 +48,7 @@ public class ZyncMessagingService extends FirebaseMessagingService {
             return;
         }
 
-        if (!application.getPreferences().getBoolean("sync_down", true)) {
+        if (!application.getConfig().syncDown()) {
             return;
         }
 
@@ -72,7 +72,7 @@ public class ZyncMessagingService extends FirebaseMessagingService {
         }
 
         long size = Long.valueOf(remoteMessage.getData().get("size"));
-        long maxSize = application.getMaxSize();
+        long maxSize = application.getConfig().getMaxSize();
 
         if (maxSize != 0 && size > maxSize) {
             return;

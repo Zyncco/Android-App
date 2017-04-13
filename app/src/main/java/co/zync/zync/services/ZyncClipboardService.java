@@ -1,4 +1,4 @@
-package co.zync.zync;
+package co.zync.zync.services;
 
 import android.app.Notification;
 import android.app.Service;
@@ -8,6 +8,8 @@ import android.os.IBinder;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import co.zync.zync.R;
+import co.zync.zync.ZyncApplication;
 import co.zync.zync.api.*;
 import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.ZyncExceptionInfo;
@@ -44,7 +46,7 @@ public class ZyncClipboardService extends Service {
         clipboardListener = new ZyncClipboardListener();
         clipMan.addPrimaryClipChangedListener(clipboardListener);
 
-        if (app.getPreferences().getBoolean("enable_persistent_notification", true)) {
+        if (app.getConfig().persistentNotification()) {
             becomePersistent();
         }
     }
@@ -141,11 +143,11 @@ public class ZyncClipboardService extends Service {
                 return; // they haven't logged in yet
             }
 
-            if (!app.getPreferences().getBoolean("sync_up", true)) {
+            if (!app.getConfig().syncUp()) {
                 return;
             }
 
-            long maxSize = app.getMaxSize();
+            long maxSize = app.getConfig().getMaxSize();
 
             if (maxSize != 0 && data.length > maxSize) {
                 return;
@@ -155,7 +157,7 @@ public class ZyncClipboardService extends Service {
                 ZyncClipData clipData;
 
                 try {
-                    clipData = new ZyncClipData(app.getEncryptionPass(), ZyncClipType.TEXT, data);
+                    clipData = new ZyncClipData(app.getConfig().getEncryptionPass(), ZyncClipType.TEXT, data);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "create ClipData from copy"));
@@ -183,7 +185,7 @@ public class ZyncClipboardService extends Service {
                 } catch (JSONException ignored) {
                 }
 
-                app.addToHistory(clipData);
+                app.getConfig().addToHistory(clipData);
             }
         }
     }

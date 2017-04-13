@@ -16,10 +16,12 @@ import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.api.callback.ZyncCallback;
-import co.zync.zync.firebase.ZyncInstanceIdService;
-import co.zync.zync.firebase.ZyncMessagingService;
-import co.zync.zync.utils.NullDialogClickListener;
-import co.zync.zync.utils.RequestStatusListener;
+import co.zync.zync.services.ZyncClipboardService;
+import co.zync.zync.services.ZyncInstanceIdService;
+import co.zync.zync.services.ZyncMessagingService;
+import co.zync.zync.listeners.ZyncPreferenceChangeListener;
+import co.zync.zync.listeners.NullDialogClickListener;
+import co.zync.zync.listeners.RequestStatusListener;
 import co.zync.zync.utils.ZyncExceptionInfo;
 import okhttp3.OkHttpClient;
 
@@ -31,7 +33,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ZyncApplication extends Application {
-    public static final List<String> SENSITIVE_PREFERENCE_FIELDS = Arrays.asList("zync_history", "zync_api_token", "encryption_pass");
+    public static final List<String> SENSITIVE_PREFERENCE_FIELDS = Arrays.asList("zync_history", "zync_api_token", "encryption_pass", "encryption_key");
     public static final List<ZyncExceptionInfo> LOGGED_EXCEPTIONS = Collections.synchronizedList(new ArrayList<ZyncExceptionInfo>());
     /* START NOTIFICATION IDS */
     public static int CLIPBOARD_UPDATED_ID = 281902;
@@ -43,6 +45,7 @@ public class ZyncApplication extends Application {
     private AtomicBoolean lastRequestStatus = new AtomicBoolean(true);
     private RequestStatusListener requestStatusListener;
     private OkHttpClient httpClient;
+    private ZyncConfiguration config;
     private ZyncDataManager dataManager;
     private ZyncAPI api;
     private ZyncWifiReceiver receiver; // do not remove, we have to retain the reference
@@ -53,8 +56,10 @@ public class ZyncApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        this.config = new ZyncConfiguration(this);
+
         // if we are connected to wifi or allowed to use data, setup Zync network services
-        if (isWifiConnected() || getPreferences().getBoolean("use_on_data", true)) {
+        if (isWifiConnected() || config.useOnData()) {
             setupNetwork();
         }
 
@@ -65,43 +70,15 @@ public class ZyncApplication extends Application {
         registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         // set a preference listener to make changes to activity when user changes setting
-        getPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+        config.getPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
     }
 
-    public ZyncDataManager dataManager() {
+    public ZyncConfiguration getConfig() {
+        return config;
+    }
+
+    public ZyncDataManager getDataManager() {
         return dataManager;
-    }
-
-    // Set the history that is stored on file
-    public void setHistory(List<ZyncClipData> history) {
-        Set<String> historyText = new HashSet<>(history.size());
-
-        for (ZyncClipData data : history) {
-            if (data.data() != null) {
-                data.encrypt(getEncryptionPass());
-            }
-
-            historyText.add(data.toJson().toString());
-        }
-
-        getPreferences().edit().putStringSet("zync_history", historyText).apply();
-    }
-
-    // adds an item to history and writes changes to file
-    public void addToHistory(ZyncClipData data) {
-        List<String> history = new ArrayList<>(getPreferences().getStringSet("zync_history", new HashSet<String>()));
-
-        if (history.size() == 10) {
-            history.remove(9);
-        }
-
-        if (data.data() != null) {
-            data.encrypt(getEncryptionPass());
-        }
-
-        history.add(data.toJson().toString());
-        getPreferences().edit().putStringSet("zync_history", new HashSet<>(history))
-                .apply();
     }
 
     // utility method to effectively -> filter(timestamp).findFirst()
@@ -217,7 +194,7 @@ public class ZyncApplication extends Application {
     }
 
     public void sendClipPostedNotification() {
-        if (getPreferences().getBoolean("clipboard_change_notification", true)) {
+        if (config.sendClipboardOnChange()) {
             sendNotification(
                     CLIPBOARD_POSTED_ID,
                     getString(R.string.clipboard_posted_notification),
@@ -267,8 +244,8 @@ public class ZyncApplication extends Application {
      * Sync cloud clipboard to local
      */
     public void syncDown() {
-        if (getPreferences().getBoolean("sync_down", true)) {
-            api.getClipboard(getEncryptionPass(), new ZyncCallback<ZyncClipData>() {
+        if (config.syncDown()) {
+            api.getClipboard(config.getEncryptionPass(), new ZyncCallback<ZyncClipData>() {
                 @Override
                 public void success(ZyncClipData value) {
                     byte[] data;
@@ -289,11 +266,6 @@ public class ZyncApplication extends Application {
         }
     }
 
-    // max size of a payload allowed based on settings in bytes
-    public long getMaxSize() {
-        return getPreferences().getInt("max_size", 10) * 1000000;
-    }
-
     // check if the clip type is supported in the app
     // modification will cause odd behaviour and errors
     // in the app
@@ -308,10 +280,6 @@ public class ZyncApplication extends Application {
         settingsIntent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, SettingsActivity.GeneralPreferenceFragment.class.getName());
         settingsIntent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true);
         startActivity(settingsIntent);
-    }
-
-    public String getEncryptionPass() {
-        return getPreferences().getString("encryption_pass", "default");
     }
 
     public SignInActivity.AuthenticateCallback authenticateCallback() {
@@ -330,19 +298,8 @@ public class ZyncApplication extends Application {
         return api;
     }
 
-    public SharedPreferences getPreferences() {
-        return getSharedPreferences(SettingsActivity.PREFERENCES_NAME, 0);
-    }
-
     public void setApi(ZyncAPI api) {
         this.api = api;
-    }
-
-    public void clearPreferences() {
-        getPreferences().edit()
-                .remove("zync_api_token")
-                .remove("zync_history")
-                .apply();
     }
 
     // creates the info file (zync_debug_info.txt) and fills it with a debug report
@@ -394,7 +351,7 @@ public class ZyncApplication extends Application {
 
         builder.append('\n');
         builder.append("Zync Settings:\n");
-        Map<String, ?> prefs = getPreferences().getAll();
+        Map<String, ?> prefs = config.getPreferences().getAll();
 
         for (String key : prefs.keySet()) {
             // do NOT include sensitive information such as their history or encryption password

@@ -65,9 +65,7 @@ public class ZyncPassDialog {
 
         // todo test password entropy (consecutive characters, etc.)
 
-        app.getPreferences().edit()
-                .putString("encryption_pass", enteredPass)
-                .apply();
+        app.getConfig().setEncryptionPass(enteredPass);
         callback.callback();
         return true;
     }

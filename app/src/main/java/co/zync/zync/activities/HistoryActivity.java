@@ -23,16 +23,13 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.*;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
-import co.zync.zync.ZyncClipboardService;
+import co.zync.zync.services.ZyncClipboardService;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.api.callback.ZyncCallback;
-import co.zync.zync.utils.NullDialogClickListener;
-import co.zync.zync.utils.ZyncExceptionInfo;
-import org.json.JSONObject;
+import co.zync.zync.listeners.NullDialogClickListener;
 
-import javax.crypto.AEADBadTagException;
 import java.util.*;
 
 public class HistoryActivity extends AppCompatActivity {
@@ -61,7 +58,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         final ZyncApplication app = getZyncApp();
 
-        app.getApi().getHistory(app.getEncryptionPass(), new ZyncCallback<List<ZyncClipData>>() {
+        app.getApi().getHistory(app.getConfig().getEncryptionPass(), new ZyncCallback<List<ZyncClipData>>() {
             @Override
             public void success(final List<ZyncClipData> history) {
                 app.setLastRequestStatus(history != null);
@@ -73,7 +70,7 @@ public class HistoryActivity extends AppCompatActivity {
                      * If the client has the data for the clipboard entry locally, load from there.
                      * Otherwise, add the timestamp to a list that we will request the payload for.
                      */
-                    List<ZyncClipData> localHistory = historyFromFile();
+                    List<ZyncClipData> localHistory = app.getConfig().getHistory();
                     List<Long> missingTimestamps = new ArrayList<>();
 
                     for (ZyncClipData historyEntry : history) {
@@ -97,7 +94,7 @@ public class HistoryActivity extends AppCompatActivity {
                      * Otherwise, display local history on activity
                      */
                     if(!missingTimestamps.isEmpty()) {
-                        app.getApi().getClipboard(getZyncApp().getEncryptionPass(), missingTimestamps, new ZyncCallback<List<ZyncClipData>>() {
+                        app.getApi().getClipboard(app.getConfig().getEncryptionPass(), missingTimestamps, new ZyncCallback<List<ZyncClipData>>() {
                             @Override
                             public void success(List<ZyncClipData> value) {
                                 for (ZyncClipData clip : value) {
@@ -108,7 +105,7 @@ public class HistoryActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         setHistory(history);
-                                        app.setHistory(history);
+                                        app.getConfig().setHistory(history);
                                         dialog.dismiss();
                                     }
                                 });
@@ -124,7 +121,7 @@ public class HistoryActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 setHistory(history);
-                                app.setHistory(history);
+                                app.getConfig().setHistory(history);
                                 dialog.dismiss();
                             }
                         });
@@ -191,34 +188,13 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void loadHistoryFromFile() {
-        final List<ZyncClipData> history = historyFromFile();
+        final List<ZyncClipData> history = getZyncApp().getConfig().getHistory();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 setHistory(history);
             }
         });
-    }
-
-    private List<ZyncClipData> historyFromFile() {
-        Set<String> historyStr = getZyncApp().getPreferences()
-                .getStringSet("zync_history", new HashSet<String>());
-        final List<ZyncClipData> history = new ArrayList<>(historyStr.size());
-
-        for (String json : historyStr) {
-            try {
-                history.add(new ZyncClipData(getZyncApp().getEncryptionPass(), new JSONObject(json)));
-            } catch (Exception e) {
-                e.printStackTrace();
-
-                if (!(e instanceof AEADBadTagException)) {
-                    ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(e, "decoding history from file"));
-                }
-            }
-        }
-
-        Collections.sort(history, new ZyncClipData.TimeComparator());
-        return history;
     }
 
     private boolean canJoin(int index, ZyncClipData data) {
@@ -229,7 +205,7 @@ public class HistoryActivity extends AppCompatActivity {
                 bitMapOption = new BitmapFactory.Options();
                 bitMapOption.inJustDecodeBounds = true;
 
-                BitmapFactory.decodeFile(getZyncApp().dataManager().load(data, true).getAbsolutePath(), bitMapOption);
+                BitmapFactory.decodeFile(getZyncApp().getDataManager().load(data, true).getAbsolutePath(), bitMapOption);
                 imageOptions.append(index, bitMapOption);
             }
 
@@ -395,7 +371,7 @@ public class HistoryActivity extends AppCompatActivity {
 
                     Bitmap bitmap = BitmapFactory.decodeFile(
                             // image must already be loaded as we are already making calculations with it
-                            getZyncApp().dataManager().load(data, false).getAbsolutePath(),
+                            getZyncApp().getDataManager().load(data, false).getAbsolutePath(),
                             bitmapOptions
                     );
                     ImageView imagePreview = new ImageView(this);

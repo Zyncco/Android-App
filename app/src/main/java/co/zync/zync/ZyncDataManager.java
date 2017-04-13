@@ -57,7 +57,7 @@ public class ZyncDataManager {
         if (!file.exists() && dl) {
             try {
                 app.getApi().downloadLarge(
-                        app.getEncryptionPass(),
+                        app.getConfig().getEncryptionPass(),
                         file,
                         data,
                         handler == null ? new NullZyncCallback<File>() : handler,
@@ -111,7 +111,7 @@ public class ZyncDataManager {
 
         // converting to PNG creates a universal file format
         // and does ZLIB compression for us, great!
-        Cipher cipher = ZyncCrypto.getCipher(Cipher.ENCRYPT_MODE, app.getEncryptionPass(), salt, iv);
+        Cipher cipher = ZyncCrypto.getCipher(Cipher.ENCRYPT_MODE, app.getConfig().getEncryptionPass(), salt, iv);
         // use this output stream to encrypt the data of the image to file
         // saves another round of I/O
         CipherOutputStream output = new CipherOutputStream(new FileOutputStream(clipFile), cipher);

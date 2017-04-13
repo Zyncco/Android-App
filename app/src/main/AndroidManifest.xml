@@ -23,16 +23,16 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="ManifestResource">
-        <service android:name=".ZyncClipboardService"/>
+        <service android:name=".services.ZyncClipboardService"/>
         <service
-                android:name=".firebase.ZyncMessagingService"
+                android:name=".services.ZyncMessagingService"
                 android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
         <service
-                android:name=".firebase.ZyncInstanceIdService"
+                android:name=".services.ZyncInstanceIdService"
                 android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>

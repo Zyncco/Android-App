@@ -12,7 +12,7 @@ public class ZyncWifiReceiver extends BroadcastReceiver {
         ZyncApplication app = (ZyncApplication) context.getApplicationContext();
         ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = conMan.getActiveNetworkInfo();
-        boolean useOnData = app.getPreferences().getBoolean("use_on_data", true);
+        boolean useOnData = app.getConfig().useOnData();
 
         if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
             if (!useOnData && app.httpClient() == null) {

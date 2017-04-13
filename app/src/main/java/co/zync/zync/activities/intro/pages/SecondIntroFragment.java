@@ -22,9 +22,7 @@ public class SecondIntroFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.start_app_button) {
-            ((ZyncApplication) getActivity().getApplication()).getPreferences().edit()
-                    .putBoolean("seen_intro", true)
-                    .commit();
+            ((ZyncApplication) getActivity().getApplication()).getConfig().setSeenIntro(true);
 
             Intent intent = new Intent(getContext(), SignInActivity.class);
             intent.putExtra("intro_direct", true);

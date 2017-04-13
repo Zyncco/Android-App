@@ -1,4 +1,4 @@
-package co.zync.zync.utils;
+package co.zync.zync.listeners;
 
 /**
  * @author Mazen Kotb

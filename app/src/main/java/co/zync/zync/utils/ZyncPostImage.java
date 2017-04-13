@@ -1,5 +1,6 @@
-package co.zync.zync;
+package co.zync.zync.utils;
 
+import co.zync.zync.ZyncApplication;
 import co.zync.zync.api.*;
 import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.ZyncExceptionInfo;

@@ -1,4 +1,4 @@
-package co.zync.zync.firebase;
+package co.zync.zync.services;
 
 import com.google.firebase.iid.FirebaseInstanceIdService;
 

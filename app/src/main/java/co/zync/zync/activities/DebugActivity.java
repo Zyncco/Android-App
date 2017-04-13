@@ -10,7 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
-import co.zync.zync.ZyncClipboardService;
+import co.zync.zync.services.ZyncClipboardService;
 
 public class DebugActivity extends AppCompatActivity {
 

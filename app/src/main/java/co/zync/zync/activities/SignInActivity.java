@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +12,7 @@ import android.view.View;
 import co.zync.zync.*;
 import co.zync.zync.activities.intro.IntroActivity;
 import co.zync.zync.api.callback.ZyncCallback;
+import co.zync.zync.services.ZyncClipboardService;
 import co.zync.zync.utils.ZyncPassDialog;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
@@ -47,9 +47,9 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this);
         findViewById(R.id.sign_in_button).setOnClickListener(this);
 
-        SharedPreferences preferences = getZyncApp().getPreferences();
+        ZyncConfiguration preferences = getZyncApp().getConfig();
 
-        if (!preferences.contains("seen_intro") || (BuildConfig.DEBUG && !getIntent().hasExtra("intro_direct"))) {
+        if (!preferences.seenIntro() || (BuildConfig.DEBUG && !getIntent().hasExtra("intro_direct"))) {
             startActivity(new Intent(this, IntroActivity.class));
         }
     }
@@ -187,11 +187,11 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
         public void callback(ZyncAPI api) {
             app.setApi(api);
-            app.getPreferences().edit().putString("zync_api_token", api.getToken()).apply();
+            app.getConfig().setApiToken(api.getToken());
 
             dialog.dismiss();
 
-            if (!app.getPreferences().contains("encryption_pass")) {
+            if (app.getConfig().getEncryptionPass() == null) {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

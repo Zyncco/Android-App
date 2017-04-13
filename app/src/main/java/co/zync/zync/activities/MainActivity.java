@@ -2,7 +2,6 @@ package co.zync.zync.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.ColorMatrix;
@@ -28,9 +27,11 @@ import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.api.callback.ZyncCallback;
-import co.zync.zync.utils.RequestStatusListener;
+import co.zync.zync.services.ZyncClipboardService;
+import co.zync.zync.listeners.RequestStatusListener;
 import co.zync.zync.utils.ZyncCircleView;
 import co.zync.zync.utils.ZyncExceptionInfo;
+import co.zync.zync.utils.ZyncPostImage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,10 +76,8 @@ public class MainActivity extends AppCompatActivity
         findViewById(R.id.zync_circle).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences preferences = getZyncApp().getPreferences();
-                preferences.edit()
-                        .putBoolean("zync_on", !preferences.getBoolean("zync_on", true))
-                        .apply();
+                ZyncConfiguration preferences = getZyncApp().getConfig();
+                preferences.setZyncOn(!preferences.zyncOn());
 
                 updateCircleColor();
             }
@@ -151,7 +150,7 @@ public class MainActivity extends AppCompatActivity
     private void updateCircleColor() {
         ZyncCircleView circle = (ZyncCircleView) findViewById(R.id.zync_circle);
 
-        if (!getZyncApp().getPreferences().getBoolean("zync_on", true)) {
+        if (!getZyncApp().getConfig().zyncOn()) {
             // make circle gray start
             ColorMatrix matrix = new ColorMatrix();
             matrix.setSaturation(0);
@@ -240,7 +239,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(this, HelpActivity.class));
         } else if (id == R.id.logout) {
             getZyncApp().setApi(null);
-            getZyncApp().clearPreferences();
+            getZyncApp().getConfig().clear();
             stopService(new Intent(this, ZyncClipboardService.class));
             startActivity(new Intent(this, SignInActivity.class));
         } else if (id == R.id.camera) {
@@ -306,8 +305,8 @@ public class MainActivity extends AppCompatActivity
     private void executeCameraCallback(final ProgressDialog dialog) {
         try {
             // compress, encrypt, hash, and create clip data
-            ZyncClipData clipData = getZyncApp().dataManager().saveImage(new FileInputStream(currentFile));
-            File clipFile = getZyncApp().dataManager().fileFor(clipData, false);
+            ZyncClipData clipData = getZyncApp().getDataManager().saveImage(new FileInputStream(currentFile));
+            File clipFile = getZyncApp().getDataManager().fileFor(clipData, false);
 
             currentFile.delete(); // remove unencrypted file
             currentFile = null; // reset current file
@@ -334,7 +333,7 @@ public class MainActivity extends AppCompatActivity
                     }
             );
 
-            getZyncApp().addToHistory(clipData);
+            getZyncApp().getConfig().addToHistory(clipData);
         } catch (Exception ignored) {
             // ex here would be due to an encryption error from ZyncClipData
             // so it's not quite possible as we didn't provide any data
@@ -366,16 +365,16 @@ public class MainActivity extends AppCompatActivity
                 if (type.startsWith("image/")) {
                     try {
                         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                        ZyncClipData clip = getZyncApp().dataManager().saveImage(imageUri);
+                        ZyncClipData clip = getZyncApp().getDataManager().saveImage(imageUri);
 
                         ZyncPostImage.exec(
                                 getZyncApp(),
-                                getZyncApp().dataManager().fileFor(clip, false),
+                                getZyncApp().getDataManager().fileFor(clip, false),
                                 clip,
                                 callback
                         );
 
-                        getZyncApp().addToHistory(clip);
+                        getZyncApp().getConfig().addToHistory(clip);
                     } catch (IOException ex) {
                         uploadingDialog.dismiss();
                         getZyncApp().sendNotification(
@@ -390,7 +389,7 @@ public class MainActivity extends AppCompatActivity
 
                     try {
                         getZyncApp().getApi().postClipboard(new ZyncClipData(
-                                getZyncApp().getEncryptionPass(),
+                                getZyncApp().getConfig().getEncryptionPass(),
                                 ZyncClipType.TEXT,
                                 sharedText.getBytes(Charset.forName("UTF-8"))
                         ), callback);

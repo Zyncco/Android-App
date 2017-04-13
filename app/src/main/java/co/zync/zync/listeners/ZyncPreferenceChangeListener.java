@@ -1,6 +1,8 @@
-package co.zync.zync;
+package co.zync.zync.listeners;
 
 import android.content.SharedPreferences;
+import co.zync.zync.ZyncApplication;
+import co.zync.zync.services.ZyncClipboardService;
 
 /**
  * @author Mazen Kotb

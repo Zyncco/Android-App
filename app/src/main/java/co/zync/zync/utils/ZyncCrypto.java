@@ -6,6 +6,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 public class ZyncCrypto {
@@ -17,6 +19,25 @@ public class ZyncCrypto {
     public static byte[] generateSecureIv() {
         SecureRandom rng = new SecureRandom();
         return rng.generateSeed(16);
+    }
+
+    public static String hashSha(byte[] data) {
+        MessageDigest md;
+
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException ex) {
+            return "unsupported";
+        }
+
+        data = md.digest(data);
+        StringBuilder sb = new StringBuilder();
+
+        for (byte b : data) {
+            sb.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
+        }
+
+        return sb.toString();
     }
 
     public static Cipher getCipher(int mode, String encryptionKey, byte[] salt, byte[] iv) throws Exception {
