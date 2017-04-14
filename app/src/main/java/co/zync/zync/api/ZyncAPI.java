@@ -219,7 +219,7 @@ public class ZyncAPI {
     // or greater of a certain threshold, this method will be used
     // to download the clip and stream it to file
     // NOTE: Only throws InterruptedException if blocking = true
-    public void downloadLarge(final String encryptionPass, final File file,
+    public void downloadLarge(final File file,
                               final ZyncClipData data, // only contains metadata
                               final ZyncCallback<File> callback,
                               final boolean blocking) throws InterruptedException {
@@ -239,7 +239,7 @@ public class ZyncAPI {
         }
 
         Request request = new Request.Builder()
-                .url(BASE + VERSION + "/clipboard/download/" + data.timestamp())
+                .url(BASE + VERSION + "/clipboard/" + data.timestamp() + "/raw")
                 .post(RequestBody.create(OCTET_STREAM_TYPE, file))
                 .addHeader("X-ZYNC-TOKEN", token)
                 .addHeader("User-Agent", System.getProperty("http.agent"))
@@ -261,17 +261,7 @@ public class ZyncAPI {
             public void onResponse(Call call, Response response) throws IOException {
                 // create stream from http response
                 InputStream source = response.body().byteStream();
-                // prepare cipher to streamline decryption
-                Cipher cipher;
-
-                try {
-                    cipher = ZyncCrypto.getCipher(Cipher.DECRYPT_MODE, encryptionPass, data.salt(), data.iv());
-                } catch (Exception ex) {
-                    onFailure(call, ex);
-                    return;
-                }
-
-                CipherOutputStream os = new CipherOutputStream(new FileOutputStream(file), cipher);
+                FileOutputStream os = new FileOutputStream(file);
                 byte[] buffer = new byte[4096];
                 int last = 4096;
 

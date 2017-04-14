@@ -254,6 +254,9 @@ public class ZyncApplication extends Application {
                             && isTypeSupported(value.type())) {
                         if (value.type() == ZyncClipType.TEXT) {
                             ZyncClipboardService.getInstance().writeToClip(new String(data), false);
+                        } else if (value.type() == ZyncClipType.IMAGE) {
+                            // download image to file for later
+                            dataManager.load(value, true);
                         }
                     }
                 }

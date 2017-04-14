@@ -11,6 +11,7 @@ import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.ZyncCrypto;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import java.io.*;
 
@@ -57,7 +58,6 @@ public class ZyncDataManager {
         if (!file.exists() && dl) {
             try {
                 app.getApi().downloadLarge(
-                        app.getConfig().getEncryptionPass(),
                         file,
                         data,
                         handler == null ? new NullZyncCallback<File>() : handler,
@@ -91,6 +91,30 @@ public class ZyncDataManager {
         }
 
         return file;
+    }
+
+    public CipherInputStream cryptoStreamFor(ZyncClipData clip) {
+        return cryptoStreamFor(clip.timestamp(), clip.salt(), clip.iv());
+    }
+
+    public CipherInputStream cryptoStreamFor(File file, byte[] salt, byte[] iv) {
+        Cipher cipher;
+
+        try {
+            cipher = ZyncCrypto.getCipher(
+                    Cipher.DECRYPT_MODE,
+                    app.getConfig().getEncryptionPass(),
+                    salt,
+                    iv
+            );
+            return new CipherInputStream(new FileInputStream(file), cipher);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    public CipherInputStream cryptoStreamFor(long timestamp, byte[] salt, byte[] iv) {
+        return cryptoStreamFor(fileFor(timestamp, false), salt, iv);
     }
 
     public ZyncClipData saveImage(InputStream is) throws Exception {

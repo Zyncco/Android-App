@@ -205,7 +205,7 @@ public class HistoryActivity extends AppCompatActivity {
                 bitMapOption = new BitmapFactory.Options();
                 bitMapOption.inJustDecodeBounds = true;
 
-                BitmapFactory.decodeFile(getZyncApp().getDataManager().load(data, true).getAbsolutePath(), bitMapOption);
+                BitmapFactory.decodeStream(getZyncApp().getDataManager().cryptoStreamFor(data), null, bitMapOption);
                 imageOptions.append(index, bitMapOption);
             }
 
@@ -369,9 +369,10 @@ public class HistoryActivity extends AppCompatActivity {
                     // on screen
                     bitmapOptions.inSampleSize = calculateInSampleSize(bitmapOptions, card.getWidth(), imageHeight);
 
-                    Bitmap bitmap = BitmapFactory.decodeFile(
+                    Bitmap bitmap = BitmapFactory.decodeStream(
                             // image must already be loaded as we are already making calculations with it
-                            getZyncApp().getDataManager().load(data, false).getAbsolutePath(),
+                            getZyncApp().getDataManager().cryptoStreamFor(data),
+                            null,
                             bitmapOptions
                     );
                     ImageView imagePreview = new ImageView(this);
