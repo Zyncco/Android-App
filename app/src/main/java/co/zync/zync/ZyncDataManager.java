@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
+import co.zync.zync.api.ZyncError;
 import co.zync.zync.api.callback.NullZyncCallback;
 import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.ZyncCrypto;
@@ -52,18 +53,31 @@ public class ZyncDataManager {
      *
      * if the file exists, it will be returned and data can be loaded from there
      */
-    public File load(ZyncClipData data, boolean dl, ZyncCallback<File> handler) {
+    public File load(ZyncClipData data, boolean dl, ZyncCallback<Void> handler) {
         File file = fileFor(data, false);
 
         if (!file.exists() && dl) {
             try {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+
+                Cipher cipher = ZyncCrypto.getCipher(
+                        Cipher.DECRYPT_MODE,
+                        app.getConfig().getEncryptionPass(),
+                        data.salt(),
+                        data.iv()
+                );
+
                 app.getApi().downloadLarge(
-                        file,
+                        new CipherOutputStream(new FileOutputStream(file), cipher),
                         data,
-                        handler == null ? new NullZyncCallback<File>() : handler,
+                        handler == null ? new NullZyncCallback<Void>() : handler,
                         true
                 );
-            } catch (InterruptedException ignored) {
+            } catch (Exception e) {
+                handler.handleError(new ZyncError(-8,
+                        "Unexpected error when downloading file: " +
+                                e.getClass().getSimpleName() + ": " + e.getMessage()));
             }
 
             return file;
@@ -93,7 +107,7 @@ public class ZyncDataManager {
         return file;
     }
 
-    public CipherInputStream cryptoStreamFor(ZyncClipData clip) {
+    public CipherInputStream   cryptoStreamFor(ZyncClipData clip) {
         return cryptoStreamFor(clip.timestamp(), clip.salt(), clip.iv());
     }
 
@@ -102,7 +116,7 @@ public class ZyncDataManager {
 
         try {
             cipher = ZyncCrypto.getCipher(
-                    Cipher.DECRYPT_MODE,
+                    Cipher.ENCRYPT_MODE,
                     app.getConfig().getEncryptionPass(),
                     salt,
                     iv
@@ -132,19 +146,13 @@ public class ZyncDataManager {
         byte[] salt = ZyncCrypto.generateSecureSalt();
         byte[] iv = ZyncCrypto.generateSecureIv();
         File clipFile = fileFor(timestamp, true);
-
-        // converting to PNG creates a universal file format
-        // and does ZLIB compression for us, great!
-        Cipher cipher = ZyncCrypto.getCipher(Cipher.ENCRYPT_MODE, app.getConfig().getEncryptionPass(), salt, iv);
-        // use this output stream to encrypt the data of the image to file
-        // saves another round of I/O
-        CipherOutputStream output = new CipherOutputStream(new FileOutputStream(clipFile), cipher);
+        FileOutputStream output = new FileOutputStream(clipFile);
 
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, output);
 
         output.flush();
         output.close();
 
-        return new ZyncClipData(timestamp, ZyncClipType.IMAGE, iv, salt, new FileInputStream(clipFile));
+        return new ZyncClipData(timestamp, ZyncClipType.IMAGE, iv, salt, null);
     }
 }

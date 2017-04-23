@@ -57,6 +57,25 @@ public class ZyncConfiguration {
                 .apply();
     }
 
+    public void update(ZyncClipData data) {
+        Set<String> historyText = new HashSet<>();
+
+        for (ZyncClipData clip : getHistory()) {
+            if (clip.timestamp() == data.timestamp()) {
+                clip = data;
+            }
+
+            if (clip.data() != null) {
+                clip.encrypt(getEncryptionPass());
+            }
+
+            historyText.add(clip.toJson().toString());
+        }
+
+        getPreferences().edit().putStringSet("zync_history", historyText)
+                .apply();
+    }
+
     public List<ZyncClipData> getHistory() {
         Set<String> historyStr = getPreferences()
                 .getStringSet("zync_history", new HashSet<String>());
@@ -92,7 +111,7 @@ public class ZyncConfiguration {
     public void setEncryptionPass(String password) {
         String hash = ZyncCrypto.hashSha(password.getBytes(StandardCharsets.UTF_8));
 
-        if ("unsupported".equals("hash")) {
+        if ("unsupported".equals(hash)) {
             hash = password; // fallback on plaintext storage on device if it doesn't support SHA-256
         }
 

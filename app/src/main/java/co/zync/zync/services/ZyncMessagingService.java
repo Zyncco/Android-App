@@ -19,8 +19,6 @@ import org.json.JSONException;
 public class ZyncMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        // todo verify integrity
-
         if (remoteMessage.getData().size() != 2) {
             return;
         }

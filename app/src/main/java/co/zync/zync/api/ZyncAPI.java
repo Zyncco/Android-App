@@ -5,26 +5,23 @@ import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.api.generic.ZyncGenericAPIListener;
 import co.zync.zync.api.generic.NullZyncTransformer;
 import co.zync.zync.api.generic.ZyncTransformer;
-import co.zync.zync.utils.ZyncCrypto;
 import co.zync.zync.utils.ZyncExceptionInfo;
 import com.google.firebase.iid.FirebaseInstanceId;
 import okhttp3.*;
+import okio.BufferedSink;
+import okio.Okio;
+import okio.Source;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.crypto.AEADBadTagException;
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.zip.CRC32;
 
 public class ZyncAPI {
     private static final MediaType OCTET_STREAM_TYPE = MediaType.parse("application/octet-stream");
@@ -162,7 +159,7 @@ public class ZyncAPI {
 
     /*
      * Sends a request to get the clipboard from the servers
-     * This method handles the decryption, decompression, and hash verification of the data.
+     * This method handles the decryption, decompression, and hashCrc verification of the data.
      * If any of these processes fail, null will be returned to the callback.
      */
     public void getClipboard(final String encryptionKey, final ZyncCallback<ZyncClipData> callback) {
@@ -219,28 +216,15 @@ public class ZyncAPI {
     // or greater of a certain threshold, this method will be used
     // to download the clip and stream it to file
     // NOTE: Only throws InterruptedException if blocking = true
-    public void downloadLarge(final File file,
+    public void downloadLarge(final OutputStream os,
                               final ZyncClipData data, // only contains metadata
-                              final ZyncCallback<File> callback,
+                              final ZyncCallback<Void> callback,
                               final boolean blocking) throws InterruptedException {
         // prepare latch to use if blocking
         final CountDownLatch latch = blocking ? new CountDownLatch(1) : null;
 
-        // create file if it doesn't exist
-        if (!file.exists()) {
-            try {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            } catch (IOException ex) {
-                callback.handleError(new ZyncError(-7, "Unable to create file " +
-                        file.getName() + " for downloading due to IOException: " + ex.getMessage()));
-                return;
-            }
-        }
-
         Request request = new Request.Builder()
                 .url(BASE + VERSION + "/clipboard/" + data.timestamp() + "/raw")
-                .post(RequestBody.create(OCTET_STREAM_TYPE, file))
                 .addHeader("X-ZYNC-TOKEN", token)
                 .addHeader("User-Agent", System.getProperty("http.agent"))
                 .build();
@@ -261,17 +245,23 @@ public class ZyncAPI {
             public void onResponse(Call call, Response response) throws IOException {
                 // create stream from http response
                 InputStream source = response.body().byteStream();
-                FileOutputStream os = new FileOutputStream(file);
+                CRC32 crc = new CRC32();
                 byte[] buffer = new byte[4096];
-                int last = 4096;
+                int last;
 
                 /*
                  * Stream payload to file in
                  * batches of 4096 bytes
                  */
-                while (last == 4096) {
+                while (true) {
                     last = source.read(buffer);
+
+                    if (last == -1) {
+                        break;
+                    }
+
                     os.write(buffer, 0, last);
+                    crc.update(buffer, 0, last);
                 }
 
                 // flush and cleanup
@@ -280,7 +270,7 @@ public class ZyncAPI {
                 source.close();
 
                 // execute callback
-                callback.success(file);
+                callback.success(null);
 
                 // count down latch if calling thread is waiting
                 if (blocking) {
@@ -296,26 +286,42 @@ public class ZyncAPI {
     }
 
     // request a URL to upload our encrypted large file
-    public void requestUploadUrl(ZyncClipData data, final ZyncCallback<URL> callback) {
+    public void requestUploadUrl(ZyncClipData data, final ZyncCallback<String> callback) throws JSONException {
         executeAuthenticatedRequest(
                 "POST",
-                "requestUpload", // todo verify with vilsol
-                data.toJson(),
+                "clipboard/upload",
+                new JSONObject().put("data", data.toJson()),
                 callback,
-                new ZyncTransformer<URL>() {
+                new ZyncTransformer<String>() {
                     @Override
-                    public URL transform(JSONObject obj) throws Exception {
-                        return new URL(obj.getJSONObject("data").getString("url"));
+                    public String transform(JSONObject obj) throws Exception {
+                        return obj.getJSONObject("data").getString("token");
                     }
                 }
         );
     }
 
-    public void upload(File file, URL url, final ZyncCallback<Void> callback) {
+    public void upload(final InputStream stream, String token, final ZyncCallback<Void> callback) {
         Request request = new Request.Builder()
-                .url(url)
-                .post(RequestBody.create(OCTET_STREAM_TYPE, file))
-                .addHeader("X-ZYNC-TOKEN", token)
+                .url(BASE + VERSION + "/clipboard/upload/" + token)
+                .post(new RequestBody() {
+                    @Override
+                    public MediaType contentType() {
+                        return OCTET_STREAM_TYPE;
+                    }
+
+                    @Override
+                    public void writeTo(BufferedSink sink) throws IOException {
+                        Source source = null;
+                        try {
+                            source = Okio.source(stream);
+                            sink.writeAll(source);
+                        } finally {
+                            okhttp3.internal.Util.closeQuietly(source);
+                        }
+                    }
+                })
+                .addHeader("X-ZYNC-TOKEN", this.token)
                 .addHeader("User-Agent", System.getProperty("http.agent"))
                 .build();
 

@@ -138,6 +138,30 @@ public class ZyncApplication extends Application {
         return connected;
     }
 
+    public void handleErrorGeneric(Activity activity, ZyncError error, int action) {
+        handleErrorGeneric(activity, error, action, null);
+    }
+
+    public void handleErrorGeneric(Activity activity, ZyncError error, int action, ProgressDialog dialog) {
+        if (dialog != null) {
+            dialog.dismiss();
+        }
+
+        setLastRequestStatus(false);
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
+
+        alertDialog.setTitle(getString(R.string.unable, getResources().getString(action)));
+        alertDialog.setMessage(getString(R.string.unable_msg, error.code(), error.message()));
+        alertDialog.setPositiveButton(R.string.ok, new NullDialogClickListener());
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                alertDialog.show();
+            }
+        });
+    }
+
     public void enableClipboardService() {
         if (ZyncClipboardService.getInstance() == null) {
             startService(ZyncClipboardService.class);

@@ -6,6 +6,7 @@ import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.ZyncExceptionInfo;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -17,29 +18,33 @@ public final class ZyncPostImage {
     public static void exec(final ZyncApplication app, final File file,
                             final ZyncClipData data, final ZyncCallback<Void> callback) {
         try {
+            final InputStream is = app.getDataManager().cryptoStreamFor(data);
+
+            if (data.hash() == null) {
+                data.setHash(ZyncClipData.hashCrc(is));
+                app.getConfig().update(data);
+            }
+
             // now our data is ready, we can request a URL to stream our file to
-            app.getApi().requestUploadUrl(data, new ZyncCallback<URL>() {
+            app.getApi().requestUploadUrl(data, new ZyncCallback<String>() {
                 @Override
-                public void success(URL url) {
-                    // do not upload to any URL except the API
-                    // this avoids any type of redirect attack
-                    if (!ZyncAPI.API_DOMAIN.equals(url.getHost().replace("www.", ""))) {
-                        handleError(new ZyncError(-7, "Provided Upload URL is not the API!"));
-                        return;
-                    }
-
+                public void success(String token) {
                     // finally, upload our file async
-                    app.getApi().upload(file, url, new ZyncCallback<Void>() {
-                        @Override
-                        public void success(Void value) {
-                            callback.success(value);
-                        }
+                    app.getApi().upload(
+                            is,
+                            token,
+                            new ZyncCallback<Void>() {
+                                @Override
+                                public void success(Void value) {
+                                    callback.success(value);
+                                }
 
-                        @Override
-                        public void handleError(ZyncError error) {
-                            callback.handleError(error);
-                        }
-                    });
+                                @Override
+                                public void handleError(ZyncError error) {
+                                    callback.handleError(error);
+                                }
+                            }
+                    );
                 }
 
                 @Override

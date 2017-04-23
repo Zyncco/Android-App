@@ -112,11 +112,6 @@ public class ZyncClipboardService extends Service {
         ));
     }
 
-
-    public void writeImageToClip(byte[] data) {
-        // TODO figure out how this works
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;

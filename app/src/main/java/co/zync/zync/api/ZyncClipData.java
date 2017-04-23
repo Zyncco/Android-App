@@ -50,18 +50,9 @@ public class ZyncClipData {
         this.iv = iv;
         this.salt = salt;
 
-        // generate hash efficiently
-        // (load data and update hash in 4096 blocks)
-        CRC32 crc = new CRC32();
-        byte[] buff = new byte[4096];
-        int last = 4096;
-
-        while (last == 4096) {
-            last = is.read(buff);
-            crc.update(buff, 0, last);
+        if (is != null) {
+            this.hash = hashCrc(is);
         }
-
-        this.hash = Long.toHexString(crc.getValue());
     }
 
     public ZyncClipData(String encryptionKey, JSONObject obj) throws Exception {
@@ -119,10 +110,25 @@ public class ZyncClipData {
         return bos.toByteArray();
     }
 
-    // hash provided data into CRC32 and output the hex representation
-    private static String hash(byte[] data) {
+    // hashCrc provided data into CRC32 and output the hex representation
+    public static String hashCrc(byte[] data) {
         CRC32 crc = new CRC32();
         crc.update(data);
+        return Long.toHexString(crc.getValue());
+    }
+
+    public static String hashCrc(InputStream is) throws IOException {
+        // generate hashCrc efficiently
+        // (load data and update hashCrc in 4096 blocks)
+        CRC32 crc = new CRC32();
+        byte[] buff = new byte[4096];
+        int last = 4096;
+
+        while (last == 4096) {
+            last = is.read(buff);
+            crc.update(buff, 0, last);
+        }
+
         return Long.toHexString(crc.getValue());
     }
 
@@ -134,7 +140,7 @@ public class ZyncClipData {
 
                 data = compress(data);
                 data = ZyncCrypto.encrypt(data, key, salt, iv);
-                this.hash = hash(data);
+                this.hash = hashCrc(data);
                 this.data = Base64.encodeToString(data, Base64.NO_WRAP).getBytes(Charset.forName("UTF-8"));
                 encrypted = true;
             } catch (Exception ex) {
@@ -171,6 +177,14 @@ public class ZyncClipData {
 
     public ZyncClipType type() {
         return type;
+    }
+
+    public String hash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 
     public JSONObject toJson() {

@@ -26,6 +26,7 @@ import java.util.Arrays;
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncError;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -106,8 +107,13 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                             } catch (JSONException ignored) {
                             }
                         }
-
-                        // todo handle error
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        getZyncApp().handleErrorGeneric(SignInActivity.this, new ZyncError(
+                                -10, e.getClass().getSimpleName() + ": " + e.getMessage()
+                        ), R.string.firebase_token_error);
                     }
                 });
     }

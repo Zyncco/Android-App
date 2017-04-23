@@ -1,6 +1,5 @@
 package co.zync.zync.activities;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -8,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
@@ -28,8 +28,9 @@ import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.api.callback.ZyncCallback;
-import co.zync.zync.listeners.NullDialogClickListener;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.*;
 
 public class HistoryActivity extends AppCompatActivity {
@@ -52,7 +53,7 @@ public class HistoryActivity extends AppCompatActivity {
         dialog.setIndeterminate(true);
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         dialog.setTitle(R.string.loading_history);
-        dialog.setMessage(getString(R.string.please_wait));
+        dialog.setMessage(getString(R.string.gathering_data));
 
         dialog.show();
 
@@ -79,7 +80,14 @@ public class HistoryActivity extends AppCompatActivity {
                         if (local != null && local.data() != null) {
                             historyEntry.setData(local.data());
                         } else {
-                            missingTimestamps.add(historyEntry.timestamp());
+                            if (historyEntry.type() == ZyncClipType.TEXT) {
+                                missingTimestamps.add(historyEntry.timestamp());
+                            } else {
+                                setDialogMessage(dialog, R.string.downloading_image);
+                                // downloads the entry if need be, will block thread
+                                getZyncApp().getDataManager().load(historyEntry, true);
+                                setDialogMessage(dialog, R.string.gathering_data);
+                            }
                         }
                     }
 
@@ -101,14 +109,10 @@ public class HistoryActivity extends AppCompatActivity {
                                     app.clipFromTimestamp(clip.timestamp(), history).setData(clip.data());
                                 }
 
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        setHistory(history);
-                                        app.getConfig().setHistory(history);
-                                        dialog.dismiss();
-                                    }
-                                });
+                                setDialogMessage(dialog, R.string.processing_data);
+                                setHistory(history);
+                                app.getConfig().setHistory(history);
+                                dialog.dismiss();
                             }
 
                             @Override
@@ -117,18 +121,14 @@ public class HistoryActivity extends AppCompatActivity {
                             }
                         });
                     } else {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                setHistory(history);
-                                app.getConfig().setHistory(history);
-                                dialog.dismiss();
-                            }
-                        });
+                        setDialogMessage(dialog, R.string.processing_data);
+                        setHistory(history);
+                        app.getConfig().setHistory(history);
+                        dialog.dismiss();
                     }
                 } else {
                     // if there was an error processing server history, load from file
-                    loadHistoryFromFile();
+                    loadHistoryFromFile(null);
                 }
             }
 
@@ -139,23 +139,18 @@ public class HistoryActivity extends AppCompatActivity {
         });
     }
 
-    private void handleHistoryError(ProgressDialog dialog, ZyncError error) {
-        dialog.dismiss();
-        getZyncApp().setLastRequestStatus(false);
-        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(HistoryActivity.this);
-
-        alertDialog.setTitle(R.string.unable_fetch_history);
-        alertDialog.setMessage(getString(R.string.unable_fetch_history_msg, error.code(), error.message()));
-        alertDialog.setPositiveButton(R.string.ok, new NullDialogClickListener());
-
+    public void setDialogMessage(final ProgressDialog dialog, final int resId) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                alertDialog.show();
+                dialog.setMessage(getString(resId));
             }
         });
+    }
 
-        loadHistoryFromFile();
+    private void handleHistoryError(ProgressDialog dialog, ZyncError error) {
+        getZyncApp().handleErrorGeneric(this, error, R.string.load_history_error, dialog);
+        loadHistoryFromFile(null);
     }
 
     /*       ACTION BAR START         */
@@ -187,14 +182,19 @@ public class HistoryActivity extends AppCompatActivity {
         return (ZyncApplication) getApplication();
     }
 
-    private void loadHistoryFromFile() {
-        final List<ZyncClipData> history = getZyncApp().getConfig().getHistory();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                setHistory(history);
-            }
-        });
+    private void loadHistoryFromFile(final Runnable callback) {
+        if (callback != null) {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                public Void doInBackground(Void... params) {
+                    setHistory(getZyncApp().getConfig().getHistory());
+                    callback.run();
+                    return null;
+                }
+            }.execute();
+        } else {
+            setHistory(getZyncApp().getConfig().getHistory());
+        }
     }
 
     private boolean canJoin(int index, ZyncClipData data) {
@@ -205,11 +205,19 @@ public class HistoryActivity extends AppCompatActivity {
                 bitMapOption = new BitmapFactory.Options();
                 bitMapOption.inJustDecodeBounds = true;
 
-                BitmapFactory.decodeStream(getZyncApp().getDataManager().cryptoStreamFor(data), null, bitMapOption);
+                try {
+                    BitmapFactory.decodeStream(
+                            new FileInputStream(getZyncApp().getDataManager().fileFor(data, false)),
+                            null,
+                            bitMapOption
+                    );
+                } catch (FileNotFoundException ignored) {
+                }
+
                 imageOptions.append(index, bitMapOption);
             }
 
-            return Math.round(bitMapOption.outHeight / bitMapOption.outWidth) == 1 ||
+            return (bitMapOption.outHeight / bitMapOption.outWidth) > 0.8 ||
                     (bitMapOption.outHeight < 700 && bitMapOption.outWidth < 700);
         }
 
@@ -285,7 +293,7 @@ public class HistoryActivity extends AppCompatActivity {
                 // entries' weights must add up to 2
                 layout.setWeightSum(2);
 
-                // odd stuff to fix card shadows from being cut off due to boundries
+                // odd stuff to fix card shadows from being cut off due to boundaries
                 layout.setOutlineProvider(ViewOutlineProvider.BOUNDS);
                 layout.setOrientation(LinearLayout.HORIZONTAL);
                 layout.setClipToPadding(false);
@@ -293,7 +301,7 @@ public class HistoryActivity extends AppCompatActivity {
 
                 // set variables for next entry
                 prevLayout = layout;
-                mainLayout.addView(layout);
+                addViewUi(mainLayout, layout);
                 mainLayout = layout;
                 joining = true;
             }
@@ -323,9 +331,6 @@ public class HistoryActivity extends AppCompatActivity {
             card.setLayoutParams(layoutParams);
             card.setCardElevation(cardElevation);
             card.setRadius(cardCorner); // card corner radius for rounded card
-
-            // add layout for this entry to the main linear layout
-            mainLayout.addView(card);
 
             // setup data preview
             switch (data.type()) {
@@ -361,26 +366,28 @@ public class HistoryActivity extends AppCompatActivity {
 
                     bitmapOptions.inJustDecodeBounds = false; // we want the image this time
 
-                    // todo test if card.getWidth() will give a valid response
-                    System.out.println("card width: " + card.getWidth());
-
                     // calculate sample size to reduce loaded image size in memory
                     // if possible; scaling down appropriately to card dimensions
                     // on screen
                     bitmapOptions.inSampleSize = calculateInSampleSize(bitmapOptions, card.getWidth(), imageHeight);
 
-                    Bitmap bitmap = BitmapFactory.decodeStream(
-                            // image must already be loaded as we are already making calculations with it
-                            getZyncApp().getDataManager().cryptoStreamFor(data),
-                            null,
-                            bitmapOptions
-                    );
+                    Bitmap bitmap = null;
+
+                    try {
+                        bitmap = BitmapFactory.decodeStream(
+                                // image must already be loaded as we are already making calculations with it
+                                new FileInputStream(getZyncApp().getDataManager().fileFor(data, false)),
+                                null,
+                                bitmapOptions
+                        );
+                    } catch (FileNotFoundException ignored) {
+                    }
+
                     ImageView imagePreview = new ImageView(this);
 
-                    setLayout(imagePreview, LayoutParams.MATCH_PARENT, cardHeight, -1);
+                    setLayout(imagePreview, LayoutParams.MATCH_PARENT, imageHeight, -1);
                     imagePreview.setImageBitmap(bitmap);
                     imagePreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
                     card.addView(imagePreview);
                     break;
             }
@@ -423,7 +430,18 @@ public class HistoryActivity extends AppCompatActivity {
             if (data.type() == ZyncClipType.TEXT) {
                 card.addView(createCopyButton(data, buttonDimension, buttonTopMargin, copyEndMargin));
             }
+
+            addViewUi(mainLayout, card);
         }
+    }
+
+    private void addViewUi(final LinearLayout layout, final View view) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                layout.addView(view);
+            }
+        });
     }
 
     private ImageView createCopyButton(final ZyncClipData data,
@@ -479,11 +497,18 @@ public class HistoryActivity extends AppCompatActivity {
                     case TEXT:
                         shareText(data.data());
                         break;
+                    case IMAGE:
+
+                        break;
                 }
             }
         });
 
         return view;
+    }
+
+    private void shareImage(ZyncClipData data) {
+        getZyncApp().getDataManager().cryptoStreamFor(data);
     }
 
     private void shareText(byte[] data) {

@@ -107,6 +107,7 @@
     <string name="logout_success">Successfully logged out</string>
     <string name="disable_encryption">Disable Encryption</string>
     <string name="uploading_image">Uploading image&#8230;</string>
+    <string name="gathering_data">Gathering data&#8230;</string>
     <string name="please_wait">Please wait</string>
     <string name="zync_persistentnotif_title">@string/app_name</string>
     <string name="zync_persistentnotif_descr">Zync is listening to the clipboard&#8230;</string>
@@ -130,8 +131,13 @@
 
     <string name="history">History</string>
     <string name="loading_history">Loading history&#8230;</string>
-    <string name="unable_fetch_history">Unable to fetch history!</string>
-    <string name="unable_fetch_history_msg">Due to Error #%1$d: %2$s</string>
+    <string name="downloading_image">Downloading image&#8230;</string>
+    <string name="processing_data">Processing data&#8230;</string>
+    <string name="load_history_error">load history</string>
+    <string name="firebase_token_error">fetch Firebase token</string>
+    <string name="post_image_error">post image to clipboard</string>
+    <string name="unable">Unable to %1$s!</string>
+    <string name="unable_msg">Due to Error #%1$d: %2$s</string>
     <string name="history_entry_info">%1$s</string>
     <string name="history_entry_title">%1$s Clip</string>
     <string name="click_to_copy">Click here to copy!</string>

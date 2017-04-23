@@ -30,6 +30,7 @@ import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.services.ZyncClipboardService;
 import co.zync.zync.listeners.RequestStatusListener;
 import co.zync.zync.utils.ZyncCircleView;
+import co.zync.zync.utils.ZyncCrypto;
 import co.zync.zync.utils.ZyncExceptionInfo;
 import co.zync.zync.utils.ZyncPostImage;
 
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final Timer TIMER = new Timer();
     public static int REQUEST_IMAGE = 23212;
-    private File currentFile;
+    private long currentStamp;
     private ZyncCircleView.ColorChangeTask circleColorChangeTask;
     private ZyncCircleView.SizeChangeTask circleBreathingTask;
 
@@ -212,20 +213,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    // creates a temporary image file used when capturing images
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "PNG_" + timeStamp + "_";
-        File storageDir = new File(getFilesDir(), "images/");
-        storageDir.mkdirs();
-        return File.createTempFile(
-                imageFileName,  /* prefix */
-                ".png",         /* suffix */
-                storageDir      /* directory */
-        );
-    }
-
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -247,15 +234,8 @@ public class MainActivity extends AppCompatActivity
 
             // ensure there's an app which can take the picture for us
             if (intent.resolveActivity(getPackageManager()) != null) {
-                File photoFile = null;
-
-                try {
-                    photoFile = currentFile = createImageFile();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "create image file for camera feature"));
-                    // unable to create image file. TODO: Complain to user
-                }
+                currentStamp = System.currentTimeMillis();
+                File photoFile = getZyncApp().getDataManager().fileFor(currentStamp, true);
 
                 if (photoFile != null) {
                     // generate a URI for the app to put the photo in
@@ -304,12 +284,15 @@ public class MainActivity extends AppCompatActivity
 
     private void executeCameraCallback(final ProgressDialog dialog) {
         try {
-            // compress, encrypt, hash, and create clip data
-            ZyncClipData clipData = getZyncApp().getDataManager().saveImage(new FileInputStream(currentFile));
-            File clipFile = getZyncApp().getDataManager().fileFor(clipData, false);
-
-            currentFile.delete(); // remove unencrypted file
-            currentFile = null; // reset current file
+            // compress, encrypt, hashCrc, and create clip data
+            File clipFile = getZyncApp().getDataManager().fileFor(currentStamp, false);
+            final ZyncClipData clipData = new ZyncClipData(
+                    currentStamp,
+                    ZyncClipType.IMAGE,
+                    ZyncCrypto.generateSecureIv(),
+                    ZyncCrypto.generateSecureSalt(),
+                    null
+            );
 
             // post image to zync async
             ZyncPostImage.exec(
@@ -321,19 +304,19 @@ public class MainActivity extends AppCompatActivity
                         public void success(Void value) {
                             dialog.dismiss();
                             getZyncApp().sendClipPostedNotification();
+                            getZyncApp().getConfig().addToHistory(clipData);
                         }
 
                         @Override
                         public void handleError(ZyncError error) {
                             dialog.dismiss();
                             getZyncApp().sendClipErrorNotification();
-                            Log.e("ZyncClipboardService", "There was an error posting the clipboard: "
+                            getZyncApp().handleErrorGeneric(MainActivity.this, error, R.string.post_image_error);
+                            Log.e("MainActivity", "There was an error posting the clipboard: "
                                     + error.code() + " : " + error.message());
                         }
                     }
             );
-
-            getZyncApp().getConfig().addToHistory(clipData);
         } catch (Exception ignored) {
             // ex here would be due to an encryption error from ZyncClipData
             // so it's not quite possible as we didn't provide any data
@@ -358,6 +341,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void handleError(ZyncError error) {
                         uploadingDialog.dismiss();
+                        getZyncApp().handleErrorGeneric(MainActivity.this, error, R.string.post_image_error);
                         getZyncApp().sendClipErrorNotification();
                     }
                 };
