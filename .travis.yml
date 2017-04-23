@@ -9,7 +9,7 @@ android:
 
 before_install:
 - openssl aes-256-cbc -K $encrypted_10349a6b5573_key -iv $encrypted_10349a6b5573_iv -in credentials.tar.enc -out credentials.tar -d
-- tar xvf
+- tar xvf credentials.tar
 - mv google-services.json app/google-services.json
 
 licenses:
