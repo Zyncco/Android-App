@@ -1,0 +1,21 @@
+language: android
+jdk: oraclejdk8
+
+android:
+  components:
+  - tools
+  - build-tools-25.0.2
+  - android-25
+  - extra-android-m2repository
+  - extra-google-m2repository
+  - extra-android-support
+  - extra-google-google_play_services
+before_install:
+- openssl aes-256-cbc -K $encrypted_10349a6b5573_key -iv $encrypted_10349a6b5573_iv -in credentials.tar.enc -out credentials.tar -d
+- tar xvf credentials.tar
+- mv google-services.json app/google-services.json
+
+licenses:
+- android-sdk-preview-license-.+
+- android-sdk-license-.+
+- google-gdk-license-.+
