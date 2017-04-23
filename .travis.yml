@@ -2,5 +2,7 @@ language: android
 jdk: oraclejdk8
 android:
   components:
-    - build-tools-25.0.2
-    - android-25
+  - build-tools-25.0.2
+  - android-25
+before_install:
+- openssl aes-256-cbc -K $encrypted_10349a6b5573_key -iv $encrypted_10349a6b5573_iv -in keystore.properties.enc -out keystore.properties -d
