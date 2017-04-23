@@ -8,8 +8,9 @@ android:
   - android-25
 
 before_install:
-- openssl aes-256-cbc -K $encrypted_10349a6b5573_key -iv $encrypted_10349a6b5573_iv -in google-services.json.enc -out app/google-services.json -d
+- openssl aes-256-cbc -K $encrypted_10349a6b5573_key -iv $encrypted_10349a6b5573_iv -in google-services.json.enc -out google-services.json -d
 - openssl aes-256-cbc -K $encrypted_10349a6b5573_key -iv $encrypted_10349a6b5573_iv -in keystore.properties.enc -out keystore.properties -d
+- mv google-services.json app/google-services.json
 
 licenses:
 - android-sdk-preview-license-.+
