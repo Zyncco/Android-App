@@ -19,6 +19,7 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_10349a6b5573_key -iv $encrypted_10349a6b5573_iv -in credentials.tar.enc -out credentials.tar -d
 - tar xvf credentials.tar
 - mv google-services.json app/google-services.json
+- mv android.jks app/android.jks
 - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
 - emulator -avd test -no-skin -no-audio -no-window &
 - android-wait-for-emulator
