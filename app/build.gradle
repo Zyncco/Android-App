@@ -5,6 +5,20 @@ def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
+    signingConfigs {
+        release {
+            keyAlias 'key0'
+            keyPassword System.getenv("KEYSTORE_PASS")
+            storeFile file('android.jks')
+            storePassword System.getenv("KEY_PASS")
+        }
+        debug {
+            keyAlias 'key0'
+            keyPassword System.getenv("KEYSTORE_PASS")
+            storeFile file('android.jks')
+            storePassword System.getenv("KEY_PASS")
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -25,6 +39,12 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            debuggable true
+            jniDebuggable true
+            signingConfig signingConfigs.debug
         }
     }
 
