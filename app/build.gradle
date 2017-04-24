@@ -8,15 +8,15 @@ android {
     signingConfigs {
         release {
             keyAlias 'key0'
-            keyPassword keystoreProperties["KEYSTORE_PASS"]
+            keyPassword keystoreProperties["KEYSTORE_PASS"].toString()
             storeFile file('android.jks')
-            storePassword keystoreProperties["KEY_PASS"]
+            storePassword keystoreProperties["KEY_PASS"].toString()
         }
         debug {
             keyAlias 'key0'
-            keyPassword keystoreProperties["KEYSTORE_PASS"]
+            keyPassword keystoreProperties["KEYSTORE_PASS"].toString()
             storeFile file('android.jks')
-            storePassword keystoreProperties["KEY_PASS"]
+            storePassword keystoreProperties["KEY_PASS"].toString()
         }
     }
     compileSdkVersion 25
