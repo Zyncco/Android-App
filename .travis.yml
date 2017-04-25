@@ -41,9 +41,5 @@ cache:
   - $HOME/.gradle/wrapper/
   - $HOME/.android/build-cache
 
-deploy:
-  skip_cleanup: true
-  provider: script
-  script: /bin/sh scripts/deploy.sh
-  on:
-    branch: master
+after_success:
+- sh ./scripts/deploy.sh
