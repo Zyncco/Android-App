@@ -44,6 +44,6 @@ cache:
 deploy:
   skip_cleanup: true
   provider: script
-  script: scripts/deploy.sh
+  script: /bin/sh scripts/deploy.sh
   on:
     branch: master
