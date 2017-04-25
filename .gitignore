@@ -56,3 +56,5 @@ freeline_project_description.json
 keystore.properties
 credentials.tar
 *.jks
+*.p12
+/app/src/main/play

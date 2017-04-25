@@ -1,10 +1,19 @@
 apply plugin: 'com.android.application'
+apply plugin:'com.android.application'
+apply plugin: 'com.github.triplet.play'
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
+    playAccountConfigs {
+        defaultAccountConfig {
+            serviceAccountEmail = keystoreProperties["SERVICE_ACCOUNT_EMAIL"].toString()
+            pk12File = file('key-5a528b77a2ae.p12')
+        }
+    }
+
     signingConfigs {
         release {
             keyAlias 'key0'
@@ -19,6 +28,7 @@ android {
             storePassword keystoreProperties["KEY_PASS"].toString()
         }
     }
+
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -28,6 +38,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        playAccountConfig = playAccountConfigs.defaultAccountConfig
     }
 
     buildTypes.each {
@@ -70,6 +81,10 @@ dependencies {
     compile 'com.android.support:cardview-v7:21.0.+'
     compile 'com.android.support:recyclerview-v7:21.0.+'
     testCompile 'junit:junit:4.12'
+}
+
+play {
+    track = 'alpha'
 }
 
 apply plugin: 'com.google.gms.google-services'

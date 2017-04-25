@@ -20,12 +20,11 @@ before_install:
 - tar xvf credentials.tar
 - mv google-services.json app/google-services.json
 - mv android.jks app/android.jks
+- mv key-5a528b77a2ae.p12 app/key-5a528b77a2ae.p12
 - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
 - emulator -avd test -no-skin -no-audio -no-window &
 - android-wait-for-emulator
 - adb shell input keyevent 82 &
-- echo y | android update sdk -u -a -t build-tools-25.0.2
-- echo y | android update sdk -u -a -t android-25
   
 licenses:
 - android-sdk-preview-license-.+
@@ -41,3 +40,6 @@ cache:
   - $HOME/.gradle/caches/
   - $HOME/.gradle/wrapper/
   - $HOME/.android/build-cache
+
+after_success:
+- ./gradlew publishApkRelease
