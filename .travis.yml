@@ -41,6 +41,8 @@ cache:
   - $HOME/.gradle/wrapper/
   - $HOME/.android/build-cache
 
-after_success:
-- sed -i 's/versionCode [0-9]\+/versionCode '"$TRAVIS_BUILD_NUMBER"'/' app/build.gradle
-- ./gradlew publishApkRelease
+deploy:
+  provider: script
+    script: scripts/deploy.sh
+    on:
+      branch: master
