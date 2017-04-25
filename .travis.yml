@@ -42,4 +42,4 @@ cache:
   - $HOME/.android/build-cache
 
 after_success:
-- sh ./scripts/deploy.sh
+- ./scripts/deploy.sh
