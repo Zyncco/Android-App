@@ -119,13 +119,20 @@ public class ZyncClipData {
 
     public static String hashCrc(InputStream is) throws IOException {
         // generate hashCrc efficiently
-        // (load data and update hashCrc in 4096 blocks)
+        // (load data and update hashCrc in 8192 blocks)
         CRC32 crc = new CRC32();
-        byte[] buff = new byte[4096];
-        int last = 4096;
+        long length = 0;
+        byte[] buff = new byte[8192];
+        int last;
 
-        while (last == 4096) {
+        while (true) {
             last = is.read(buff);
+
+            if (last == -1) {
+                break;
+            }
+
+            length += last;
             crc.update(buff, 0, last);
         }
 

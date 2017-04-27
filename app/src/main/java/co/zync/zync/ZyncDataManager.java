@@ -75,9 +75,11 @@ public class ZyncDataManager {
                         true
                 );
             } catch (Exception e) {
-                handler.handleError(new ZyncError(-8,
-                        "Unexpected error when downloading file: " +
-                                e.getClass().getSimpleName() + ": " + e.getMessage()));
+                if (handler != null) {
+                    handler.handleError(new ZyncError(-8,
+                            "Unexpected error when downloading file: " +
+                                    e.getClass().getSimpleName() + ": " + e.getMessage()));
+                }
             }
 
             return file;

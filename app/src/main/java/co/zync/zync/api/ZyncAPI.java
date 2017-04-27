@@ -5,6 +5,7 @@ import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.api.generic.ZyncGenericAPIListener;
 import co.zync.zync.api.generic.NullZyncTransformer;
 import co.zync.zync.api.generic.ZyncTransformer;
+import co.zync.zync.utils.Provider;
 import co.zync.zync.utils.ZyncExceptionInfo;
 import com.google.firebase.iid.FirebaseInstanceId;
 import okhttp3.*;
@@ -244,30 +245,12 @@ public class ZyncAPI {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 // create stream from http response
-                InputStream source = response.body().byteStream();
-                CRC32 crc = new CRC32();
-                byte[] buffer = new byte[4096];
-                int last;
+                BufferedSink sink = Okio.buffer(Okio.sink(os));
+                sink.writeAll(response.body().source());
+                sink.close();
 
-                /*
-                 * Stream payload to file in
-                 * batches of 4096 bytes
-                 */
-                while (true) {
-                    last = source.read(buffer);
-
-                    if (last == -1) {
-                        break;
-                    }
-
-                    os.write(buffer, 0, last);
-                    crc.update(buffer, 0, last);
-                }
-
-                // flush and cleanup
-                os.flush();
-                os.close();
-                source.close();
+                System.out.println("model hash: " + data.hash());
+                System.out.println("size of download: " + response.body().contentLength());
 
                 // execute callback
                 callback.success(null);
@@ -301,7 +284,7 @@ public class ZyncAPI {
         );
     }
 
-    public void upload(final InputStream stream, String token, final ZyncCallback<Void> callback) {
+    public void upload(final Provider<InputStream> streamProvider, String token, final ZyncCallback<Void> callback) {
         Request request = new Request.Builder()
                 .url(BASE + VERSION + "/clipboard/upload/" + token)
                 .post(new RequestBody() {
@@ -314,7 +297,7 @@ public class ZyncAPI {
                     public void writeTo(BufferedSink sink) throws IOException {
                         Source source = null;
                         try {
-                            source = Okio.source(stream);
+                            source = Okio.buffer(Okio.source(streamProvider.get()));
                             sink.writeAll(source);
                         } finally {
                             okhttp3.internal.Util.closeQuietly(source);

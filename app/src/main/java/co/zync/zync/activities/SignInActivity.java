@@ -75,10 +75,13 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             IdpResponse response = IdpResponse.fromResultIntent(data);
 
             // Successfully signed in
-            if (resultCode == ResultCodes.OK) {
+            if (resultCode == ResultCodes.OK && response != null) {
                 System.out.println("yay signed in for " + response.getEmail());
                 handleSignIn(response);
             } else {
+                String extension = response == null ? "" : "due to error " + response.getErrorCode();
+                getZyncApp().handleErrorGeneric(this, new ZyncError(-11,
+                        "Couldn't log into firebase " + extension), R.string.log_in);
                 System.out.println("that's sad... now what");
             }
         }

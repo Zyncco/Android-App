@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         // circle toggle
-        findViewById(R.id.zync_circle).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.main_logo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ZyncConfiguration preferences = getZyncApp().getConfig();
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity
 
         // debug menu
         if (BuildConfig.DEBUG) {
-            findViewById(R.id.zync_circle).setOnLongClickListener(new View.OnLongClickListener() {
+            findViewById(R.id.main_logo).setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     startActivity(new Intent(MainActivity.this, DebugActivity.class));

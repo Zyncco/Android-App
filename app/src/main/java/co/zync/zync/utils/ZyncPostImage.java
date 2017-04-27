@@ -3,11 +3,8 @@ package co.zync.zync.utils;
 import co.zync.zync.ZyncApplication;
 import co.zync.zync.api.*;
 import co.zync.zync.api.callback.ZyncCallback;
-import co.zync.zync.utils.ZyncExceptionInfo;
 
-import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
+import java.io.*;
 
 /**
  * Class which posts image (from file) to cloud clipboard
@@ -18,10 +15,8 @@ public final class ZyncPostImage {
     public static void exec(final ZyncApplication app, final File file,
                             final ZyncClipData data, final ZyncCallback<Void> callback) {
         try {
-            final InputStream is = app.getDataManager().cryptoStreamFor(data);
-
             if (data.hash() == null) {
-                data.setHash(ZyncClipData.hashCrc(is));
+                data.setHash(ZyncClipData.hashCrc(app.getDataManager().cryptoStreamFor(data)));
                 app.getConfig().update(data);
             }
 
@@ -31,7 +26,12 @@ public final class ZyncPostImage {
                 public void success(String token) {
                     // finally, upload our file async
                     app.getApi().upload(
-                            is,
+                            new Provider<InputStream>() {
+                                @Override
+                                public InputStream get() {
+                                    return app.getDataManager().cryptoStreamFor(data);
+                                }
+                            },
                             token,
                             new ZyncCallback<Void>() {
                                 @Override
