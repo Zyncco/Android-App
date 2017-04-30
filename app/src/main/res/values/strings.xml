@@ -133,6 +133,7 @@
     <string name="history">History</string>
     <string name="loading_history">Loading history&#8230;</string>
     <string name="downloading_image">Downloading image&#8230;</string>
+    <string name="downloading_image_history">Downloading image (%1$d / %2$d)</string>
     <string name="starting_upload">Starting upload&#8230;</string>
     <string name="processing_data">Processing data&#8230;</string>
     <string name="load_history_error">load history</string>

@@ -93,7 +93,7 @@ public class HistoryActivity extends AppCompatActivity {
                     }
 
                     for (int i = 0; i < imageTimestamps.size(); i++) {
-                        setDialogMessage(dialog, getString(R.string.downloading_image, i + 1, imageTimestamps.size()));
+                        setDialogMessage(dialog, getString(R.string.downloading_image_history, i + 1, imageTimestamps.size()));
                         // downloads the entry if need be, will block thread
                         getZyncApp().getDataManager().load(history.get(i), true);
                     }
