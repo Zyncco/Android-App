@@ -1,14 +1,16 @@
 package co.zync.zync.activities;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.FileProvider;
@@ -22,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 import co.zync.zync.*;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
@@ -29,17 +32,11 @@ import co.zync.zync.api.ZyncError;
 import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.services.ZyncClipboardService;
 import co.zync.zync.listeners.RequestStatusListener;
-import co.zync.zync.utils.ZyncCircleView;
-import co.zync.zync.utils.ZyncCrypto;
-import co.zync.zync.utils.ZyncExceptionInfo;
-import co.zync.zync.utils.ZyncPostImage;
+import co.zync.zync.utils.*;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Timer;
 
 public class MainActivity extends AppCompatActivity
@@ -137,7 +134,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void scheduleCircleSizeTask() {
-        if (circleBreathingTask == null) {
+        // execute breathing task if it's not
+        // already running and if it's in power saving mode
+        if (circleBreathingTask == null && !isPowerSaving()) {
             circleBreathingTask = new ZyncCircleView.SizeChangeTask(
                     this,
                     (ZyncCircleView) findViewById(R.id.zync_circle),
@@ -146,6 +145,11 @@ public class MainActivity extends AppCompatActivity
 
             TIMER.scheduleAtFixedRate(circleBreathingTask, 75, 75);
         }
+    }
+
+    private boolean isPowerSaving() {
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && powerManager.isPowerSaveMode();
     }
 
     private void updateCircleColor() {
@@ -227,6 +231,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.logout) {
             getZyncApp().setApi(null);
             getZyncApp().getConfig().clear();
+            getZyncApp().getDataManager().clearData();
             stopService(new Intent(this, ZyncClipboardService.class));
             startActivity(new Intent(this, SignInActivity.class));
         } else if (id == R.id.camera) {
@@ -255,6 +260,10 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void createUploadingToast() {
+        Toast.makeText(this, R.string.starting_upload, Toast.LENGTH_LONG).show();
+    }
+
     private ProgressDialog createUploadingDialog() {
         final ProgressDialog dialog = new ProgressDialog(this);
         dialog.setTitle(R.string.uploading_image);
@@ -272,20 +281,18 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == REQUEST_IMAGE && resultCode == RESULT_OK) {
             final ProgressDialog dialog = createUploadingDialog();
 
-            new AsyncTask<Void, Void, Void>() {
+            new GenericAsyncTask(new Runnable() {
                 @Override
-                protected Void doInBackground(Void... params) {
+                public void run() {
                     executeCameraCallback(dialog);
-                    return null;
                 }
-            }.execute();
+            }).execute();
         }
     }
 
     private void executeCameraCallback(final ProgressDialog dialog) {
         try {
             // compress, encrypt, hashCrc, and create clip data
-            File clipFile = getZyncApp().getDataManager().fileFor(currentStamp, false);
             final ZyncClipData clipData = new ZyncClipData(
                     currentStamp,
                     ZyncClipType.IMAGE,
@@ -297,7 +304,6 @@ public class MainActivity extends AppCompatActivity
             // post image to zync async
             ZyncPostImage.exec(
                     getZyncApp(),
-                    clipFile, // temporary
                     clipData,
                     new ZyncCallback<Void>() {
                         @Override
@@ -324,60 +330,53 @@ public class MainActivity extends AppCompatActivity
     }
 
     private boolean checkIntent() {
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if (getZyncApp().getApi() != null) {
-                final ProgressDialog uploadingDialog = createUploadingDialog();
-                ZyncCallback<Void> callback = new ZyncCallback<Void>() {
-                    @Override
-                    public void success(Void value) {
-                        uploadingDialog.dismiss();
-                        getZyncApp().sendClipPostedNotification();
-                    }
-
-                    @Override
-                    public void handleError(ZyncError error) {
-                        uploadingDialog.dismiss();
-                        getZyncApp().handleErrorGeneric(MainActivity.this, error, R.string.post_image_error);
-                        getZyncApp().sendClipErrorNotification();
-                    }
-                };
-
                 if (type.startsWith("image/")) {
-                    try {
-                        Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                        ZyncClipData clip = getZyncApp().getDataManager().saveImage(imageUri);
+                    new GenericAsyncTask(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                                ZyncClipData clip = getZyncApp().getDataManager().saveImage(imageUri);
 
-                        ZyncPostImage.exec(
-                                getZyncApp(),
-                                getZyncApp().getDataManager().fileFor(clip, false),
-                                clip,
-                                callback
-                        );
+                                createUploadingToast();
+                                ZyncPostImage.exec(
+                                        getZyncApp(),
+                                        clip,
+                                        new ShareZyncCallback(clip)
+                                );
 
-                        getZyncApp().getConfig().addToHistory(clip);
-                    } catch (IOException ex) {
-                        uploadingDialog.dismiss();
-                        getZyncApp().sendNotification(
-                                ZyncApplication.CLIPBOARD_ERROR_ID,
-                                getString(R.string.clipboard_post_error_notification),
-                                getString(R.string.clipboard_post_error_notification_desc)
-                        );
-                    } catch (Exception ignored) {
-                    }
+                                getZyncApp().getConfig().addToHistory(clip);
+                            } catch (IOException ex) {
+                                getZyncApp().sendNotification(
+                                        ZyncApplication.CLIPBOARD_ERROR_ID,
+                                        getString(R.string.clipboard_post_error_notification),
+                                        getString(R.string.clipboard_post_error_notification_desc)
+                                );
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }).execute();
                 } else if ("text/plain".equals(type)) {
                     String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
 
                     try {
-                        getZyncApp().getApi().postClipboard(new ZyncClipData(
+                        ZyncClipData clipData = new ZyncClipData(
                                 getZyncApp().getConfig().getEncryptionPass(),
                                 ZyncClipType.TEXT,
                                 sharedText.getBytes(Charset.forName("UTF-8"))
-                        ), callback);
-                        getZyncApp().sendClipPostedNotification();
+                        );
+
+                        createUploadingToast();
+                        getZyncApp().getApi().postClipboard(
+                                clipData,
+                                new ShareZyncCallback(clipData)
+                        );
                     } catch (Exception e) {
                         ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(e, "post clip from share"));
                         getZyncApp().sendClipErrorNotification();
@@ -395,5 +394,25 @@ public class MainActivity extends AppCompatActivity
 
     private ZyncApplication getZyncApp() {
         return (ZyncApplication) getApplication();
+    }
+
+    private class ShareZyncCallback implements ZyncCallback<Void> {
+        private final ZyncClipData clipData;
+
+        public ShareZyncCallback(ZyncClipData clipData) {
+            this.clipData = clipData;
+        }
+
+        @Override
+        public void success(Void value) {
+            getZyncApp().sendClipPostedNotification();
+            getZyncApp().getConfig().addToHistory(clipData);
+        }
+
+        @Override
+        public void handleError(ZyncError error) {
+            getZyncApp().handleErrorGeneric(MainActivity.this, error, R.string.post_image_error);
+            getZyncApp().sendClipErrorNotification();
+        }
     }
 }

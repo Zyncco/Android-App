@@ -40,6 +40,7 @@ public class ZyncApplication extends Application {
     public static int CLIPBOARD_POSTED_ID = 213812;
     public static int CLIPBOARD_ERROR_ID = 9308312;
     public static int PERSISTENT_NOTIFICATION_ID = 329321;
+    public static int CLIPBOARD_PROGRESS_ID = 3901831;
     /* END NOTIFICATION IDS */
     // whether the last request was successful or not
     private AtomicBoolean lastRequestStatus = new AtomicBoolean(true);
@@ -247,9 +248,6 @@ public class ZyncApplication extends Application {
     public void sendNotification(int id, String title, String text, PendingIntent intent) {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        notificationManager.cancel(id);
-
         Notification.Builder builder = new Notification.Builder(this);
         builder.setSmallIcon(R.drawable.notification_icon);
         builder.setContentTitle(title);

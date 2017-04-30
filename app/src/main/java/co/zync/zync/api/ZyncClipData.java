@@ -121,7 +121,6 @@ public class ZyncClipData {
         // generate hashCrc efficiently
         // (load data and update hashCrc in 8192 blocks)
         CRC32 crc = new CRC32();
-        long length = 0;
         byte[] buff = new byte[8192];
         int last;
 
@@ -132,7 +131,6 @@ public class ZyncClipData {
                 break;
             }
 
-            length += last;
             crc.update(buff, 0, last);
         }
 

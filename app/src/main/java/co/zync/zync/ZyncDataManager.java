@@ -109,7 +109,7 @@ public class ZyncDataManager {
         return file;
     }
 
-    public CipherInputStream   cryptoStreamFor(ZyncClipData clip) {
+    public CipherInputStream cryptoStreamFor(ZyncClipData clip) {
         return cryptoStreamFor(clip.timestamp(), clip.salt(), clip.iv());
     }
 
@@ -156,5 +156,10 @@ public class ZyncDataManager {
         output.close();
 
         return new ZyncClipData(timestamp, ZyncClipType.IMAGE, iv, salt, null);
+    }
+
+    public void clearData() {
+        clipboardDir.delete();
+        clipboardDir.mkdirs();
     }
 }

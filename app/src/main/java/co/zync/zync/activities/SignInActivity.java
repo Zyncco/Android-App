@@ -50,8 +50,13 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
         ZyncConfiguration preferences = getZyncApp().getConfig();
 
-        if (!preferences.seenIntro() || (BuildConfig.DEBUG && !getIntent().hasExtra("intro_direct"))) {
+        if (!preferences.seenIntro()) {
             startActivity(new Intent(this, IntroActivity.class));
+        }
+
+        if (preferences.apiToken() != null) {
+            getZyncApp().setApi(new ZyncAPI(getZyncApp().httpClient(), preferences.apiToken()));
+            signInSuccess();
         }
     }
 
@@ -132,7 +137,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                                     .setProviders(Arrays.asList(
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
                                     ))
-                                    .setIsSmartLockEnabled(!BuildConfig.DEBUG) // disableClipboardService smart lock if debugging
                                     .setTheme(R.style.AppTheme)
                                     .build(),
                             RC_SIGN_IN);
@@ -200,7 +204,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
             dialog.dismiss();
 
-            if (app.getConfig().getEncryptionPass() == null) {
+            if ("default".equals(app.getConfig().getEncryptionPass())) {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

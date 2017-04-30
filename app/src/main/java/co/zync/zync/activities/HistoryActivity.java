@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.util.SparseArray;
 import android.view.*;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.*;
+import co.zync.zync.BuildConfig;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
 import co.zync.zync.services.ZyncClipboardService;
@@ -28,6 +30,7 @@ import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.api.callback.ZyncCallback;
+import co.zync.zync.utils.GenericAsyncTask;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -73,6 +76,7 @@ public class HistoryActivity extends AppCompatActivity {
                      */
                     List<ZyncClipData> localHistory = app.getConfig().getHistory();
                     List<Long> missingTimestamps = new ArrayList<>();
+                    List<Long> imageTimestamps = new ArrayList<>();
 
                     for (ZyncClipData historyEntry : history) {
                         ZyncClipData local = app.clipFromTimestamp(historyEntry.timestamp(), localHistory);
@@ -83,13 +87,18 @@ public class HistoryActivity extends AppCompatActivity {
                             if (historyEntry.type() == ZyncClipType.TEXT) {
                                 missingTimestamps.add(historyEntry.timestamp());
                             } else {
-                                setDialogMessage(dialog, R.string.downloading_image);
-                                // downloads the entry if need be, will block thread
-                                getZyncApp().getDataManager().load(historyEntry, true);
-                                setDialogMessage(dialog, R.string.gathering_data);
+                                imageTimestamps.add(historyEntry.timestamp());
                             }
                         }
                     }
+
+                    for (int i = 0; i < imageTimestamps.size(); i++) {
+                        setDialogMessage(dialog, getString(R.string.downloading_image, i + 1, imageTimestamps.size()));
+                        // downloads the entry if need be, will block thread
+                        getZyncApp().getDataManager().load(history.get(i), true);
+                    }
+
+                    setDialogMessage(dialog, getString(R.string.gathering_data));
 
                     /*
                      * If we are missing data (if we have been offline for some time or some other reason):
@@ -109,7 +118,7 @@ public class HistoryActivity extends AppCompatActivity {
                                     app.clipFromTimestamp(clip.timestamp(), history).setData(clip.data());
                                 }
 
-                                setDialogMessage(dialog, R.string.processing_data);
+                                setDialogMessage(dialog, getString(R.string.processing_data));
                                 setHistory(history);
                                 app.getConfig().setHistory(history);
                                 dialog.dismiss();
@@ -121,7 +130,7 @@ public class HistoryActivity extends AppCompatActivity {
                             }
                         });
                     } else {
-                        setDialogMessage(dialog, R.string.processing_data);
+                        setDialogMessage(dialog, getString(R.string.processing_data));
                         setHistory(history);
                         app.getConfig().setHistory(history);
                         dialog.dismiss();
@@ -139,11 +148,11 @@ public class HistoryActivity extends AppCompatActivity {
         });
     }
 
-    public void setDialogMessage(final ProgressDialog dialog, final int resId) {
+    public void setDialogMessage(final ProgressDialog dialog, final String message) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                dialog.setMessage(getString(resId));
+                dialog.setMessage(message);
             }
         });
     }
@@ -184,14 +193,13 @@ public class HistoryActivity extends AppCompatActivity {
 
     private void loadHistoryFromFile(final Runnable callback) {
         if (callback != null) {
-            new AsyncTask<Void, Void, Void>() {
+            new GenericAsyncTask(new Runnable() {
                 @Override
-                public Void doInBackground(Void... params) {
+                public void run() {
                     setHistory(getZyncApp().getConfig().getHistory());
                     callback.run();
-                    return null;
                 }
-            }.execute();
+            }).execute();
         } else {
             setHistory(getZyncApp().getConfig().getHistory());
         }
@@ -265,17 +273,18 @@ public class HistoryActivity extends AppCompatActivity {
             final ZyncClipData data = history.get(i);
 
             LinearLayout mainLayout = (LinearLayout) findViewById(R.id.history_layout);
-            boolean even = (i % 2) == 0 && i != 0;
             boolean joining = false;
+            boolean second = false;
 
             /*
              * Check if we are in queue to be joined with another
              * entry in the same row
              */
-            if (even && prevLayout != null) {
+            if (prevLayout != null && (i != 0 && canJoin(i - 1, data))) {
                 mainLayout = prevLayout;
                 prevLayout = null;
                 joining = true;
+                second = true;
             }
 
             /*
@@ -283,8 +292,7 @@ public class HistoryActivity extends AppCompatActivity {
              * on the same row, if so, create the layout that the items will go under
              * and set the appropriate variables for the next entry to be added
              */
-            if (prevLayout == null && !even && canJoin(i, data) &&
-                    i != historySize && canJoin(i + 1, history.get(i + 1))) {
+            if (!joining && canJoin(i, data) && i != historySize && canJoin(i + 1, history.get(i + 1))) {
                 LinearLayout layout = new LinearLayout(this);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, cardLayoutHeight);
                 layout.setLayoutParams(params);
@@ -323,7 +331,7 @@ public class HistoryActivity extends AppCompatActivity {
                 layoutParams.bottomMargin = cardBottomMargin;
 
                 // if we are even (and joining), add a start margin to separate the two entries
-                if (even) {
+                if (second) {
                     layoutParams.setMarginStart(cardStartMargin);
                 }
             }
@@ -498,7 +506,7 @@ public class HistoryActivity extends AppCompatActivity {
                         shareText(data.data());
                         break;
                     case IMAGE:
-
+                        shareImage(data);
                         break;
                 }
             }
@@ -508,7 +516,15 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void shareImage(ZyncClipData data) {
-        getZyncApp().getDataManager().cryptoStreamFor(data);
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(
+                this,
+                "co.zync.zync.fileprovider",
+                getZyncApp().getDataManager().fileFor(data, false)
+        ));
+        sendIntent.setType("image/png");
+        startActivity(sendIntent);
     }
 
     private void shareText(byte[] data) {

@@ -107,6 +107,7 @@
     <string name="logout_success">Successfully logged out</string>
     <string name="disable_encryption">Disable Encryption</string>
     <string name="uploading_image">Uploading image&#8230;</string>
+    <string name="upload_complete">Upload complete!</string>
     <string name="gathering_data">Gathering data&#8230;</string>
     <string name="please_wait">Please wait</string>
     <string name="zync_persistentnotif_title">@string/app_name</string>
@@ -132,6 +133,7 @@
     <string name="history">History</string>
     <string name="loading_history">Loading history&#8230;</string>
     <string name="downloading_image">Downloading image&#8230;</string>
+    <string name="starting_upload">Starting upload&#8230;</string>
     <string name="processing_data">Processing data&#8230;</string>
     <string name="load_history_error">load history</string>
     <string name="firebase_token_error">fetch Firebase token</string>

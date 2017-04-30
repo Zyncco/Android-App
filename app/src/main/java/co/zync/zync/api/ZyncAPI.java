@@ -1,6 +1,7 @@
 package co.zync.zync.api;
 
 import co.zync.zync.ZyncApplication;
+import co.zync.zync.api.callback.ProgressCallback;
 import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.api.generic.ZyncGenericAPIListener;
 import co.zync.zync.api.generic.NullZyncTransformer;
@@ -249,9 +250,6 @@ public class ZyncAPI {
                 sink.writeAll(response.body().source());
                 sink.close();
 
-                System.out.println("model hash: " + data.hash());
-                System.out.println("size of download: " + response.body().contentLength());
-
                 // execute callback
                 callback.success(null);
 
@@ -284,7 +282,8 @@ public class ZyncAPI {
         );
     }
 
-    public void upload(final Provider<InputStream> streamProvider, String token, final ZyncCallback<Void> callback) {
+    public void upload(final Provider<InputStream> streamProvider, String token,
+                       final ZyncCallback<Void> callback, final ProgressCallback progressCallback) {
         Request request = new Request.Builder()
                 .url(BASE + VERSION + "/clipboard/upload/" + token)
                 .post(new RequestBody() {
@@ -295,13 +294,27 @@ public class ZyncAPI {
 
                     @Override
                     public void writeTo(BufferedSink sink) throws IOException {
-                        Source source = null;
-                        try {
-                            source = Okio.buffer(Okio.source(streamProvider.get()));
-                            sink.writeAll(source);
-                        } finally {
-                            okhttp3.internal.Util.closeQuietly(source);
+                        InputStream is = streamProvider.get();
+                        byte[] buff = new byte[125];
+                        int length = buff.length;
+                        int totalRead = 0;
+
+                        while (length != -1) {
+                            length = is.read(buff);
+
+                            if (length == -1) {
+                                break;
+                            }
+
+                            totalRead += length;
+                            sink.write(buff, 0, length);
+
+                            if (progressCallback != null) {
+                                progressCallback.callback(totalRead);
+                            }
                         }
+
+                        is.close();
                     }
                 })
                 .addHeader("X-ZYNC-TOKEN", this.token)

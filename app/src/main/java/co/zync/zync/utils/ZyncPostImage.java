@@ -1,7 +1,12 @@
 package co.zync.zync.utils;
 
+import android.app.NotificationManager;
+import android.content.Context;
+import android.support.v4.app.NotificationCompat;
+import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
 import co.zync.zync.api.*;
+import co.zync.zync.api.callback.ProgressCallback;
 import co.zync.zync.api.callback.ZyncCallback;
 
 import java.io.*;
@@ -12,9 +17,16 @@ import java.io.*;
  * @author Mazen Kotb
  */
 public final class ZyncPostImage {
-    public static void exec(final ZyncApplication app, final File file,
-                            final ZyncClipData data, final ZyncCallback<Void> callback) {
+    public static void exec(final ZyncApplication app, final ZyncClipData data,
+                            final ZyncCallback<Void> callback) {
         try {
+            final NotificationManager notifManager = (NotificationManager) app.getSystemService(Context.NOTIFICATION_SERVICE);
+            final int size = (int) app.getDataManager().fileFor(data, false).length();
+            final int notificationId = ZyncApplication.CLIPBOARD_PROGRESS_ID;
+            final NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(app.getApplicationContext())
+                    .setContentTitle(app.getString(R.string.uploading_image))
+                    .setSmallIcon(R.drawable.notification_icon);
+
             if (data.hash() == null) {
                 data.setHash(ZyncClipData.hashCrc(app.getDataManager().cryptoStreamFor(data)));
                 app.getConfig().update(data);
@@ -33,15 +45,26 @@ public final class ZyncPostImage {
                                 }
                             },
                             token,
-                            new ZyncCallback<Void>() {
+                            callback,
+                            new ProgressCallback() {
                                 @Override
-                                public void success(Void value) {
-                                    callback.success(value);
-                                }
+                                public void callback(int bytesRead) {
+                                    double percent = ((double) bytesRead / (double) size) * 100d;
 
-                                @Override
-                                public void handleError(ZyncError error) {
-                                    callback.handleError(error);
+                                    notifBuilder.setProgress(size, bytesRead, false);
+                                    notifBuilder.setContentText(String.valueOf(Math.floor(percent))
+                                            .replace(".0", "") + "%");
+
+                                    if (bytesRead >= size) {
+                                        notifBuilder.setContentTitle(app.getString(R.string.upload_complete));
+                                        notifBuilder.setContentText(null);
+                                    }
+
+                                    notifManager.notify(notificationId, notifBuilder.build());
+
+                                    if (bytesRead >= size) {
+                                        notifManager.cancel(notificationId);
+                                    }
                                 }
                             }
                     );
