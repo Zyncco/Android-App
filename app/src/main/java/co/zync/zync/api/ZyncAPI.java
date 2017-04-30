@@ -295,7 +295,7 @@ public class ZyncAPI {
                     @Override
                     public void writeTo(BufferedSink sink) throws IOException {
                         InputStream is = streamProvider.get();
-                        byte[] buff = new byte[125];
+                        byte[] buff = new byte[16248];
                         int length = buff.length;
                         int totalRead = 0;
 

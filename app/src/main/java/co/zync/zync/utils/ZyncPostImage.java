@@ -21,11 +21,16 @@ public final class ZyncPostImage {
                             final ZyncCallback<Void> callback) {
         try {
             final NotificationManager notifManager = (NotificationManager) app.getSystemService(Context.NOTIFICATION_SERVICE);
-            final int size = (int) app.getDataManager().fileFor(data, false).length();
+            final int fileSize = (int) app.getDataManager().fileFor(data, false).length();
+            final int size = fileSize + (16 - (fileSize % 16));
             final int notificationId = ZyncApplication.CLIPBOARD_PROGRESS_ID;
             final NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(app.getApplicationContext())
                     .setContentTitle(app.getString(R.string.uploading_image))
+                    .setContentText("0%")
+                    .setProgress(size, 0, true)
                     .setSmallIcon(R.drawable.notification_icon);
+
+            notifManager.notify(notificationId, notifBuilder.build());
 
             if (data.hash() == null) {
                 data.setHash(ZyncClipData.hashCrc(app.getDataManager().cryptoStreamFor(data)));

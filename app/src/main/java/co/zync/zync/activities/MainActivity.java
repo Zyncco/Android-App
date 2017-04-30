@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -24,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 import co.zync.zync.*;
 import co.zync.zync.api.ZyncClipData;
 import co.zync.zync.api.ZyncClipType;
@@ -260,8 +260,13 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void createUploadingToast() {
-        Toast.makeText(this, R.string.starting_upload, Toast.LENGTH_LONG).show();
+    private void createUploadingSnackbar() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Snackbar.make(findViewById(R.id.content_main), R.string.starting_upload, Snackbar.LENGTH_LONG).show();
+            }
+        });
     }
 
     private ProgressDialog createUploadingDialog() {
@@ -337,21 +342,20 @@ public class MainActivity extends AppCompatActivity
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if (getZyncApp().getApi() != null) {
                 if (type.startsWith("image/")) {
+                    final Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
                     new GenericAsyncTask(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
                                 ZyncClipData clip = getZyncApp().getDataManager().saveImage(imageUri);
 
-                                createUploadingToast();
+                                createUploadingSnackbar();
                                 ZyncPostImage.exec(
                                         getZyncApp(),
                                         clip,
                                         new ShareZyncCallback(clip)
                                 );
-
-                                getZyncApp().getConfig().addToHistory(clip);
                             } catch (IOException ex) {
                                 getZyncApp().sendNotification(
                                         ZyncApplication.CLIPBOARD_ERROR_ID,
@@ -372,7 +376,7 @@ public class MainActivity extends AppCompatActivity
                                 sharedText.getBytes(Charset.forName("UTF-8"))
                         );
 
-                        createUploadingToast();
+                        createUploadingSnackbar();
                         getZyncApp().getApi().postClipboard(
                                 clipData,
                                 new ShareZyncCallback(clipData)
