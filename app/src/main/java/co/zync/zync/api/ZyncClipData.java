@@ -18,7 +18,7 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-public class ZyncClipData {
+public class ZyncClipData implements Cloneable {
     private final long timestamp;
     private String hash;
     private final byte[] iv;
@@ -211,6 +211,15 @@ public class ZyncClipData {
             return object;
         } catch (JSONException | UnsupportedEncodingException ignored) {
             return new JSONObject();
+        }
+    }
+
+    @Override
+    public ZyncClipData clone() {
+        try {
+            return (ZyncClipData) super.clone();
+        } catch (CloneNotSupportedException ignored) {
+            return null;
         }
     }
 

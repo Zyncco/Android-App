@@ -29,7 +29,9 @@ public class ZyncConfiguration {
     public void setHistory(List<ZyncClipData> history) {
         Set<String> historyText = new HashSet<>(history.size());
 
-        for (ZyncClipData data : history) {
+        for (ZyncClipData d : history) {
+            ZyncClipData data = d.clone();
+
             if (data.data() != null) {
                 data.encrypt(getEncryptionPass());
             }
@@ -41,7 +43,8 @@ public class ZyncConfiguration {
     }
 
     // adds an item to history and writes changes to file
-    public void addToHistory(ZyncClipData data) {
+    public void addToHistory(ZyncClipData d) {
+        ZyncClipData data = d.clone();
         List<String> history = new ArrayList<>(getPreferences().getStringSet("zync_history", new HashSet<String>()));
 
         if (history.size() == 10) {
