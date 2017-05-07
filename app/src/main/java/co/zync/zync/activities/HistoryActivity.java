@@ -225,7 +225,7 @@ public class HistoryActivity extends AppCompatActivity {
                 imageOptions.append(index, bitMapOption);
             }
 
-            return (bitMapOption.outHeight / bitMapOption.outWidth) > 0.8 ||
+            return bitMapOption.outWidth == 0 || (bitMapOption.outHeight / bitMapOption.outWidth) > 0.8 ||
                     (bitMapOption.outHeight < 700 && bitMapOption.outWidth < 700);
         }
 
