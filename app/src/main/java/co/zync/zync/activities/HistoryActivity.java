@@ -524,7 +524,7 @@ public class HistoryActivity extends AppCompatActivity {
                 getZyncApp().getDataManager().fileFor(data, false)
         ));
         sendIntent.setType("image/png");
-        startActivity(sendIntent);
+        startActivity(Intent.createChooser(sendIntent, getString(R.string.share_via)));
     }
 
     private void shareText(byte[] data) {
@@ -532,7 +532,7 @@ public class HistoryActivity extends AppCompatActivity {
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, new String(data));
         sendIntent.setType("text/plain");
-        startActivity(sendIntent);
+        startActivity(Intent.createChooser(sendIntent, getString(R.string.share_via)));
     }
 
     private void setTextAppearance(TextView view, int resId) {

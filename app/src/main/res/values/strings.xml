@@ -148,6 +148,7 @@
     <string name="history_image_desc">Image. Click to share to another app!</string>
     <string name="history_encryption_error">Error decrypting this entry&#8230;</string>
     <string name="history_copy_button">Copy to Clipboard</string>
+    <string name="share_via">Share via</string>
     <string name="history_clip_updated_msg">Your clipboard has been successfully updated</string>
 
     <string name="max_size">Max Size</string>
