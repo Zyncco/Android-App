@@ -347,6 +347,7 @@ public class HistoryActivity extends AppCompatActivity {
                     setLayout(textPreview, LayoutParams.WRAP_CONTENT, textHeight, textMargin);
                     LinearLayout.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) textPreview.getLayoutParams();
                     params.setMarginStart(textMargin);
+                    params.setMarginEnd(textMargin);
 
                     setTextAppearance(textPreview, android.R.style.TextAppearance_Material_Body1);
                     textPreview.setTextSize(12);
