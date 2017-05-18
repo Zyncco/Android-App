@@ -11,10 +11,7 @@ import android.preference.PreferenceActivity;
 import android.util.Log;
 import co.zync.zync.activities.SettingsActivity;
 import co.zync.zync.activities.SignInActivity;
-import co.zync.zync.api.ZyncAPI;
-import co.zync.zync.api.ZyncClipData;
-import co.zync.zync.api.ZyncClipType;
-import co.zync.zync.api.ZyncError;
+import co.zync.zync.api.*;
 import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.services.ZyncClipboardService;
 import co.zync.zync.services.ZyncInstanceIdService;
@@ -23,6 +20,7 @@ import co.zync.zync.listeners.ZyncPreferenceChangeListener;
 import co.zync.zync.listeners.NullDialogClickListener;
 import co.zync.zync.listeners.RequestStatusListener;
 import co.zync.zync.utils.ZyncExceptionInfo;
+import com.crashlytics.android.Crashlytics;
 import okhttp3.OkHttpClient;
 
 import java.io.File;
@@ -34,7 +32,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ZyncApplication extends Application {
     public static final List<String> SENSITIVE_PREFERENCE_FIELDS = Arrays.asList("zync_history", "zync_api_token", "encryption_pass", "encryption_key");
-    public static final List<ZyncExceptionInfo> LOGGED_EXCEPTIONS = Collections.synchronizedList(new ArrayList<ZyncExceptionInfo>());
+    public static final List<ZyncExceptionInfo> LOGGED_EXCEPTIONS = Collections.synchronizedList(new ArrayList<ZyncExceptionInfo>() {
+        @Override
+        public boolean add(ZyncExceptionInfo zyncExceptionInfo) {
+            if (zyncExceptionInfo.ex() instanceof ZyncAPIException) {
+                Crashlytics.logException(zyncExceptionInfo.ex());
+            }
+
+            return super.add(zyncExceptionInfo);
+        }
+    });
     /* START NOTIFICATION IDS */
     public static int CLIPBOARD_UPDATED_ID = 281902;
     public static int CLIPBOARD_POSTED_ID = 213812;

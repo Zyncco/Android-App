@@ -23,6 +23,11 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="ManifestResource">
+        <meta-data
+                android:name="io.fabric.ApiKey"
+                android:value="56f11d9b17391e15213ad6b5166f56c52924a99f"
+                tools:replace="android:value"
+        />
         <service android:name=".services.ZyncClipboardService"/>
         <service
                 android:name=".services.ZyncMessagingService"

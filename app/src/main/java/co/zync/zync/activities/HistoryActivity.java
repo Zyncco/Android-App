@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
@@ -22,7 +21,6 @@ import android.util.SparseArray;
 import android.view.*;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.*;
-import co.zync.zync.BuildConfig;
 import co.zync.zync.R;
 import co.zync.zync.ZyncApplication;
 import co.zync.zync.services.ZyncClipboardService;
@@ -234,7 +232,7 @@ public class HistoryActivity extends AppCompatActivity {
 
     // set history that is being displayed on the activity
     // this will not override any pre-existing entries
-    private void setHistory(List<ZyncClipData> systemHistory) {
+    protected void setHistory(List<ZyncClipData> systemHistory) {
         List<ZyncClipData> history = new ArrayList<>(systemHistory.size());
         LinearLayout prevLayout = null; // ha
         // define variables to be used

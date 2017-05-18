@@ -14,6 +14,7 @@ import co.zync.zync.activities.intro.IntroActivity;
 import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.services.ZyncClipboardService;
 import co.zync.zync.utils.ZyncPassDialog;
+import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.ResultCodes;
@@ -31,6 +32,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import io.fabric.sdk.android.Fabric;
 import org.json.JSONException;
 
 /*
@@ -46,6 +48,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
         // make sure google play services is available
         GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this);
+        Fabric.with(this, new Crashlytics());
         findViewById(R.id.sign_in_button).setOnClickListener(this);
 
         ZyncConfiguration preferences = getZyncApp().getConfig();
@@ -98,7 +101,11 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         final ZyncApplication app = getZyncApp();
         final ProgressDialog dialog = createSignInDialog();
 
-        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        final FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        Crashlytics.setUserEmail(mUser.getEmail());
+        Crashlytics.setUserName(mUser.getDisplayName());
+
         mUser.getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
