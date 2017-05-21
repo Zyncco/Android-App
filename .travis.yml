@@ -23,6 +23,8 @@ licenses:
 - android-sdk-preview-license-.+
 - android-sdk-license-.+
 - google-gdk-license-.+
+- extra-.+
+- sys-.+
 
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
