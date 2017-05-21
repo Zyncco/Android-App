@@ -5,15 +5,8 @@ sudo: false
 android:
   components:
   - tools
-  - platform-tools
   - build-tools-25.0.2
   - android-25
-  - android-21
-  - extra-android-m2repository
-  - extra-google-m2repository
-  - extra-android-support
-  - extra-google-google_play_services
-  - sys-img-armeabi-v7a-android-21
   
 before_install:
 - openssl aes-256-cbc -K $encrypted_c04a08a0789a_key -iv $encrypted_c04a08a0789a_iv -in credentials.tar.enc -out credentials.tar -d
