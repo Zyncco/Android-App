@@ -33,6 +33,7 @@ import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.services.ZyncClipboardService;
 import co.zync.zync.listeners.RequestStatusListener;
 import co.zync.zync.utils.*;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;
 import java.io.IOException;
@@ -229,6 +230,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_help) {
             startActivity(new Intent(this, HelpActivity.class));
         } else if (id == R.id.logout) {
+            FirebaseAuth.getInstance().signOut();
             getZyncApp().setApi(null);
             getZyncApp().getConfig().clear();
             getZyncApp().getDataManager().clearData();

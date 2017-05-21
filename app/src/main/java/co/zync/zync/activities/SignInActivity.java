@@ -15,11 +15,12 @@ import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.services.ZyncClipboardService;
 import co.zync.zync.utils.ZyncPassDialog;
 import com.crashlytics.android.Crashlytics;
-import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.IdpResponse;
-import com.firebase.ui.auth.ResultCodes;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Arrays;
@@ -29,9 +30,7 @@ import co.zync.zync.api.ZyncError;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.auth.*;
 import io.fabric.sdk.android.Fabric;
 import org.json.JSONException;
 
@@ -40,6 +39,7 @@ import org.json.JSONException;
  */
 public class SignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
     private static final int RC_SIGN_IN = 64209;
+    private GoogleApiClient googleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +49,10 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         // make sure google play services is available
         GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this);
         Fabric.with(this, new Crashlytics());
+
+        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_WIDE);
+
         findViewById(R.id.sign_in_button).setOnClickListener(this);
 
         ZyncConfiguration preferences = getZyncApp().getConfig();
@@ -61,6 +65,16 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             getZyncApp().setApi(new ZyncAPI(getZyncApp().httpClient(), preferences.apiToken()));
             signInSuccess();
         }
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken("958433754089-lu2d68r11jasp08ihgm5mc079avv21af.apps.googleusercontent.com")
+                .build();
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
     }
 
     @Override
@@ -80,14 +94,30 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
             // Successfully signed in
-            if (resultCode == ResultCodes.OK && response != null) {
-                System.out.println("yay signed in for " + response.getEmail());
-                handleSignIn(response);
+            if (resultCode == RESULT_OK && result != null && result.isSuccess()) {
+                System.out.println("yay signed in for " + result.getSignInAccount().getEmail());
+                AuthCredential credential = GoogleAuthProvider.getCredential(
+                        result.getSignInAccount().getIdToken(),
+                        null
+                );
+
+                FirebaseAuth.getInstance().signInWithCredential(credential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            handleSignIn(task.getResult().getUser());
+                        } else {
+                            getZyncApp().handleErrorGeneric(SignInActivity.this, new ZyncError(-12,
+                                    "Couldn't log into firebase !"), R.string.log_in);
+                        }
+                    }
+                });
             } else {
-                String extension = response == null ? "" : "due to error " + response.getErrorCode();
+                String extension = result == null ? "" : "due to error " + result.getStatus().getStatusCode()
+                        + ":" + result.getStatus().getStatusMessage();
                 getZyncApp().handleErrorGeneric(this, new ZyncError(-11,
                         "Couldn't log into firebase " + extension), R.string.log_in);
                 System.out.println("that's sad... now what");
@@ -95,18 +125,15 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         }
     }
 
-    private void handleSignIn(IdpResponse result) {
+    private void handleSignIn(FirebaseUser user) {
         // Signed in successfully, show authenticated UI.
-        System.out.println(result.getEmail() + " is logged in!");
         final ZyncApplication app = getZyncApp();
         final ProgressDialog dialog = createSignInDialog();
 
-        final FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        Crashlytics.setUserEmail(user.getEmail());
+        Crashlytics.setUserName(user.getDisplayName());
 
-        Crashlytics.setUserEmail(mUser.getEmail());
-        Crashlytics.setUserName(mUser.getDisplayName());
-
-        mUser.getToken(true)
+        user.getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
                         if (task.isSuccessful()) {
@@ -138,7 +165,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         switch (v.getId()) {
             case R.id.sign_in_button:
                 if (getZyncApp().httpClient() != null) {
-                    startActivityForResult(
+                    /*startActivityForResult(
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
                                     .setProviders(Arrays.asList(
@@ -146,7 +173,9 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                                     ))
                                     .setTheme(R.style.AppTheme)
                                     .build(),
-                            RC_SIGN_IN);
+                            RC_SIGN_IN);*/
+                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+                    startActivityForResult(signInIntent, RC_SIGN_IN);
                 } else {
                     AlertDialog.Builder dialog = new AlertDialog.Builder(this);
                     dialog.setTitle(R.string.no_internet);

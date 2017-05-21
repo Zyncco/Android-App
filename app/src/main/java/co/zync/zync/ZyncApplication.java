@@ -36,7 +36,11 @@ public class ZyncApplication extends Application {
         @Override
         public boolean add(ZyncExceptionInfo zyncExceptionInfo) {
             if (zyncExceptionInfo.ex() instanceof ZyncAPIException) {
-                Crashlytics.logException(zyncExceptionInfo.ex());
+                ZyncError error = ((ZyncAPIException) zyncExceptionInfo.ex()).error();
+
+                if (error.code() != 300 && !("Clipboard Empty".equals(error.message()))) {
+                    Crashlytics.logException(zyncExceptionInfo.ex());
+                }
             }
 
             return super.add(zyncExceptionInfo);
