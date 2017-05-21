@@ -29,6 +29,7 @@ import co.zync.zync.api.ZyncClipType;
 import co.zync.zync.api.ZyncError;
 import co.zync.zync.api.callback.ZyncCallback;
 import co.zync.zync.utils.GenericAsyncTask;
+import com.google.firebase.perf.metrics.AddTrace;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -232,6 +233,7 @@ public class HistoryActivity extends AppCompatActivity {
 
     // set history that is being displayed on the activity
     // this will not override any pre-existing entries
+    @AddTrace(name = "loadHistoryUi")
     protected void setHistory(List<ZyncClipData> systemHistory) {
         List<ZyncClipData> history = new ArrayList<>(systemHistory.size());
         LinearLayout prevLayout = null; // ha
