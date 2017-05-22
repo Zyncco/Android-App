@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context="co.zync.zync.activities.HistoryActivity">
+        tools:context="co.zync.android.activities.HistoryActivity">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                   android:id="@+id/history_layout" android:paddingBottom="10dp"
                   android:outlineProvider="bounds"

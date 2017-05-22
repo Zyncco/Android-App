@@ -5,7 +5,7 @@
         android:id="@+id/activity_credit"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="co.zync.zync.activities.CreditActivity">
+        tools:context="co.zync.android.activities.CreditActivity">
     <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:paddingLeft="@dimen/activity_horizontal_margin"
                     android:paddingRight="@dimen/activity_horizontal_margin"

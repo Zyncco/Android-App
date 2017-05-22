@@ -3,7 +3,7 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-            android:fragment="co.zync.zync.activities.SettingsActivity$GeneralPreferenceFragment"
+            android:fragment="co.zync.android.activities.SettingsActivity$GeneralPreferenceFragment"
             android:title="@string/pref_header_general"
             />
 

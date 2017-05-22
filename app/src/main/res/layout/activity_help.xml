@@ -2,7 +2,7 @@
 <ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        tools:context="co.zync.zync.activities.HelpActivity"
+        tools:context="co.zync.android.activities.HelpActivity"
         android:id="@+id/activity_help"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

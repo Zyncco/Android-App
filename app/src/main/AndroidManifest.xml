@@ -15,7 +15,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
-            android:name=".ZyncApplication"
+            android:name="co.zync.android.ZyncApplication"
             android:allowBackup="false"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
@@ -28,23 +28,23 @@
                 android:value="56f11d9b17391e15213ad6b5166f56c52924a99f"
                 tools:replace="android:value"
         />
-        <service android:name=".services.ZyncClipboardService"/>
+        <service android:name="co.zync.android.services.ZyncClipboardService"/>
         <service
-                android:name=".services.ZyncMessagingService"
+                android:name="co.zync.android.services.ZyncMessagingService"
                 android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
         <service
-                android:name=".services.ZyncInstanceIdService"
+                android:name="co.zync.android.services.ZyncInstanceIdService"
                 android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
         </service>
 
-        <activity android:name=".activities.SignInActivity">
+        <activity android:name="co.zync.android.activities.SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -52,11 +52,11 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".activities.SettingsActivity"
+                android:name="co.zync.android.activities.SettingsActivity"
                 android:label="@string/zync_settings">
         </activity>
         <activity
-                android:name=".activities.MainActivity"
+                android:name="co.zync.android.activities.MainActivity"
                 android:label="@string/title_activity_main"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -68,19 +68,19 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".activities.intro.IntroActivity"
+                android:name="co.zync.android.activities.intro.IntroActivity"
                 android:label="@string/title_activity_intro"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".activities.HelpActivity">
+        <activity android:name="co.zync.android.activities.HelpActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activities.MainActivity"/>
+                    android:value="co.zync.android.activities.MainActivity"/>
         </activity>
 
         <provider
                 android:name="android.support.v4.content.FileProvider"
-                android:authorities="co.zync.zync.fileprovider"
+                android:authorities="co.zync.android.fileprovider"
                 android:exported="false"
                 android:grantUriPermissions="true">
             <meta-data
@@ -88,20 +88,20 @@
                     android:resource="@xml/file_paths"/>
         </provider>
 
-        <activity android:name=".activities.HistoryActivity">
+        <activity android:name="co.zync.android.activities.HistoryActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activities.MainActivity"/>
+                    android:value="co.zync.android.activities.MainActivity"/>
         </activity>
-        <activity android:name=".activities.CreditActivity">
+        <activity android:name="co.zync.android.activities.CreditActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activities.SettingsActivity"/>
+                    android:value="co.zync.android.activities.SettingsActivity"/>
         </activity>
-        <activity android:name=".activities.DebugActivity">
+        <activity android:name="co.zync.android.activities.DebugActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activities.MainActivity"/>
+                    android:value="co.zync.android.activities.MainActivity"/>
         </activity>
     </application>
 

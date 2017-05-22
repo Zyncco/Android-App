@@ -6,7 +6,7 @@
                                                  android:layout_width="match_parent"
                                                  android:layout_height="match_parent"
                                                  android:fitsSystemWindows="true"
-                                                 tools:context="co.zync.zync.activities.intro.IntroActivity">
+                                                 tools:context="co.zync.android.activities.intro.IntroActivity">
     <android.support.v4.view.ViewPager
             android:id="@+id/container"
             android:layout_width="match_parent"

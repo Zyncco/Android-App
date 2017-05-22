@@ -42,7 +42,7 @@
                 android:title="@string/use_on_data" android:key="use_on_data"
                 android:summary="@string/use_on_data_desc"/>
 
-        <co.zync.zync.utils.ZyncSliderPreference
+        <co.zync.android.utils.ZyncSliderPreference
                 android:title="@string/max_size" android:key="max_size"
                 android:summary="@string/max_size_desc"
                 android:dialogMessage="@string/max_size_desc"/>
