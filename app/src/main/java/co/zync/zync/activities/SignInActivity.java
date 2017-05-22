@@ -23,8 +23,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.util.Arrays;
-
 import co.zync.zync.api.ZyncAPI;
 import co.zync.zync.api.ZyncError;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -165,15 +163,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         switch (v.getId()) {
             case R.id.sign_in_button:
                 if (getZyncApp().httpClient() != null) {
-                    /*startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setProviders(Arrays.asList(
-                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
-                                    ))
-                                    .setTheme(R.style.AppTheme)
-                                    .build(),
-                            RC_SIGN_IN);*/
                     Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
                     startActivityForResult(signInIntent, RC_SIGN_IN);
                 } else {
