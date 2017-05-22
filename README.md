@@ -24,7 +24,7 @@ You can also import a Google project by clicking _Import Google Project_
 - Click _Add Firebase to Android App_ and follow the instructions there. This may have already been 
 done for you if you imported a Google project, and you can download the `google-services.json` file
 by following [these](https://support.google.com/firebase/answer/7015592#android) instructions
-- When asked for the project's package name, enter `co.zync.zync`
+- When asked for the project's package name, enter `co.zync.android`
 - When finished, you can download the `google-services.json` file and move it to the `app` folder
 
 These instructions were based off of [this](https://firebase.google.com/docs/android/setup#manually_add_firebase)

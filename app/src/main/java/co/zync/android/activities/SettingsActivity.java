@@ -138,7 +138,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                 Intent.EXTRA_STREAM,
                                 FileProvider.getUriForFile(
                                         getActivity().getApplicationContext(),
-                                        "co.zync.zync.fileprovider",
+                                        "co.zync.android.fileprovider",
                                         ((ZyncApplication) getActivity().getApplication()).createInfoFile()
                                 )
                         );

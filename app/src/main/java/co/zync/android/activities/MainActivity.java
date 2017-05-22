@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity
                 if (photoFile != null) {
                     // generate a URI for the app to put the photo in
                     Uri photoURI = FileProvider.getUriForFile(this,
-                            "co.zync.zync.fileprovider",
+                            "co.zync.android.fileprovider",
                             photoFile);
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 

@@ -521,7 +521,7 @@ public class HistoryActivity extends AppCompatActivity {
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(
                 this,
-                "co.zync.zync.fileprovider",
+                "co.zync.android.fileprovider",
                 getZyncApp().getDataManager().fileFor(data, false)
         ));
         sendIntent.setType("image/png");
