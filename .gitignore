@@ -58,3 +58,4 @@ credentials.tar
 *.jks
 *.p12
 /app/src/main/play
+play-service-account.json
