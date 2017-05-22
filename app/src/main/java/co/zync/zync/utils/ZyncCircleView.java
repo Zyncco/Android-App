@@ -5,19 +5,19 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.*;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.View;
 
 import java.util.TimerTask;
 
 import static android.graphics.Color.rgb;
+import static android.graphics.Color.argb;
 
 public class ZyncCircleView extends View {
-    public static final int GREEN_OK = rgb(71, 224, 20);
+    public static final int OK = argb(128, 72, 140, 255);
     public static final int RED_ERROR = rgb(255, 40, 40);
     public static final int GRAY_OFF = rgb(145, 145, 145);
     private static final float COLOR_FACTOR_BOUND = 0.15f;
-    private int color = GREEN_OK;
+    private int color = OK;
     private int radius = -1;
     private Paint paint;
 
@@ -42,7 +42,7 @@ public class ZyncCircleView extends View {
     }
 
     private int size() {
-        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.74);
+        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.67);
     }
 
     private void init() {
@@ -91,16 +91,16 @@ public class ZyncCircleView extends View {
     }
 
     private int rectBound() {
-        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.0075);
+        return (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.045);
     }
 
     private static int modify(int color, float fraction) {
         int red = modifyColor(Color.red(color), fraction);
         int green = modifyColor(Color.green(color), fraction);
         int blue = modifyColor(Color.blue(color), fraction);
-        int alpha = modifyColor(Color.alpha(color), (fraction / 3));
+        //int alpha = modifyColor(Color.alpha(color), (fraction / 3));
 
-        return Color.argb(alpha, red, green, blue);
+        return Color.argb(Color.alpha(color), red, green, blue);
     }
 
     // if fraction is negative, color will be lightened

@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         ViewGroup.LayoutParams params = findViewById(R.id.main_logo).getLayoutParams();
-        int imageSize = (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.75);
+        int imageSize = (int) (Resources.getSystem().getDisplayMetrics().widthPixels * 0.735);
 
         params.height = imageSize;
         params.width = imageSize;
@@ -141,10 +141,10 @@ public class MainActivity extends AppCompatActivity
             circleBreathingTask = new ZyncCircleView.SizeChangeTask(
                     this,
                     (ZyncCircleView) findViewById(R.id.zync_circle),
-                    120
+                    100
             );
 
-            TIMER.scheduleAtFixedRate(circleBreathingTask, 75, 75);
+            TIMER.scheduleAtFixedRate(circleBreathingTask, 35, 35);
         }
     }
 
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity
 
             return;
         } else {
-            circle.setColor(ZyncCircleView.GREEN_OK);
+            circle.setColor(ZyncCircleView.OK);
 
             ((ImageView) findViewById(R.id.main_logo)).setColorFilter(null);
             getZyncApp().enableClipboardService();
