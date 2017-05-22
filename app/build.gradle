@@ -15,23 +15,22 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 android {
     playAccountConfigs {
         defaultAccountConfig {
-            serviceAccountEmail = keystoreProperties["SERVICE_ACCOUNT_EMAIL"].toString()
-            pk12File = file('key-5a528b77a2ae.p12')
+            jsonFile = file('../play-service-account.json')
         }
     }
 
     signingConfigs {
         release {
-            keyAlias 'key0'
-            keyPassword keystoreProperties["KEYSTORE_PASS"].toString()
-            storeFile file('android.jks')
-            storePassword keystoreProperties["KEY_PASS"].toString()
+            keyAlias 'zyncco'
+            keyPassword keystoreProperties["KEY_PASS"].toString()
+            storeFile file('../keystore.jks')
+            storePassword keystoreProperties["KEYSTORE_PASS"].toString()
         }
         debug {
-            keyAlias 'key0'
-            keyPassword keystoreProperties["KEYSTORE_PASS"].toString()
-            storeFile file('android.jks')
-            storePassword keystoreProperties["KEY_PASS"].toString()
+            keyAlias 'zyncco'
+            keyPassword keystoreProperties["KEY_PASS"].toString()
+            storeFile file('../keystore.jks')
+            storePassword keystoreProperties["KEYSTORE_PASS"].toString()
         }
     }
 
