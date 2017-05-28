@@ -6,17 +6,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.crypto.AEADBadTagException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Comparator;
 import java.util.Locale;
-import java.util.zip.CRC32;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
+import java.util.zip.*;
 
 public class ZyncClipData implements Cloneable {
     private final long timestamp;
@@ -26,10 +20,8 @@ public class ZyncClipData implements Cloneable {
     private final ZyncClipType type;
     // ONLY exists if type=TEXT, otherwise stored in file
     private byte[] data; // encoded in base 64
-    private boolean encrypted = false; // is data[] encrypted?
 
-    public ZyncClipData(String encryptionKey,
-                        ZyncClipType type, byte[] data) throws Exception {
+    public ZyncClipData(ZyncClipType type, byte[] data) throws Exception {
         this.timestamp = System.currentTimeMillis();
         this.type = type;
         this.iv = ZyncCrypto.generateSecureIv();
@@ -37,7 +29,7 @@ public class ZyncClipData implements Cloneable {
 
         if (data != null) {
             this.data = data;
-            encrypt(encryptionKey);
+            this.hash = hashCrc(data);
         }
     }
 
@@ -57,7 +49,6 @@ public class ZyncClipData implements Cloneable {
 
     public ZyncClipData(String encryptionKey, JSONObject obj) throws Exception {
         this.timestamp = obj.getLong("timestamp");
-        this.hash = obj.getJSONObject("hash").getString("crc32");
         JSONObject encryption = obj.getJSONObject("encryption");
         this.iv = Base64.decode(encryption.getString("iv"), Base64.NO_WRAP);
         this.salt = Base64.decode(encryption.getString("salt"), Base64.NO_WRAP);
@@ -68,45 +59,40 @@ public class ZyncClipData implements Cloneable {
 
             try {
                 this.data = ZyncCrypto.decrypt(data, encryptionKey, salt, iv);
+                JSONObject payload = new JSONObject(new String(data));
+
+                this.data = Base64.decode(payload.getString("data"), Base64.NO_WRAP);
                 this.data = decompress(data);
+                this.hash = payload.getString("hash");
             } catch (DataFormatException | AEADBadTagException ex) {
                 this.data = null;
             }
         }
     }
 
-    private static byte[] compress(byte[] data) {
+    private static byte[] compress(byte[] data) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        Deflater deflater = new Deflater();
-        byte[] buff = new byte[256];
-        int lastLength = 256;
+        GZIPOutputStream gzip = new GZIPOutputStream(bos);
 
-        deflater.setInput(data);
-        deflater.finish();
+        gzip.write(data);
+        gzip.close();
+        gzip.flush();
 
-        while (lastLength == 256) {
-            lastLength = deflater.deflate(buff);
-            bos.write(buff, 0, lastLength);
-        }
-
-        deflater.end();
         return bos.toByteArray();
     }
 
-    private static byte[] decompress(byte[] data) throws DataFormatException {
+    private static byte[] decompress(byte[] data) throws DataFormatException, IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        Inflater inflate = new Inflater();
+        GZIPInputStream input = new GZIPInputStream(new ByteArrayInputStream(data));
         byte[] buff = new byte[256];
         int lastLength = 256;
 
-        inflate.setInput(data);
-
         while (lastLength == 256) {
-            lastLength = inflate.inflate(buff);
+            lastLength = input.read(buff);
             bos.write(buff, 0, lastLength);
         }
 
-        inflate.end();
+        input.close();
         return bos.toByteArray();
     }
 
@@ -135,29 +121,6 @@ public class ZyncClipData implements Cloneable {
         }
 
         return Long.toHexString(crc.getValue());
-    }
-
-    // returns whether it was successful
-    public boolean encrypt(String key) {
-        if (!encrypted) {
-            try {
-                byte[] data = this.data;
-
-                data = compress(data);
-                data = ZyncCrypto.encrypt(data, key, salt, iv);
-                this.hash = hashCrc(data);
-                this.data = Base64.encodeToString(data, Base64.NO_WRAP).getBytes(Charset.forName("UTF-8"));
-                encrypted = true;
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                this.data = null;
-                encrypted = false;
-            }
-
-            return encrypted;
-        } else {
-            return true;
-        }
     }
 
     public byte[] iv() {
@@ -192,7 +155,7 @@ public class ZyncClipData implements Cloneable {
         this.hash = hash;
     }
 
-    public JSONObject toJson() {
+    public JSONObject toJson(String encryptionKey) {
         try {
             JSONObject object = new JSONObject();
 
@@ -202,14 +165,18 @@ public class ZyncClipData implements Cloneable {
                     .put("iv", Base64.encodeToString(iv, Base64.NO_WRAP))
                     .put("salt", Base64.encodeToString(salt, Base64.NO_WRAP)));
             object.put("payload-type", type.name());
-            object.put("hash", new JSONObject().put("crc32", hash));
 
             if (data != null) {
-                object.put("payload", new String(data, "UTF-8"));
+                JSONObject payload = new JSONObject();
+
+                payload.put("data", Base64.encode(compress(data), Base64.NO_WRAP));
+                payload.put("hash", hash);
+
+                object.put("payload", ZyncCrypto.encrypt(payload.toString().getBytes(), encryptionKey, salt, iv));
             }
 
             return object;
-        } catch (JSONException | UnsupportedEncodingException ignored) {
+        } catch (Exception ignored) {
             return new JSONObject();
         }
     }

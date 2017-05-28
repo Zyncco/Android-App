@@ -373,13 +373,13 @@ public class MainActivity extends AppCompatActivity
 
                     try {
                         ZyncClipData clipData = new ZyncClipData(
-                                getZyncApp().getConfig().getEncryptionPass(),
                                 ZyncClipType.TEXT,
                                 sharedText.getBytes(Charset.forName("UTF-8"))
                         );
 
                         createUploadingSnackbar();
                         getZyncApp().getApi().postClipboard(
+                                getZyncApp().getConfig().getEncryptionPass(),
                                 clipData,
                                 new ShareZyncCallback(clipData)
                         );

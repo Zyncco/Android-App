@@ -102,9 +102,9 @@ public class ZyncAPI {
     /*
      * Sends a request to post a clipboard update
      */
-    public void postClipboard(ZyncClipData clipData,
+    public void postClipboard(String encryptionPass, ZyncClipData clipData,
                               final ZyncCallback<Void> responseListener) throws JSONException {
-        JSONObject body = new JSONObject().put("data", clipData.toJson());
+        JSONObject body = new JSONObject().put("data", clipData.toJson(encryptionPass));
         executeAuthenticatedRequest(
                 "POST",
                 "clipboard",
@@ -269,7 +269,8 @@ public class ZyncAPI {
         executeAuthenticatedRequest(
                 "POST",
                 "clipboard/upload",
-                new JSONObject().put("data", data.toJson()),
+                // for large files, 'data' must be null so no encryption key provided
+                new JSONObject().put("data", data.toJson(null)),
                 callback,
                 new ZyncTransformer<String>() {
                     @Override

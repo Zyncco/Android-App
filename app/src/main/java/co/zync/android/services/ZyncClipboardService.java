@@ -152,7 +152,7 @@ public class ZyncClipboardService extends Service {
                 ZyncClipData clipData;
 
                 try {
-                    clipData = new ZyncClipData(app.getConfig().getEncryptionPass(), ZyncClipType.TEXT, data);
+                    clipData = new ZyncClipData(ZyncClipType.TEXT, data);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     ZyncApplication.LOGGED_EXCEPTIONS.add(new ZyncExceptionInfo(ex, "create ClipData from copy"));
@@ -161,7 +161,7 @@ public class ZyncClipboardService extends Service {
                 }
 
                 try {
-                    app.getApi().postClipboard(clipData, new ZyncCallback<Void>() {
+                    app.getApi().postClipboard(app.getConfig().getEncryptionPass(), clipData, new ZyncCallback<Void>() {
                         @Override
                         public void success(Void value) {
                             app.sendClipPostedNotification();

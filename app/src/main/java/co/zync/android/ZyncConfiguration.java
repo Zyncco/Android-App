@@ -29,33 +29,22 @@ public class ZyncConfiguration {
     public void setHistory(List<ZyncClipData> history) {
         Set<String> historyText = new HashSet<>(history.size());
 
-        for (ZyncClipData d : history) {
-            ZyncClipData data = d.clone();
-
-            if (data.data() != null) {
-                data.encrypt(getEncryptionPass());
-            }
-
-            historyText.add(data.toJson().toString());
+        for (ZyncClipData data : history) {
+            historyText.add(data.toJson(getEncryptionPass()).toString());
         }
 
         getPreferences().edit().putStringSet("zync_history", historyText).apply();
     }
 
     // adds an item to history and writes changes to file
-    public void addToHistory(ZyncClipData d) {
-        ZyncClipData data = d.clone();
+    public void addToHistory(ZyncClipData data) {
         List<String> history = new ArrayList<>(getPreferences().getStringSet("zync_history", new HashSet<String>()));
 
         if (history.size() == 10) {
             history.remove(9);
         }
 
-        if (data.data() != null) {
-            data.encrypt(getEncryptionPass());
-        }
-
-        history.add(data.toJson().toString());
+        history.add(data.toJson(getEncryptionPass()).toString());
         getPreferences().edit().putStringSet("zync_history", new HashSet<>(history))
                 .apply();
     }
@@ -68,11 +57,7 @@ public class ZyncConfiguration {
                 clip = data;
             }
 
-            if (clip.data() != null) {
-                clip.encrypt(getEncryptionPass());
-            }
-
-            historyText.add(clip.toJson().toString());
+            historyText.add(clip.toJson(getEncryptionPass()).toString());
         }
 
         getPreferences().edit().putStringSet("zync_history", historyText)
