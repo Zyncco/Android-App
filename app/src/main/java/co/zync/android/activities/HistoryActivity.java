@@ -265,6 +265,7 @@ public class HistoryActivity extends AppCompatActivity {
             }
 
             history.add(data);
+            System.out.println("Adding data " + data.type() + " to be displayed in history");
         }
 
         int historySize = history.size() - 1;
