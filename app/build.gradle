@@ -21,13 +21,13 @@ android {
 
     signingConfigs {
         release {
-            keyAlias 'zyncco'
+            keyAlias 'key0'
             keyPassword keystoreProperties["KEY_PASS"].toString()
             storeFile file('../keystore.jks')
             storePassword keystoreProperties["KEYSTORE_PASS"].toString()
         }
         debug {
-            keyAlias 'zyncco'
+            keyAlias 'key0'
             keyPassword keystoreProperties["KEY_PASS"].toString()
             storeFile file('../keystore.jks')
             storePassword keystoreProperties["KEYSTORE_PASS"].toString()

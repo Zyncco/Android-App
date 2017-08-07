@@ -169,10 +169,13 @@ public class ZyncClipData implements Cloneable {
             if (data != null) {
                 JSONObject payload = new JSONObject();
 
-                payload.put("data", Base64.encode(compress(data), Base64.NO_WRAP));
+                payload.put("data", Base64.encodeToString(compress(data), Base64.NO_WRAP));
                 payload.put("hash", hash);
 
-                object.put("payload", ZyncCrypto.encrypt(payload.toString().getBytes(), encryptionKey, salt, iv));
+                object.put("payload", Base64.encodeToString(
+                        ZyncCrypto.encrypt(payload.toString().getBytes(), encryptionKey, salt, iv),
+                        Base64.NO_WRAP
+                ));
             }
 
             return object;

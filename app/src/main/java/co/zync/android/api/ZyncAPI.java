@@ -233,10 +233,6 @@ public class ZyncAPI {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                onFailure(call, e);
-            }
-
-            private void onFailure(Call call, Exception e) {
                 callback.handleError(new ZyncError(-4, "HTTP Error: " +
                         (e.getCause() != null ? e.getCause().getClass().getSimpleName() : "null") + ":" + e.getMessage()));
             }
