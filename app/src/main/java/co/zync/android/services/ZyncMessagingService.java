@@ -19,10 +19,6 @@ import org.json.JSONException;
 public class ZyncMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        if (remoteMessage.getData().size() != 2) {
-            return;
-        }
-
         final ZyncApplication application = ((ZyncApplication) getApplication());
 
         if (remoteMessage.getData().containsKey("zync-token")) {
@@ -43,15 +39,11 @@ public class ZyncMessagingService extends FirebaseMessagingService {
                 });
             } catch (JSONException ignord) {
             }
+            System.out.println("validate message");
             return;
         }
 
         if (!application.getConfig().syncDown()) {
-            return;
-        }
-
-        if (!remoteMessage.getData().containsKey("type") ||
-                !remoteMessage.getData().containsKey("size")) {
             return;
         }
 
@@ -60,7 +52,7 @@ public class ZyncMessagingService extends FirebaseMessagingService {
         ZyncClipType clipType;
 
         try {
-            clipType = ZyncClipType.valueOf(remoteMessage.getData().get("type"));
+            clipType = ZyncClipType.valueOf(remoteMessage.getData().get("payload-type"));
         } catch (IllegalArgumentException ignored) {
             return;
         }
@@ -69,12 +61,12 @@ public class ZyncMessagingService extends FirebaseMessagingService {
             return;
         }
 
-        long size = Long.valueOf(remoteMessage.getData().get("size"));
+        /*long size = Long.valueOf(remoteMessage.getData().get("size"));
         long maxSize = application.getConfig().getMaxSize();
 
         if (maxSize != 0 && size > maxSize) {
             return;
-        }
+        }*/
 
         application.syncDown();
         application.sendNotification(
