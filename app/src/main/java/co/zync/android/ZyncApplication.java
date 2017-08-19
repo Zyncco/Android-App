@@ -8,6 +8,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceActivity;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import co.zync.android.activities.SettingsActivity;
 import co.zync.android.activities.SignInActivity;
@@ -263,6 +264,9 @@ public class ZyncApplication extends Application {
         builder.setSmallIcon(R.drawable.notification_icon);
         builder.setContentTitle(title);
         builder.setContentText(text);
+        builder.setShowWhen(true);
+        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+        builder.setVibrate(new long[] {0, 125, 125, 125});
 
         if (intent != null) {
             builder.setContentIntent(intent);
