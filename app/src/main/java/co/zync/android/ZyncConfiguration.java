@@ -115,8 +115,8 @@ public class ZyncConfiguration {
         return getPreferences().getBoolean("use_on_data", true);
     }
 
-    public boolean sendClipboardOnChange() {
-        return getPreferences().getBoolean("clipboard_change_notification", true);
+    public boolean sendNotificationOnClipChange() {
+        return getPreferences().getBoolean("clipboard_change_notification", false);
     }
 
     public boolean persistentNotification() {

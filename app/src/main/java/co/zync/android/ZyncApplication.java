@@ -231,7 +231,7 @@ public class ZyncApplication extends Application {
     }
 
     public void sendClipPostedNotification() {
-        if (config.sendClipboardOnChange()) {
+        if (config.sendNotificationOnClipChange()) {
             sendNotification(
                     CLIPBOARD_POSTED_ID,
                     getString(R.string.clipboard_posted_notification),

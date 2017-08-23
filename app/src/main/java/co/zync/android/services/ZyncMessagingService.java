@@ -3,6 +3,7 @@ package co.zync.android.services;
 import co.zync.android.R;
 import co.zync.android.ZyncApplication;
 import co.zync.android.api.ZyncAPI;
+import co.zync.android.api.ZyncClipData;
 import co.zync.android.api.ZyncClipType;
 import co.zync.android.api.ZyncError;
 import co.zync.android.api.callback.ZyncCallback;
@@ -68,11 +69,23 @@ public class ZyncMessagingService extends FirebaseMessagingService {
             return;
         }*/
 
+        long timestamp = Long.valueOf(remoteMessage.getData().get("timestamp"));
+
+        // (we might be getting our own message here)
+        for (ZyncClipData data : application.getConfig().getHistory()) {
+            if (data.timestamp() == timestamp) {
+                return;
+            }
+        }
+
         application.syncDown();
-        application.sendNotification(
-                ZyncApplication.CLIPBOARD_UPDATED_ID,
-                getString(R.string.clipboard_changed_notification),
-                getString(R.string.clipboard_changed_notification_desc)
-        );
+
+        if (application.getConfig().sendNotificationOnClipChange()) {
+            application.sendNotification(
+                    ZyncApplication.CLIPBOARD_UPDATED_ID,
+                    getString(R.string.clipboard_changed_notification),
+                    getString(R.string.clipboard_changed_notification_desc)
+            );
+        }
     }
 }

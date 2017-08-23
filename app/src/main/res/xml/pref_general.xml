@@ -31,7 +31,7 @@
             android:title="@string/notifications">
 
         <SwitchPreference
-                android:defaultValue="true"
+                android:defaultValue="false"
                 android:title="@string/clipboard_change_notification" android:key="clipboard_change_notification"
                 android:summary="@string/clipboard_change_notification_desc"/>
     </PreferenceCategory>
