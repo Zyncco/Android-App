@@ -125,6 +125,8 @@
     <string name="clipboard_post_error_notification_desc">Are you connected to the internet?</string>
     <string name="clipboard_changed_notification">Clipboard updated!</string>
     <string name="clipboard_changed_notification_desc">New content has been written to your clipboard!</string>
+    <string name="decryption_error_notification">Error decrypting clip entry</string>
+    <string name="decryption_error_notification_desc">Ensure that your password is the same on all devices</string>
     <string name="connectivity">Connectivity</string>
     <string name="use_on_data">Use on Data</string>
     <string name="use_on_data_desc">Use mobile data to post/fetch clipboard on the cloud</string>

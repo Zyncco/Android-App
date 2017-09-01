@@ -1,6 +1,7 @@
 package co.zync.android.api;
 
 import android.util.Base64;
+import co.zync.android.utils.Consumer;
 import co.zync.android.utils.ZyncCrypto;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +14,7 @@ import java.util.Locale;
 import java.util.zip.*;
 
 public class ZyncClipData implements Cloneable {
+    private static Consumer<AEADBadTagException> decryptionErrorConsumer = null;
     private final long timestamp;
     private String hash;
     private final byte[] iv;
@@ -47,6 +49,10 @@ public class ZyncClipData implements Cloneable {
         }
     }
 
+    public static void listenForDecryptionError(Consumer<AEADBadTagException> decryptionErrorConsumer) {
+        ZyncClipData.decryptionErrorConsumer = decryptionErrorConsumer;
+    }
+
     public ZyncClipData(String encryptionKey, JSONObject obj) throws Exception {
         this.timestamp = obj.getLong("timestamp");
         JSONObject encryption = obj.getJSONObject("encryption");
@@ -66,6 +72,10 @@ public class ZyncClipData implements Cloneable {
                 this.hash = payload.getString("hash");
             } catch (DataFormatException | AEADBadTagException ex) {
                 this.data = null;
+
+                if (ex instanceof AEADBadTagException && decryptionErrorConsumer != null) {
+                    decryptionErrorConsumer.consume((AEADBadTagException) ex);
+                }
             }
         }
     }

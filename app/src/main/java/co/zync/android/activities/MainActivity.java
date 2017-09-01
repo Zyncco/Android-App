@@ -359,11 +359,7 @@ public class MainActivity extends AppCompatActivity
                                         new ShareZyncCallback(clip)
                                 );
                             } catch (IOException ex) {
-                                getZyncApp().sendNotification(
-                                        ZyncApplication.CLIPBOARD_ERROR_ID,
-                                        getString(R.string.clipboard_post_error_notification),
-                                        getString(R.string.clipboard_post_error_notification_desc)
-                                );
+                                getZyncApp().sendClipErrorNotification();
                             } catch (Exception ignored) {
                             }
                         }

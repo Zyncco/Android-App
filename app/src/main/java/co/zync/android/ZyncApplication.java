@@ -20,10 +20,12 @@ import co.zync.android.services.ZyncMessagingService;
 import co.zync.android.listeners.ZyncPreferenceChangeListener;
 import co.zync.android.listeners.NullDialogClickListener;
 import co.zync.android.listeners.RequestStatusListener;
+import co.zync.android.utils.Consumer;
 import co.zync.android.utils.ZyncExceptionInfo;
 import com.crashlytics.android.Crashlytics;
 import okhttp3.OkHttpClient;
 
+import javax.crypto.AEADBadTagException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,6 +52,7 @@ public class ZyncApplication extends Application {
     /* START NOTIFICATION IDS */
     public static int CLIPBOARD_UPDATED_ID = 281902;
     public static int CLIPBOARD_POSTED_ID = 213812;
+    public static int CLIPBOARD_INCORRECT_PASS_ID = 2312435;
     public static int CLIPBOARD_ERROR_ID = 9308312;
     public static int PERSISTENT_NOTIFICATION_ID = 329321;
     public static int CLIPBOARD_PROGRESS_ID = 3901831;
@@ -84,6 +87,17 @@ public class ZyncApplication extends Application {
 
         // set a preference listener to make changes to activity when user changes setting
         config.getPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+
+        ZyncClipData.listenForDecryptionError(new Consumer<AEADBadTagException>() {
+            @Override
+            public void consume(AEADBadTagException value) {
+                sendNotification(
+                        CLIPBOARD_INCORRECT_PASS_ID,
+                        getString(R.string.decryption_error_notification),
+                        getString(R.string.decryption_error_notification_desc)
+                );
+            }
+        });
     }
 
     public ZyncConfiguration getConfig() {
@@ -291,9 +305,31 @@ public class ZyncApplication extends Application {
                             && isTypeSupported(value.type())) {
                         if (value.type() == ZyncClipType.TEXT) {
                             ZyncClipboardService.getInstance().writeToClip(new String(data), false);
+                            if (getConfig().sendNotificationOnClipChange()) {
+                                sendNotification(
+                                        ZyncApplication.CLIPBOARD_UPDATED_ID,
+                                        getString(R.string.clipboard_changed_notification),
+                                        getString(R.string.clipboard_changed_notification_desc)
+                                );
+                            }
                         } else if (value.type() == ZyncClipType.IMAGE) {
                             // download image to file for later
-                            dataManager.load(value, true);
+                            dataManager.load(value, true, new ZyncCallback<Void>() {
+                                @Override
+                                public void success(Void value) {
+                                    if (getConfig().sendNotificationOnClipChange()) {
+                                        sendNotification(
+                                                ZyncApplication.CLIPBOARD_UPDATED_ID,
+                                                getString(R.string.clipboard_changed_notification),
+                                                getString(R.string.clipboard_changed_notification_desc)
+                                        );
+                                    }
+                                }
+
+                                @Override
+                                public void handleError(ZyncError error) {
+                                }
+                            });
                         }
                     }
                 }

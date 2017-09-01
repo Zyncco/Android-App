@@ -135,7 +135,7 @@ public class ZyncAPI {
                         if (timestamps.size() == 1) {
                             try {
                                 return Collections.singletonList(new ZyncClipData(encryptionKey, obj.getJSONObject("data")));
-                            } catch (AEADBadTagException ignored) {
+                            } catch (Exception ignored) {
                                 return Collections.emptyList();
                             }
                         } else {
