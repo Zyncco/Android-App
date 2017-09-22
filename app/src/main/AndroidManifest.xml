@@ -14,6 +14,7 @@
             android:maxSdkVersion="18"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
             android:name="co.zync.android.ZyncApplication"
@@ -104,6 +105,12 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="co.zync.android.activities.MainActivity"/>
         </activity>
+
+        <receiver android:name=".ZyncBootReceiver" android:enabled="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

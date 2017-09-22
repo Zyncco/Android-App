@@ -27,6 +27,7 @@ public class ZyncClipboardService extends Service {
     private ZyncClipboardListener clipboardListener;
 
     public ZyncClipboardService() {
+        instance = this;
     }
 
     public static void nullify() {

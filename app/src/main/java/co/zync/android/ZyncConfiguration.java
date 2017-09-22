@@ -1,5 +1,6 @@
 package co.zync.android;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import co.zync.android.activities.SettingsActivity;
 import co.zync.android.api.ZyncClipData;
@@ -15,9 +16,9 @@ import java.util.*;
  * @author Mazen Kotb
  */
 public class ZyncConfiguration {
-    private ZyncApplication app;
+    private Context app;
 
-    ZyncConfiguration(ZyncApplication app) {
+    ZyncConfiguration(Context app) {
         this.app = app;
     }
 

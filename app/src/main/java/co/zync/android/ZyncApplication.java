@@ -119,16 +119,16 @@ public class ZyncApplication extends Application {
     }
 
     public void setupNetwork() {
+        if (api != null) {
+            enableClipboardService();
+            api.setClient(httpClient);
+        }
+
         // Zync services
         startService(ZyncInstanceIdService.class);
         startService(ZyncMessagingService.class);
 
         httpClient = new OkHttpClient();
-
-        if (api != null) {
-            enableClipboardService();
-            api.setClient(httpClient);
-        }
     }
 
     // remove network services
@@ -144,9 +144,13 @@ public class ZyncApplication extends Application {
         }
     }
 
-    // go across all networks and test if the device is connected to the internet
     public boolean isWifiConnected() {
-        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return isWifiConnected(this);
+    }
+
+    // go across all networks and test if the device is connected to the internet
+    public static boolean isWifiConnected(Context context) {
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         boolean connected = false;
 
         for (Network network : connManager.getAllNetworks()) {
