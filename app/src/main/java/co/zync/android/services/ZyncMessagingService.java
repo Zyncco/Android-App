@@ -1,6 +1,5 @@
 package co.zync.android.services;
 
-import co.zync.android.R;
 import co.zync.android.ZyncApplication;
 import co.zync.android.api.ZyncAPI;
 import co.zync.android.api.ZyncClipData;
@@ -9,6 +8,7 @@ import co.zync.android.api.ZyncError;
 import co.zync.android.api.callback.ZyncCallback;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import okhttp3.OkHttpClient;
 import org.json.JSONException;
 
 /**
@@ -76,6 +76,15 @@ public class ZyncMessagingService extends FirebaseMessagingService {
             if (data.timestamp() == timestamp) {
                 return;
             }
+        }
+
+        // if for some reason our api and client have unloaded, reload them
+        if (application.getApi() == null) {
+            if (application.httpClient() == null) {
+                application.setHttpClient(new OkHttpClient());
+            }
+
+            application.setApi(new ZyncAPI(application.httpClient(), application.getConfig().apiToken()));
         }
 
         application.syncDown();

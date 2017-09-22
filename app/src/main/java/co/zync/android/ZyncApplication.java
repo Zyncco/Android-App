@@ -86,7 +86,6 @@ public class ZyncApplication extends Application {
         registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         // set a preference listener to make changes to activity when user changes setting
-        config.getPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
         ZyncClipData.listenForDecryptionError(new Consumer<AEADBadTagException>() {
             @Override
@@ -368,6 +367,10 @@ public class ZyncApplication extends Application {
 
     public OkHttpClient httpClient() {
         return httpClient;
+    }
+
+    public void setHttpClient(OkHttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
     public ZyncAPI getApi() {
